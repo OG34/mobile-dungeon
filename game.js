@@ -2,8 +2,7 @@
 //  PIXEL QUEST RPG
 // ============================================================
 
-// ── PIXEL SPRITES ──────────────────────────────────────────
-// Each sprite: 8×8 grid, values = palette index or '.' (transparent)
+// ── SPRITES ─────────────────────────────────────────────────
 const SPRITES = {
   player: {
     p: ['#c8a882','#4a2e00','#3a5a9a','#8ab4d8','#c0c0c0','#888888','#e8c96b','#e05252'],
@@ -19,7 +18,7 @@ const SPRITES = {
     ]
   },
   slime: {
-    p: ['#52c07a','#2a8050','#a0ffc0','#1a5030'],
+    p: ['#52c07a','#2a8050','#a0ffc0'],
     d: [
       ['.','.','.','.','.','.','.','.'],
       ['.','.', 0, 0, 0, 0,'.','.'],
@@ -95,7 +94,72 @@ const SPRITES = {
       ['.','.',1,'.','.','.','.','.'],
       ['.','.','.','.','.','.','.','.'],
     ]
-  }
+  },
+  bat: {
+    p: ['#4a2878','#7744aa','#220033','#cc88ff'],
+    d: [
+      [0,'.','.','.','.','.','.', 0],
+      [0, 0,'.','.','.','.', 0, 0],
+      [0, 0, 0,1,1, 0, 0, 0],
+      [0,3,0,1,1,0,3,0],
+      ['.', 0, 0, 0, 0, 0, 0,'.'],
+      ['.','.', 0, 2, 2, 0,'.','.'],
+      ['.','.','.', 0, 0,'.','.', '.'],
+      ['.','.','.','.','.','.','.','.'],
+    ]
+  },
+  troll: {
+    p: ['#4a7a3c','#2a5a1c','#c8b082','#8aaa6a','#333333'],
+    d: [
+      ['.','.', 0, 0, 0, 0,'.','.'],
+      ['.', 0, 2, 0, 0, 2, 0,'.'],
+      [0, 0, 2, 2, 2, 2, 0, 0],
+      [0,3,0,0,0,0,3,0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 1, 0, 0, 0, 0, 1, 0],
+      [0, 1, 0, '.', '.', 0, 1, 0],
+      ['.', 1, 1, '.', '.', 1, 1,'.'],
+    ]
+  },
+  zombie: {
+    p: ['#6a8a5a','#3a5a2a','#c8a882','#4a8a4a','#cc3333'],
+    d: [
+      ['.','.', 0, 0, 0, 0,'.','.'],
+      ['.',0,2,4,4,2,0,'.'],
+      ['.','.', 2, 2, 2, 2,'.','.'],
+      ['.',3,3,3,3,3,3,'.'],
+      [3, 0, 3, 3, 3, 3, 0, 3],
+      ['.',3,3,3,3,3,3,'.'],
+      ['.','.', 1, '.', '.', 1,'.','.'],
+      ['.','.', 1, 1, 1, 1,'.','.'],
+    ]
+  },
+  ghost: {
+    p: ['#aaaaee','#7777cc','#ffffff','#4444aa','#ccccff'],
+    d: [
+      ['.','.', 0, 0, 0, 0,'.','.'],
+      ['.',0,0,0,0,0,0,'.'],
+      ['.',0,2,0,0,2,0,'.'],
+      ['.',0,0,0,0,0,0,'.'],
+      [0,0,0,0,0,0,0,0],
+      [0,0,0,0,0,0,0,0],
+      [0,'.', 0,'.','.', 0,'.',0],
+      ['.','.','.','.','.','.','.','.'],
+    ]
+  },
+  demon: {
+    p: ['#aa1111','#660000','#ff4400','#ffaa00','#330000'],
+    d: [
+      [0,'.',2,'.','.', 2,'.',0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      ['.',0,3,0,0,3,0,'.'],
+      ['.',0,0,0,0,0,0,'.'],
+      [0, 1, 0, 0, 0, 0, 1, 0],
+      [0, 0, 2, 0, 0, 2, 0, 0],
+      ['.', 0, 0, 0, 0, 0, 0,'.'],
+      ['.',0,'.','.','.','.', 0,'.'],
+    ]
+  },
 };
 
 function drawSprite(canvas, key, scale=8) {
@@ -111,43 +175,79 @@ function drawSprite(canvas, key, scale=8) {
   }));
 }
 
-// ── GAME DATA ────────────────────────────────────────────────
+// ── AREAS ───────────────────────────────────────────────────
 const AREAS = [
-  { id:'forest',  name:'Enchanted Forest', icon:'🌲', min:1,  max:5,  foes:['slime','goblin','rat','wolf'] },
-  { id:'dungeon', name:'Dark Dungeon',      icon:'⛏',  min:4,  max:10, foes:['skeleton','goblin','wolf'] },
-  { id:'castle',  name:'Shadow Castle',     icon:'🏰', min:9,  max:20, foes:['skeleton','dragon'] },
+  { id:'forest',    name:'Enchanted Forest', icon:'🌲', min:1,  max:4,  foes:['slime','rat','goblin','wolf'] },
+  { id:'cave',      name:'Goblin Caves',     icon:'🦇', min:3,  max:7,  foes:['goblin','bat','troll','rat'] },
+  { id:'dungeon',   name:'Dark Dungeon',     icon:'⛏',  min:6,  max:11, foes:['skeleton','goblin','wolf','bat'] },
+  { id:'graveyard', name:'Cursed Graveyard', icon:'💀', min:9,  max:15, foes:['skeleton','zombie','ghost'] },
+  { id:'castle',    name:'Shadow Castle',    icon:'🏰', min:13, max:30, foes:['ghost','demon','dragon'] },
 ];
 
+// ── ENEMIES ─────────────────────────────────────────────────
 const FOES = {
-  rat:      { name:'Rat',      sprite:'rat',      hp:8,  atk:2,  def:0, xp:5,  gold:[1,3] },
-  slime:    { name:'Slime',    sprite:'slime',    hp:14, atk:4,  def:1, xp:10, gold:[1,5] },
-  goblin:   { name:'Goblin',   sprite:'goblin',   hp:22, atk:7,  def:2, xp:18, gold:[3,10] },
-  wolf:     { name:'Wolf',     sprite:'wolf',     hp:28, atk:9,  def:2, xp:24, gold:[2,8] },
-  skeleton: { name:'Skeleton', sprite:'skeleton', hp:38, atk:11, def:4, xp:35, gold:[5,15] },
-  dragon:   { name:'Dragon',   sprite:'dragon',   hp:90, atk:20, def:8, xp:120,gold:[25,70] },
+  rat:      { name:'Rat',      sprite:'rat',      hp:8,  atk:2,  def:0,  xp:5,   gold:[1,3]   },
+  slime:    { name:'Slime',    sprite:'slime',    hp:14, atk:4,  def:1,  xp:10,  gold:[1,5]   },
+  goblin:   { name:'Goblin',   sprite:'goblin',   hp:22, atk:7,  def:2,  xp:18,  gold:[3,10]  },
+  bat:      { name:'Bat',      sprite:'bat',      hp:18, atk:8,  def:1,  xp:16,  gold:[2,7]   },
+  wolf:     { name:'Wolf',     sprite:'wolf',     hp:28, atk:9,  def:2,  xp:24,  gold:[2,8]   },
+  troll:    { name:'Troll',    sprite:'troll',    hp:45, atk:12, def:5,  xp:40,  gold:[8,18]  },
+  skeleton: { name:'Skeleton', sprite:'skeleton', hp:38, atk:11, def:4,  xp:35,  gold:[5,15]  },
+  zombie:   { name:'Zombie',   sprite:'zombie',   hp:50, atk:13, def:3,  xp:45,  gold:[6,16]  },
+  ghost:    { name:'Ghost',    sprite:'ghost',    hp:42, atk:15, def:6,  xp:55,  gold:[8,20]  },
+  demon:    { name:'Demon',    sprite:'demon',    hp:70, atk:18, def:7,  xp:90,  gold:[15,40] },
+  dragon:   { name:'Dragon',   sprite:'dragon',   hp:90, atk:20, def:8,  xp:120, gold:[25,70] },
 };
 
 const DROPS = {
-  rat:      [{ id:'potion',        p:0.2 }],
-  slime:    [{ id:'potion',        p:0.18 }],
-  goblin:   [{ id:'potion',        p:0.22 }, { id:'wood_sword', p:0.06 }],
-  wolf:     [{ id:'potion',        p:0.2  }, { id:'leather',    p:0.07 }],
-  skeleton: [{ id:'potion',        p:0.28 }, { id:'iron_sword', p:0.08 }, { id:'iron_shield', p:0.07 }],
-  dragon:   [{ id:'dragon_blade',  p:0.35 }, { id:'elixir',     p:0.6  }, { id:'magic_ring',  p:0.3  }],
+  rat:      [{ id:'potion',       p:.20 }],
+  slime:    [{ id:'potion',       p:.18 }],
+  bat:      [{ id:'potion',       p:.15 }],
+  goblin:   [{ id:'potion',       p:.22 }, { id:'wood_sword',  p:.06 }],
+  wolf:     [{ id:'potion',       p:.20 }, { id:'leather',     p:.07 }],
+  troll:    [{ id:'potion',       p:.30 }, { id:'iron_shield', p:.10 }, { id:'elixir', p:.12 }],
+  skeleton: [{ id:'potion',       p:.28 }, { id:'iron_sword',  p:.08 }, { id:'iron_shield', p:.07 }],
+  zombie:   [{ id:'potion',       p:.25 }, { id:'leather',     p:.10 }, { id:'elixir', p:.10 }],
+  ghost:    [{ id:'magic_staff',  p:.12 }, { id:'magic_ring',  p:.12 }, { id:'elixir', p:.20 }],
+  demon:    [{ id:'demon_armor',  p:.15 }, { id:'elixir',      p:.40 }, { id:'magic_ring', p:.18 }],
+  dragon:   [{ id:'dragon_blade', p:.35 }, { id:'elixir',      p:.60 }, { id:'magic_ring', p:.30 }],
 };
 
+// ── ITEMS ───────────────────────────────────────────────────
 const ITEMS = {
-  wood_sword:  { name:'Wood Sword',   icon:'🗡', slot:'weapon', atk:4,  def:0,              value:10 },
-  iron_sword:  { name:'Iron Sword',   icon:'⚔', slot:'weapon', atk:10, def:0,              value:55 },
-  magic_staff: { name:'Magic Staff',  icon:'🪄', slot:'weapon', atk:7,  def:0,  maxMp:10,  value:65 },
-  dragon_blade:{ name:'Dragon Blade', icon:'🔥', slot:'weapon', atk:22, def:0,              value:350 },
-  leather:     { name:'Leather',      icon:'🥋', slot:'armor',  atk:0,  def:4,              value:30 },
-  iron_shield: { name:'Iron Shield',  icon:'🛡', slot:'armor',  atk:0,  def:9,              value:85 },
-  health_ring: { name:'HP Ring',      icon:'💍', slot:'acc',    atk:0,  def:0,  maxHp:20,  value:40 },
-  magic_ring:  { name:'Magic Ring',   icon:'🔮', slot:'acc',    atk:0,  def:0,  maxMp:15,  value:45 },
-  potion:      { name:'HP Potion',    icon:'🧪', slot:null,     hp:40,                      value:20 },
-  elixir:      { name:'Elixir',       icon:'✨', slot:null,     hp:80,  mp:20,              value:65 },
+  wood_sword:  { name:'Wood Sword',   icon:'🗡', slot:'weapon', atk:4,  def:0,             value:10,  buyable:true  },
+  iron_sword:  { name:'Iron Sword',   icon:'⚔', slot:'weapon', atk:10, def:0,             value:55,  buyable:true  },
+  magic_staff: { name:'Magic Staff',  icon:'🪄', slot:'weapon', atk:7,  def:0,  maxMp:10, value:65,  buyable:true  },
+  dragon_blade:{ name:'Dragon Blade', icon:'🔥', slot:'weapon', atk:22, def:0,             value:350, buyable:false },
+  leather:     { name:'Leather',      icon:'🥋', slot:'armor',  atk:0,  def:4,             value:30,  buyable:true  },
+  iron_shield: { name:'Iron Shield',  icon:'🛡', slot:'armor',  atk:0,  def:9,             value:85,  buyable:true  },
+  demon_armor: { name:'Demon Armor',  icon:'🔴', slot:'armor',  atk:2,  def:14,            value:220, buyable:false },
+  health_ring: { name:'HP Ring',      icon:'💍', slot:'acc',    atk:0,  def:0,  maxHp:20,  value:40,  buyable:true  },
+  magic_ring:  { name:'Magic Ring',   icon:'🔮', slot:'acc',    atk:0,  def:0,  maxMp:15,  value:45,  buyable:true  },
+  potion:      { name:'HP Potion',    icon:'🧪', slot:null,     hp:40,                     value:20,  buyable:true  },
+  elixir:      { name:'Elixir',       icon:'✨', slot:null,     hp:80,  mp:20,             value:65,  buyable:true  },
 };
+
+// ── QUESTS ──────────────────────────────────────────────────
+const QUEST_POOL = [
+  { type:'kill', target:'rat',      qty:5,  label:'Töte 5 Ratten',      xpR:40,  goldR:25  },
+  { type:'kill', target:'slime',    qty:5,  label:'Töte 5 Slimes',      xpR:50,  goldR:30  },
+  { type:'kill', target:'goblin',   qty:5,  label:'Töte 5 Goblins',     xpR:80,  goldR:50  },
+  { type:'kill', target:'bat',      qty:5,  label:'Töte 5 Fledermäuse', xpR:70,  goldR:45  },
+  { type:'kill', target:'wolf',     qty:3,  label:'Töte 3 Wölfe',       xpR:80,  goldR:55  },
+  { type:'kill', target:'troll',    qty:3,  label:'Töte 3 Trolle',      xpR:130, goldR:90  },
+  { type:'kill', target:'skeleton', qty:3,  label:'Töte 3 Skelette',    xpR:120, goldR:80  },
+  { type:'kill', target:'zombie',   qty:3,  label:'Töte 3 Zombies',     xpR:140, goldR:90  },
+  { type:'kill', target:'ghost',    qty:3,  label:'Töte 3 Geister',     xpR:160, goldR:100 },
+  { type:'kill', target:'demon',    qty:2,  label:'Töte 2 Dämonen',     xpR:200, goldR:150 },
+  { type:'kill', target:'dragon',   qty:1,  label:'Besiege den Drachen',xpR:350, goldR:250 },
+  { type:'step', qty:15,  label:'Gehe 15 Schritte',   xpR:35,  goldR:20 },
+  { type:'step', qty:30,  label:'Gehe 30 Schritte',   xpR:70,  goldR:40 },
+  { type:'step', qty:60,  label:'Gehe 60 Schritte',   xpR:130, goldR:75 },
+  { type:'step', qty:100, label:'Gehe 100 Schritte',  xpR:200, goldR:120, itemR:'potion' },
+  { type:'gold', qty:80,  label:'Verdiene 80 Gold',   xpR:55,  goldR:0,  itemR:'potion' },
+  { type:'gold', qty:200, label:'Verdiene 200 Gold',  xpR:120, goldR:0,  itemR:'elixir' },
+];
 
 // ── STATE ────────────────────────────────────────────────────
 const G = {
@@ -155,6 +255,7 @@ const G = {
     name:'Hero', level:1, xp:0, xpNext:100,
     hp:100, maxHp:100, mp:30, maxMp:30,
     baseAtk:8, baseDef:3, gold:0, kills:0,
+    totalGoldEarned:0,
     eq:{ weapon:null, armor:null, acc:null },
     inv:[],
   },
@@ -162,8 +263,11 @@ const G = {
   combat: null,
   steps: 0,
   busy: false,
+  quests: [],        // active quests
+  shopMode: 'buy',
 };
 
+// ── STATS ────────────────────────────────────────────────────
 function stats() {
   const p = G.p;
   let atk=p.baseAtk, def=p.baseDef, maxHp=p.maxHp, maxMp=p.maxMp;
@@ -210,9 +314,9 @@ const EVENTS = [
 ];
 
 function pick(arr) {
-  const total = arr.reduce((s,e)=>s+(e.w||e.p),0);
+  const total = arr.reduce((s,e)=>s+(e.w||e.p||e.weight||0),0);
   let r = Math.random()*total;
-  for (const e of arr) { r -= (e.w||e.p); if (r<=0) return e; }
+  for (const e of arr) { r -= (e.w||e.p||e.weight||0); if (r<=0) return e; }
   return arr[arr.length-1];
 }
 
@@ -223,6 +327,7 @@ function doStep() {
 
   G.steps++;
   document.getElementById('step-val').textContent = G.steps;
+  tickQuestStep();
 
   setBusy(true);
   setTimeout(() => setBusy(false), 700);
@@ -234,7 +339,7 @@ function doStep() {
     startCombat(foeId);
   } else if (ev.t === 'gold') {
     const g = Math.floor((Math.random()*8+2) * p.level);
-    p.gold += g;
+    earnGold(g);
     addLog(`💰 Du findest ${g} Gold!`);
     refresh();
   } else if (ev.t === 'heal') {
@@ -250,9 +355,17 @@ function doStep() {
       '🍄 Du siehst bunte Pilze. Besser nicht anfassen.',
       '🐦 Vögel zwitschern in der Ferne.',
       '💨 Der Wind flüstert deinen Namen.',
+      '🕸️ Spinnweben überall. Ungemütlich.',
+      '🌙 Der Mond steht tief am Himmel.',
     ];
     addLog(msgs[Math.floor(Math.random()*msgs.length)]);
   }
+}
+
+function earnGold(g) {
+  G.p.gold += g;
+  G.p.totalGoldEarned += g;
+  tickQuestGold(g);
 }
 
 function setBusy(v) {
@@ -297,7 +410,7 @@ function combatAction(act) {
       setTimeout(() => endCombat(false), 800);
     } else {
       combatLog('😱 Flucht fehlgeschlagen!');
-      setTimeout(() => enemyTurn(), 700);
+      setTimeout(enemyTurn, 700);
     }
     return;
   }
@@ -316,6 +429,7 @@ function combatAction(act) {
   e.hp -= dmg;
   shake(document.getElementById('enemy-canvas'));
   updateCombatUI();
+  updateHUD();
 
   if (e.hp <= 0) { setTimeout(combatWin, 700); return; }
   setTimeout(enemyTurn, 800);
@@ -349,8 +463,10 @@ function enemyTurn() {
 function combatWin() {
   const p = G.p; const e = G.combat;
   const g = rand(e.gold[0], e.gold[1]);
-  p.gold += g; p.kills++;
+  earnGold(g);
+  p.kills++;
   combatLog(`🎉 Sieg! +${e.xp} XP  +${g} Gold`);
+  tickQuestKill(e.id);
 
   for (const drop of e.drops) {
     if (Math.random() < drop.p) {
@@ -362,7 +478,7 @@ function combatWin() {
   setTimeout(() => { endCombat(true); gainXP(xp); addLog(`✅ ${e.name} besiegt! +${xp} XP`); }, 1100);
 }
 
-function endCombat(won) {
+function endCombat() {
   G.combat = null;
   showScreen('explore', document.querySelector('.nav-btn'));
   refresh();
@@ -393,7 +509,6 @@ function addInv(id) {
   } else {
     G.p.inv.push({ id, equipped:false });
   }
-  updateInvScreen();
 }
 
 function useItem(idx) {
@@ -425,18 +540,198 @@ function useItem(idx) {
   refresh();
 }
 
+function sellItem(idx) {
+  const p = G.p;
+  const slot = p.inv[idx];
+  if (!slot || slot.equipped) return;
+  const item = ITEMS[slot.id];
+  if (!item) return;
+  const price = Math.floor(item.value * 0.5);
+  if (slot.qty > 1) slot.qty--;
+  else p.inv.splice(idx, 1);
+  earnGold(price);
+  addLog(`💱 ${item.name} verkauft für ${price} Gold.`);
+  refresh();
+}
+
 function updateInvScreen() {
-  document.getElementById('inv-gold-val').textContent = G.p.gold;
+  document.getElementById('inv-gold-lbl').textContent = `🪙 ${G.p.gold}`;
   const grid = document.getElementById('inv-grid');
   grid.innerHTML = '';
-  G.p.inv.forEach((slot,idx) => {
+  G.p.inv.forEach((slot, idx) => {
     const item = ITEMS[slot.id];
     if (!item) return;
     const div = document.createElement('div');
     div.className = 'inv-item'+(slot.equipped?' equipped':'');
     div.innerHTML = `${item.icon}<small>${item.name.slice(0,10)}</small>${slot.qty>1?`<small>x${slot.qty}</small>`:''}`;
     div.onclick = () => useItem(idx);
+    // long press to sell
+    let t;
+    div.addEventListener('touchstart', () => { t = setTimeout(() => { sellItem(idx); }, 600); }, { passive:true });
+    div.addEventListener('touchend', () => clearTimeout(t), { passive:true });
+    div.addEventListener('touchmove', () => clearTimeout(t), { passive:true });
     grid.appendChild(div);
+  });
+}
+
+// ── SHOP ─────────────────────────────────────────────────────
+function shopTab(mode, btn) {
+  G.shopMode = mode;
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('shop-buy-list').style.display  = mode==='buy'  ? 'flex' : 'none';
+  document.getElementById('shop-sell-list').style.display = mode==='sell' ? 'flex' : 'none';
+  if (mode === 'sell') renderShopSell();
+}
+
+function buyItem(id) {
+  const item = ITEMS[id];
+  if (!item) return;
+  const price = Math.ceil(item.value * 1.5);
+  if (G.p.gold < price) { showOverlay('❌ Kein Gold!'); return; }
+  G.p.gold -= price;
+  addInv(id);
+  addLog(`🛒 ${item.name} gekauft!`);
+  refresh();
+  updateShopScreen();
+}
+
+function renderShopSell() {
+  const list = document.getElementById('shop-sell-list');
+  list.innerHTML = '';
+  if (!G.p.inv.length) {
+    list.innerHTML = '<div style="font-size:7px;color:var(--dim);padding:12px">Inventar leer.</div>';
+    return;
+  }
+  G.p.inv.forEach((slot, idx) => {
+    const item = ITEMS[slot.id];
+    if (!item) return;
+    const price = Math.floor(item.value * 0.5);
+    const row = document.createElement('div');
+    row.className = 'shop-row';
+    row.innerHTML = `
+      <div class="shop-icon">${item.icon}</div>
+      <div class="shop-info">
+        <div class="shop-name">${item.name}${slot.qty>1?` x${slot.qty}`:''}</div>
+        <div class="shop-stat">${slot.equipped?'[equipped]':''}</div>
+      </div>
+      <div class="shop-price">${price}🪙</div>
+      <button class="shop-btn" ${slot.equipped?'disabled':''} onclick="sellItem(${idx});updateShopScreen()">Sell</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function updateShopScreen() {
+  document.getElementById('shop-gold-val').textContent = G.p.gold;
+  const buy = document.getElementById('shop-buy-list');
+  buy.innerHTML = '';
+  Object.entries(ITEMS).filter(([,it])=>it.buyable).forEach(([id,item]) => {
+    const price = Math.ceil(item.value * 1.5);
+    const stats = [];
+    if (item.atk)   stats.push(`ATK+${item.atk}`);
+    if (item.def)   stats.push(`DEF+${item.def}`);
+    if (item.maxHp) stats.push(`HP+${item.maxHp}`);
+    if (item.maxMp) stats.push(`MP+${item.maxMp}`);
+    if (item.hp)    stats.push(`Heilt ${item.hp}HP`);
+    if (item.mp)    stats.push(`+${item.mp}MP`);
+    const row = document.createElement('div');
+    row.className = 'shop-row';
+    row.innerHTML = `
+      <div class="shop-icon">${item.icon}</div>
+      <div class="shop-info">
+        <div class="shop-name">${item.name}</div>
+        <div class="shop-stat">${stats.join('  ')}</div>
+      </div>
+      <div class="shop-price">${price}🪙</div>
+      <button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Buy</button>
+    `;
+    buy.appendChild(row);
+  });
+  if (G.shopMode === 'sell') renderShopSell();
+}
+
+// ── QUESTS ───────────────────────────────────────────────────
+function generateQuests() {
+  while (G.quests.length < 3) {
+    const used = new Set(G.quests.map(q=>q.label));
+    const available = QUEST_POOL.filter(q => !used.has(q.label));
+    if (!available.length) break;
+    const tmpl = available[Math.floor(Math.random()*available.length)];
+    G.quests.push({ ...tmpl, progress:0, claimed:false });
+  }
+}
+
+function tickQuestKill(foeId) {
+  G.quests.forEach(q => {
+    if (q.type==='kill' && q.target===foeId && q.progress<q.qty) {
+      q.progress++;
+      if (q.progress >= q.qty) notifyQuestDone(q);
+    }
+  });
+  updateQuestScreen();
+}
+
+function tickQuestStep() {
+  G.quests.forEach(q => {
+    if (q.type==='step' && q.progress<q.qty) {
+      q.progress++;
+      if (q.progress >= q.qty) notifyQuestDone(q);
+    }
+  });
+  updateQuestScreen();
+}
+
+function tickQuestGold(amount) {
+  G.quests.forEach(q => {
+    if (q.type==='gold' && q.progress<q.qty) {
+      q.progress = Math.min(q.qty, q.progress+amount);
+      if (q.progress >= q.qty) notifyQuestDone(q);
+    }
+  });
+  updateQuestScreen();
+}
+
+function notifyQuestDone(q) {
+  addLog(`📜 Quest abgeschlossen: ${q.label}!`);
+}
+
+function claimQuest(idx) {
+  const q = G.quests[idx];
+  if (!q || q.progress < q.qty) return;
+  G.p.gold += q.goldR;
+  if (q.itemR) addInv(q.itemR);
+  const xpAmt = q.xpR;
+  G.quests.splice(idx, 1);
+  generateQuests();
+  showOverlay(`📜 Quest!\n+${xpAmt} XP\n+${q.goldR} Gold${q.itemR?'\n+'+ITEMS[q.itemR]?.name:''}`);
+  gainXP(xpAmt);
+  updateQuestScreen();
+  refresh();
+}
+
+function updateQuestScreen() {
+  const list = document.getElementById('quest-list');
+  if (!list) return;
+  list.innerHTML = '';
+  G.quests.forEach((q, idx) => {
+    const done = q.progress >= q.qty;
+    const card = document.createElement('div');
+    card.className = 'quest-card'+(done?' done':'');
+    const rewardParts = [`+${q.xpR} XP`, `+${q.goldR}🪙`];
+    if (q.itemR) rewardParts.push(ITEMS[q.itemR]?.icon||'');
+    card.innerHTML = `
+      <div class="quest-title">${q.label}</div>
+      <div class="quest-prog-wrap">
+        <div class="quest-prog${done?' done':''}" style="width:${pct(q.progress,q.qty)}"></div>
+      </div>
+      <div class="quest-info">
+        <span>${q.progress}/${q.qty}</span>
+        <span class="quest-reward">${rewardParts.join('  ')}</span>
+      </div>
+      ${done?`<button class="quest-claim" onclick="claimQuest(${idx})">✅ CLAIM</button>`:''}
+    `;
+    list.appendChild(card);
   });
 }
 
@@ -466,12 +761,13 @@ function updateCharScreen() {
     const eq = p.eq[sl];
     document.getElementById(`eq-${sl}`).innerHTML = `${icons[sl]} <span>${eq?eq.name:'Empty'}</span>`;
   }
+  updateInvScreen();
 }
 
 function refresh() {
   updateHUD();
   updateCharScreen();
-  updateInvScreen();
+  updateQuestScreen();
   if (G.combat) updateCombatUI();
 }
 
@@ -499,16 +795,18 @@ function showScreen(name, btn) {
   document.getElementById(`screen-${name}`).classList.add('active');
   if (btn) { btn.classList.add('active'); }
   else {
-    const order=['explore','char','inventory'];
+    const order=['explore','quests','char','shop'];
     const nb=document.querySelectorAll('.nav-btn');
     const i=order.indexOf(name);
     if (i>=0 && nb[i]) nb[i].classList.add('active');
   }
-  if (name==='char') { updateCharScreen(); drawSprite(document.getElementById('char-canvas'),'player'); }
+  if (name==='char')  { updateCharScreen(); drawSprite(document.getElementById('char-canvas'),'player'); }
   if (name==='explore') drawSprite(document.getElementById('player-canvas'),'player');
+  if (name==='quests')  updateQuestScreen();
+  if (name==='shop')    updateShopScreen();
 }
 
-// ── OVERLAY (level up, etc.) ─────────────────────────────────
+// ── OVERLAY ──────────────────────────────────────────────────
 function showOverlay(msg) {
   const wrap = document.createElement('div');
   wrap.id = 'overlay';
@@ -520,7 +818,9 @@ function showOverlay(msg) {
 
 // ── SAVE / LOAD ──────────────────────────────────────────────
 function save() {
-  try { localStorage.setItem('pq_save', JSON.stringify({ p:G.p, steps:G.steps })); } catch(_){}
+  try {
+    localStorage.setItem('pq_save', JSON.stringify({ p:G.p, steps:G.steps, quests:G.quests }));
+  } catch(_){}
 }
 
 function load() {
@@ -530,6 +830,7 @@ function load() {
     const d = JSON.parse(raw);
     Object.assign(G.p, d.p);
     G.steps = d.steps || 0;
+    G.quests = d.quests || [];
     document.getElementById('step-val').textContent = G.steps;
   } catch(_){}
 }
@@ -549,6 +850,7 @@ function shake(el) {
 // ── INIT ─────────────────────────────────────────────────────
 function init() {
   load();
+  generateQuests();
   updateArea();
   refresh();
   drawSprite(document.getElementById('player-canvas'), 'player');

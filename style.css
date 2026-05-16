@@ -206,6 +206,7 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 /* ── INVENTORY ── */
 #inv-gold{font-size:9px;color:var(--accent);align-self:flex-start}
 #inv-tip{font-size:6px;color:var(--dim);align-self:flex-start}
+#inv-gold-lbl{color:var(--dim)}
 #inv-grid{
   width:100%;
   display:grid;
@@ -227,6 +228,77 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 .inv-item small{font-size:5px;color:var(--dim);line-height:1.4}
 .inv-item:active{border-color:var(--accent)}
 .inv-item.equipped{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+
+/* ── QUESTS ── */
+#quest-hint{font-size:7px;color:var(--dim);align-self:flex-start}
+#quest-list{width:100%;display:flex;flex-direction:column;gap:8px}
+.quest-card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  padding:10px;
+}
+.quest-card.done{border-color:var(--green)}
+.quest-title{font-size:8px;color:var(--text);margin-bottom:6px}
+.quest-prog-wrap{height:6px;background:var(--border);margin:6px 0}
+.quest-prog{height:100%;background:var(--blue);transition:width .4s}
+.quest-prog.done{background:var(--green)}
+.quest-info{display:flex;justify-content:space-between;align-items:center;font-size:6px;color:var(--dim)}
+.quest-reward{color:var(--accent)}
+.quest-claim{
+  margin-top:8px;
+  width:100%;
+  background:var(--green);
+  color:var(--bg);
+  border:none;
+  border-bottom:3px solid #2a8050;
+  padding:8px;
+  font-family:'Press Start 2P',monospace;
+  font-size:7px;
+  cursor:pointer;
+}
+.quest-claim:active{border-bottom-width:1px;transform:translateY(2px)}
+
+/* ── SHOP ── */
+#shop-gold{font-size:9px;color:var(--accent);align-self:flex-start}
+.shop-tabs{display:flex;gap:0;width:100%}
+.stab{
+  flex:1;
+  background:var(--panel);
+  color:var(--dim);
+  border:1px solid var(--border);
+  padding:8px;
+  font-family:'Press Start 2P',monospace;
+  font-size:7px;
+  cursor:pointer;
+}
+.stab.active{background:var(--border);color:var(--accent)}
+#shop-buy-list,#shop-sell-list{width:100%;display:flex;flex-direction:column;gap:6px}
+.shop-row{
+  background:var(--panel);
+  border:1px solid var(--border);
+  padding:8px 10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.shop-icon{font-size:20px;flex-shrink:0}
+.shop-info{flex:1}
+.shop-name{font-size:8px;color:var(--text)}
+.shop-stat{font-size:6px;color:var(--dim);margin-top:3px}
+.shop-price{font-size:8px;color:var(--accent);flex-shrink:0}
+.shop-btn{
+  background:var(--accent);
+  color:var(--bg);
+  border:none;
+  border-bottom:2px solid var(--accent2);
+  padding:6px 8px;
+  font-family:'Press Start 2P',monospace;
+  font-size:6px;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.shop-btn:disabled{background:var(--border);color:var(--dim);border-bottom-color:#111;cursor:default}
+.shop-btn:active{border-bottom-width:0;transform:translateY(2px)}
 
 /* ── NAV ── */
 #bottom-nav{

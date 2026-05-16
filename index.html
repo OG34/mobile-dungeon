@@ -73,7 +73,7 @@
         </div>
       </div>
 
-      <!-- CHARACTER -->
+      <!-- CHARACTER + INVENTORY -->
       <div id="screen-char" class="screen">
         <h2>Character</h2>
         <canvas id="char-canvas" width="64" height="64" style="margin:8px auto"></canvas>
@@ -92,14 +92,30 @@
           <div class="equip-row" id="eq-armor">🛡 <span>Empty</span></div>
           <div class="equip-row" id="eq-acc">💍 <span>Empty</span></div>
         </div>
+        <h3>Inventory <span id="inv-gold-lbl" style="color:var(--dim);font-size:7px">🪙 0</span></h3>
+        <div id="inv-tip">Tap to equip/use · Long press to sell</div>
+        <div id="inv-grid"></div>
+        <div style="height:8px"></div>
       </div>
 
-      <!-- INVENTORY -->
-      <div id="screen-inventory" class="screen">
-        <h2>Inventory</h2>
-        <div id="inv-gold">🪙 Gold: <span id="inv-gold-val">0</span></div>
-        <div id="inv-tip">Tap items to equip/use</div>
-        <div id="inv-grid"></div>
+      <!-- QUESTS -->
+      <div id="screen-quests" class="screen">
+        <h2>Quests</h2>
+        <div id="quest-hint">Schließe Quests ab für Belohnungen!</div>
+        <div id="quest-list"></div>
+        <div style="height:8px"></div>
+      </div>
+
+      <!-- SHOP -->
+      <div id="screen-shop" class="screen">
+        <h2>Shop</h2>
+        <div id="shop-gold">🪙 Gold: <span id="shop-gold-val">0</span></div>
+        <div class="shop-tabs">
+          <button class="stab active" onclick="shopTab('buy',this)">Kaufen</button>
+          <button class="stab" onclick="shopTab('sell',this)">Verkaufen</button>
+        </div>
+        <div id="shop-buy-list"></div>
+        <div id="shop-sell-list" style="display:none"></div>
       </div>
 
     </div>
@@ -107,8 +123,9 @@
     <!-- BOTTOM NAV -->
     <nav id="bottom-nav">
       <button class="nav-btn active" onclick="showScreen('explore',this)">🗺<br><small>Explore</small></button>
+      <button class="nav-btn" onclick="showScreen('quests',this)">📜<br><small>Quests</small></button>
       <button class="nav-btn" onclick="showScreen('char',this)">🧙<br><small>Char</small></button>
-      <button class="nav-btn" onclick="showScreen('inventory',this)">🎒<br><small>Items</small></button>
+      <button class="nav-btn" onclick="showScreen('shop',this)">🏪<br><small>Shop</small></button>
     </nav>
 
   </div>
