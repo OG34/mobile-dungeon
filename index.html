@@ -56,6 +56,7 @@
             <canvas id="enemy-canvas" width="64" height="64"></canvas>
             <div class="bar-track slim"><div id="enemy-hp-bar" class="bar-fill red"></div></div>
             <span id="enemy-hp-text" class="bar-val">10/10</span>
+            <div id="enemy-status" class="status-row"></div>
           </div>
           <div id="vs-icon">⚔</div>
           <div class="combatant">
@@ -63,13 +64,16 @@
             <canvas id="player-combat-canvas" width="64" height="64"></canvas>
             <div class="bar-track slim"><div id="pcombat-hp-bar" class="bar-fill red"></div></div>
             <span id="pcombat-hp-text" class="bar-val">100/100</span>
+            <div id="player-status" class="status-row"></div>
           </div>
         </div>
         <div id="combat-log-box"><div id="combat-log"></div></div>
         <div id="skill-picker"></div>
+        <div id="combat-item-picker"></div>
         <div id="combat-btns">
           <button class="cbtn" id="btn-attack" onclick="combatAction('attack')">⚔ Attack</button>
           <button class="cbtn" id="btn-skills" onclick="toggleSkillPicker()">✨ Skills</button>
+          <button class="cbtn" id="btn-items" onclick="toggleCombatItems()">🎒 Items</button>
           <button class="cbtn" onclick="combatAction('flee')">🏃 Flee</button>
         </div>
       </div>
@@ -78,13 +82,16 @@
       <div id="screen-char" class="screen">
         <h2>Character</h2>
         <canvas id="char-canvas" width="64" height="64" style="margin:8px auto"></canvas>
+        <div id="stat-points-banner" style="display:none" class="sp-banner">⭐ <span id="sp-count">0</span> Stat-Punkte verfügbar!</div>
         <div class="panel">
           <div class="stat-row"><span>Level</span><span id="s-level">1</span></div>
           <div class="stat-row"><span>XP</span><span id="s-xp">0 / 100</span></div>
           <div class="stat-row"><span>HP</span><span id="s-hp">100 / 100</span></div>
           <div class="stat-row"><span>MP</span><span id="s-mp">30 / 30</span></div>
-          <div class="stat-row"><span>ATK</span><span id="s-atk">8</span></div>
-          <div class="stat-row"><span>DEF</span><span id="s-def">3</span></div>
+          <div class="stat-row"><span>ATK</span><span id="s-atk">8</span><button class="salloc" onclick="allocateStat('str')" title="STR +2ATK">+</button></div>
+          <div class="stat-row"><span>DEF</span><span id="s-def">3</span><button class="salloc" onclick="allocateStat('def')" title="DEF +2DEF">+</button></div>
+          <div class="stat-row"><span>MaxHP</span><span id="s-maxhp">100</span><button class="salloc" onclick="allocateStat('vit')" title="VIT +15HP">+</button></div>
+          <div class="stat-row"><span>MaxMP</span><span id="s-maxmp">30</span><button class="salloc" onclick="allocateStat('wis')" title="WIS +8MP">+</button></div>
           <div class="stat-row"><span>Kills</span><span id="s-kills">0</span></div>
         </div>
         <h3>Equipment</h3>
