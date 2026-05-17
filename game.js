@@ -207,9 +207,10 @@ const DROPS = {
   troll:    [{id:'potion',       p:.30},{id:'iron_shield',p:.10},{id:'elixir',p:.12}],
   skeleton: [{id:'potion',       p:.28},{id:'iron_sword', p:.08},{id:'iron_shield',p:.07}],
   zombie:   [{id:'potion',       p:.25},{id:'leather',    p:.10},{id:'elixir',p:.10}],
-  ghost:    [{id:'magic_staff',  p:.12},{id:'magic_ring', p:.12},{id:'elixir',p:.20}],
-  demon:    [{id:'demon_armor',  p:.15},{id:'elixir',     p:.40},{id:'magic_ring',p:.18}],
-  dragon:   [{id:'dragon_blade', p:.35},{id:'elixir',     p:.60},{id:'magic_ring',p:.30}],
+  ghost:    [{id:'magic_staff',  p:.12},{id:'magic_ring',  p:.12},{id:'elixir',p:.20}],
+  demon:    [{id:'demon_armor',  p:.15},{id:'elixir',     p:.40},{id:'magic_ring',p:.18},{id:'shadow_blade',p:.08}],
+  dragon:   [{id:'dragon_blade', p:.35},{id:'elixir',     p:.60},{id:'magic_ring',p:.30},{id:'thorn_shield',p:.20}],
+  troll:    [{id:'potion',       p:.30},{id:'iron_shield',p:.10},{id:'elixir',p:.12},{id:'thorn_shield',p:.06}],
 };
 
 const ITEMS = {
@@ -224,13 +225,19 @@ const ITEMS = {
   magic_ring:  { name:'Magic Ring',   icon:'🔮', slot:'acc',    atk:0,  def:0,  maxMp:15,  value:45,  buyable:true,  rarity:'rare'      },
   potion:      { name:'HP Potion',    icon:'🧪', slot:null,     hp:40,                     value:20,  buyable:true,  rarity:'common'    },
   elixir:      { name:'Elixir',       icon:'✨', slot:null,     hp:80,  mp:20,             value:65,  buyable:true,  rarity:'rare'      },
+  battle_brew: { name:'Battle Brew',  icon:'⚗', slot:null,     buffAtk:10, buffLeft:3,    value:45,  buyable:true,  rarity:'uncommon'  },
+  shadow_blade:{ name:'Shadow Blade', icon:'🌑', slot:'weapon', atk:18, def:0,             value:280, buyable:false, rarity:'epic'      },
+  thorn_shield:{ name:'Thorn Shield', icon:'🌵', slot:'armor',  atk:3,  def:12,            value:150, buyable:false, rarity:'rare'      },
 };
 
 const SKILLS = [
-  { id:'power',   name:'Power Strike', icon:'💥', mp:15, unlockLv:1,  dmgMult:2.2,         desc:'2.2x ATK' },
-  { id:'heal',    name:'Heal',         icon:'💚', mp:20, unlockLv:6,  healAmt:50,           desc:'Heilt 50 HP' },
-  { id:'thunder', name:'Thunder',      icon:'⚡', mp:30, unlockLv:10, dmgMult:3.5, burn:true,desc:'3.5x + Burn' },
-  { id:'drain',   name:'Drain Life',   icon:'🩸', mp:25, unlockLv:15, dmgMult:1.8, drain:true,desc:'1.8x + Lifesteal' },
+  { id:'power',   name:'Power Strike', icon:'💥', mp:15, unlockLv:1,  dmgMult:2.2,                    desc:'2.2× ATK' },
+  { id:'bash',    name:'Shield Bash',  icon:'🛡', mp:12, unlockLv:3,  dmgMult:0.6, stun:true,          desc:'0.6× + Stun' },
+  { id:'heal',    name:'Heal',         icon:'💚', mp:20, unlockLv:6,  healAmt:50,                      desc:'Heilt 50 HP' },
+  { id:'thunder', name:'Thunder',      icon:'⚡', mp:30, unlockLv:10, dmgMult:3.5, burn:true,           desc:'3.5× + Burn' },
+  { id:'blizzard',name:'Blizzard',     icon:'❄', mp:35, unlockLv:12, dmgMult:1.8, multiHit:2,          desc:'2× 1.8× Treffer' },
+  { id:'drain',   name:'Drain Life',   icon:'🩸', mp:25, unlockLv:15, dmgMult:1.8, drain:true,          desc:'1.8× + Lifesteal' },
+  { id:'meteor',  name:'Meteor',       icon:'☄', mp:50, unlockLv:18, dmgMult:4.5, burn:true,            desc:'4.5× + Burn 3T' },
 ];
 
 function unlockedSkills() { return SKILLS.filter(s => G.p.level >= s.unlockLv); }
@@ -286,7 +293,7 @@ const G = {
     baseAtk:8, baseDef:3, gold:0, kills:0,
     totalGoldEarned:0, statPoints:0, prestige:0,
     eq:{weapon:null,armor:null,acc:null},
-    inv:[],
+    inv:[], buffs:[],
   },
   area: AREAS[0],
   combat: null,
@@ -305,6 +312,10 @@ function stats() {
   for (const slot of ['weapon','armor','acc']) {
     const eq = p.eq[slot];
     if (eq) { atk+=eq.atk||0; def+=eq.def||0; maxHp+=eq.maxHp||0; maxMp+=eq.maxMp||0; }
+  }
+  for (const b of (p.buffs||[])) {
+    if (b.type==='atk') atk+=b.val;
+    if (b.type==='def') def+=b.val;
   }
   return { atk, def, maxHp, maxMp };
 }
@@ -356,10 +367,11 @@ function updateArea() {
 
 // ── EXPLORE ──────────────────────────────────────────────────
 const EVENTS = [
-  {t:'combat', w:48},{t:'gold',  w:18},{t:'heal',   w:10},
-  {t:'chest',  w:8}, {t:'shrine',w:6}, {t:'boss',   w:4},{t:'nothing',w:6},
+  {t:'combat',   w:44},{t:'gold',    w:16},{t:'heal',    w:9},
+  {t:'chest',    w:7}, {t:'shrine',  w:5}, {t:'boss',    w:4},
+  {t:'merchant', w:5}, {t:'stranger',w:4}, {t:'trap',    w:4},{t:'nothing',w:2},
 ];
-const CHEST_LOOT = ['potion','potion','potion','elixir','iron_sword','leather','iron_shield','health_ring','magic_ring'];
+const CHEST_LOOT = ['potion','potion','potion','elixir','iron_sword','leather','iron_shield','health_ring','magic_ring','battle_brew'];
 
 function pick(arr) {
   const total=arr.reduce((s,e)=>s+(e.w||e.p||0),0);
@@ -396,6 +408,16 @@ function doStep() {
       ()=>{ const g=10*p.level; earnGold(g); addLog(`⛩️ Glücksschrein! +${g} Gold.`); },
     ];
     opts[Math.floor(Math.random()*opts.length)](); refresh();
+  } else if (ev.t==='merchant') {
+    addLog('🧙 Ein Wanderhändler bietet seine Waren an!'); showMerchant();
+  } else if (ev.t==='stranger') {
+    addLog('🤫 Ein mysteriöser Fremder tritt aus dem Schatten...'); showStranger();
+  } else if (ev.t==='trap') {
+    const dmg=Math.max(1,Math.floor(p.hp*0.2));
+    p.hp=Math.max(1,p.hp-dmg);
+    const g=Math.floor((Math.random()*15+10)*p.level);
+    earnGold(g); SFX.goldPickup();
+    addLog(`🪤 Falle! -${dmg} HP aber ${g} Gold gefunden!`); refresh();
   } else {
     const msgs=['🌲 Nichts passiert.','🌫️ Seltsamer Nebel...','🍄 Bunte Pilze.','🐦 Vögel zwitschern.','💨 Der Wind flüstert.','🕸️ Überall Spinnweben.','🌙 Der Mond steht tief.'];
     addLog(msgs[Math.floor(Math.random()*msgs.length)]);
@@ -537,15 +559,30 @@ function useSkill(skillId) {
     floatDmg(document.getElementById('player-combat-canvas'),'+'+healed,'#52c07a');
     updateHUD(); e.playerTurn=true; setCombatBtns(true); updateCombatUI(); return;
   }
+  const ec2 = document.getElementById('enemy-canvas');
+  if(skill.multiHit){
+    let total=0;
+    for(let i=0;i<skill.multiHit;i++){
+      const d=Math.max(1,Math.floor(s.atk*skill.dmgMult-e.def+rand(-1,2)));
+      total+=d; e.hp-=d;
+      floatDmg(ec2,skill.icon+d,'#88ddff');
+      shake(ec2); flashHit(ec2);
+    }
+    combatLog(`${skill.icon} ${skill.name}! ${skill.multiHit}× Treffer! ${total} Gesamtschaden!`);
+    SFX.hit();
+    updateCombatUI(); updateHUD();
+    if(e.hp<=0){setTimeout(combatWin,700);return;}
+    setTimeout(enemyTurn,800); return;
+  }
   const crit=Math.random()<0.15;
   const dmg=Math.max(1,Math.floor(s.atk*skill.dmgMult-e.def+rand(-1,2))*(crit?2:1));
   combatLog(`${skill.icon} ${skill.name}! ${dmg}${crit?' KRIT!':''}`);
   if(crit) SFX.crit(); else SFX.hit();
   e.hp-=dmg;
-  const ec2=document.getElementById('enemy-canvas');
   floatDmg(ec2,skill.icon+dmg,'#e8c96b');
   shake(ec2); flashHit(ec2);
-  if(skill.burn)  applyStatus('enemy','burn',2,8);
+  if(skill.stun)  applyStatus('enemy','stun',1,0);
+  if(skill.burn)  applyStatus('enemy','burn',skill.id==='meteor'?3:2,skill.id==='meteor'?14:8);
   if(skill.drain){ const d=Math.floor(dmg*0.4); p.hp=Math.min(s.maxHp,p.hp+d); combatLog(`🩸 +${d} HP`); floatDmg(document.getElementById('player-combat-canvas'),'+'+d,'#cc44aa'); }
   updateCombatUI(); updateHUD();
   if(e.hp<=0){setTimeout(combatWin,700);return;}
@@ -557,8 +594,16 @@ function useItemInCombat(idx) {
   const slot=G.p.inv[idx]; if(!slot) return;
   const item=ITEMS[slot.id]; if(!item||item.slot) return;
   const p=G.p; const s=stats();
-  if(item.hp){p.hp=Math.min(s.maxHp,p.hp+(item.hp||0)); floatDmg(document.getElementById('player-combat-canvas'),'+'+item.hp+'HP','#52c07a');}
+  if(item.hp){p.hp=Math.min(s.maxHp,p.hp+(item.hp||0)); SFX.heal(); floatDmg(document.getElementById('player-combat-canvas'),'+'+item.hp+'HP','#52c07a');}
   if(item.mp) p.mp=Math.min(s.maxMp,p.mp+(item.mp||0));
+  if(item.buffAtk){
+    p.buffs=p.buffs||[];
+    const ex=p.buffs.find(b=>b.type==='atk');
+    if(ex) ex.left=Math.max(ex.left,item.buffLeft);
+    else p.buffs.push({type:'atk',val:item.buffAtk,left:item.buffLeft});
+    combatLog(`⚗ Battle Brew! +${item.buffAtk} ATK für ${item.buffLeft} Kämpfe!`);
+    floatDmg(document.getElementById('player-combat-canvas'),`+${item.buffAtk}ATK`,'#e8c96b');
+  }
   slot.qty=(slot.qty||1)-1; if(slot.qty<=0) p.inv.splice(idx,1);
   combatLog(`🧪 ${item.name} benutzt!`); hideCombatItems(); setCombatBtns(false);
   G.combat.playerTurn=false; updateHUD(); setTimeout(enemyTurn,800);
@@ -585,7 +630,7 @@ function showCombatItems(){
   const picker=document.getElementById('combat-item-picker'); picker.innerHTML='';
   const cons=G.p.inv.filter(s=>ITEMS[s.id]&&!ITEMS[s.id].slot);
   if(!cons.length){picker.innerHTML='<div style="font-size:7px;color:var(--dim);padding:8px;text-align:center">Keine Tränke.</div>';}
-  else{ G.p.inv.forEach((slot,idx)=>{const item=ITEMS[slot.id];if(!item||item.slot)return;const btn=document.createElement('button');btn.className='skill-btn';btn.innerHTML=`<span>${item.icon} ${item.name}${slot.qty>1?` x${slot.qty}`:''}</span><span class="skill-unlock">${item.hp?'+'+item.hp+'HP':''} ${item.mp?'+'+item.mp+'MP':''}</span>`;btn.onclick=()=>useItemInCombat(idx);picker.appendChild(btn);}); }
+  else{ G.p.inv.forEach((slot,idx)=>{const item=ITEMS[slot.id];if(!item||item.slot)return;const btn=document.createElement('button');btn.className='skill-btn';const desc=item.buffAtk?`+${item.buffAtk}ATK ${item.buffLeft}K`:`${item.hp?'+'+item.hp+'HP':''} ${item.mp?'+'+item.mp+'MP':''}`.trim();btn.innerHTML=`<span>${item.icon} ${item.name}${slot.qty>1?` x${slot.qty}`:''}</span><span class="skill-unlock">${desc}</span>`;btn.onclick=()=>useItemInCombat(idx);picker.appendChild(btn);}); }
   picker.classList.add('open'); document.getElementById('btn-items').textContent='🎒 Items ▼';
 }
 function hideCombatItems(){document.getElementById('combat-item-picker').classList.remove('open');const b=document.getElementById('btn-items');if(b)b.textContent='🎒 Items';}
@@ -631,6 +676,11 @@ function combatWin() {
 
 function endCombat() {
   G.combat=null; hideSkillPicker(); hideCombatItems();
+  G.p.buffs=(G.p.buffs||[]).filter(b=>{
+    b.left--;
+    if(b.left<=0){addLog(`⌛ ${b.type==='atk'?'ATK':'DEF'}-Buff abgelaufen.`);return false;}
+    return true;
+  });
   showScreen('explore',document.querySelector('.nav-btn')); refresh();
 }
 
@@ -646,6 +696,50 @@ function updateCombatUI() {
 }
 
 function setCombatBtns(on){document.querySelectorAll('.cbtn').forEach(b=>b.disabled=!on);}
+
+// ── NPC EVENTS ───────────────────────────────────────────────
+function showMerchant() {
+  const pool=Object.entries(ITEMS).filter(([,it])=>it.buyable);
+  const picks=[];
+  const tmp=[...pool];
+  while(picks.length<3&&tmp.length){ picks.push(tmp.splice(Math.floor(Math.random()*tmp.length),1)[0]); }
+  const btnStyle='display:block;width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);border-bottom:2px solid var(--accent2);padding:8px;margin-bottom:6px;font-family:\'Press Start 2P\',monospace;font-size:7px;cursor:pointer;text-align:left';
+  const closeStyle='display:block;width:100%;background:var(--panel);color:var(--dim);border:1px solid var(--border);padding:8px;font-family:\'Press Start 2P\',monospace;font-size:7px;cursor:pointer';
+  const wrap=document.createElement('div');
+  wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;max-width:90vw;text-align:center">
+    🧙 Wanderhändler<br><br>
+    <span style="font-size:7px;color:var(--dim)">Sonderangebote — 50% Rabatt!</span><br><br>
+    ${picks.map(([id,it])=>`<button style="${btnStyle}" onclick="merchantBuy('${id}',${Math.ceil(it.value*0.75)})">${it.icon} ${it.name} &nbsp;${Math.ceil(it.value*0.75)}🪙<br><span style="color:var(--dim)">${it.rarity}</span></button>`).join('')}
+    <button style="${closeStyle}" onclick="document.getElementById('overlay').remove()">🚶 Weiter</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function merchantBuy(id,price){
+  if(G.p.gold<price){showOverlay('❌ Kein Gold!');return;}
+  G.p.gold-=price; addInv(id); addLog(`🧙 ${ITEMS[id].icon} ${ITEMS[id].name} für ${price}🪙 gekauft!`);
+  document.getElementById('overlay')?.remove(); refresh();
+}
+function showStranger(){
+  const xp=Math.floor(20*G.p.level); const g=Math.floor(15*G.p.level);
+  const btnStyle='display:block;width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);border-bottom:2px solid var(--accent2);padding:10px;margin-bottom:6px;font-family:\'Press Start 2P\',monospace;font-size:7px;cursor:pointer';
+  const wrap=document.createElement('div');
+  wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:90vw;text-align:center">
+    🤫 Mysteriöser Fremder<br><br>
+    <span style="font-size:7px;color:var(--dim)">"Wähle weise, Held..."</span><br><br>
+    <button style="${btnStyle}" onclick="strangerChoice('xp',${xp})">⭐ ${xp} Erfahrung</button>
+    <button style="${btnStyle}" onclick="strangerChoice('gold',${g})">🪙 ${g} Gold</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function strangerChoice(type,val){
+  document.getElementById('overlay')?.remove();
+  if(type==='xp'){ gainXP(val); addLog(`🤫 Fremder schenkt dir ${val} XP!`); }
+  else { earnGold(val); SFX.goldPickup(); addLog(`🤫 Fremder schenkt dir ${val} Gold!`); refresh(); }
+}
 
 // ── VICTORY + PRESTIGE ───────────────────────────────────────
 function showVictory() {
