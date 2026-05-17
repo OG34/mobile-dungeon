@@ -40,6 +40,13 @@ function drawSprite(canvas, key, scale=8) {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.imageSmoothingEnabled = false;
+  // black outline pass: slightly larger rect behind each pixel
+  ctx.fillStyle = '#000';
+  s.d.forEach((row,r) => row.forEach((v,c) => {
+    if (v === '.') return;
+    ctx.fillRect(c*scale-1, r*scale-1, scale+2, scale+2);
+  }));
+  // color pass
   s.d.forEach((row,r) => row.forEach((v,c) => {
     if (v === '.') return;
     ctx.fillStyle = s.p[v];
@@ -94,11 +101,11 @@ const SFX = (function() {
 })();
 
 // ── BACKGROUNDS ─────────────────────────────────────────────
-function drawBackground(areaId) {
-  const canvas = document.getElementById('bg-canvas');
+function drawBackground(areaId, targetCanvas) {
+  const canvas = targetCanvas || document.getElementById('bg-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  const W=240, H=100;
+  const W = canvas.width, H = canvas.height;
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0,0,W,H);
   const r = (c,x,y,w,h) => { ctx.fillStyle=c; ctx.fillRect(x,y,w,h); };
@@ -388,6 +395,7 @@ function doStep() {
   document.getElementById('step-val').textContent = G.steps;
   tickQuestStep(); tickDailyStep();
   SFX.step();
+  p.mp = Math.min(stats().maxMp, p.mp + 3);
   setBusy(true); setTimeout(()=>setBusy(false),700);
 
   const ev = pick(EVENTS);
@@ -486,7 +494,7 @@ function startCombat(foeId, isBoss) {
     atk:Math.floor(base.atk*m), def:Math.floor(base.def*m),
     xp:Math.floor(base.xp*m*(isBoss?1.5:isElite?2:1)),
     gold:[base.gold[0]*goldMult, base.gold[1]*goldMult],
-    drops, playerTurn:true, playerStatus:[], enemyStatus:[],
+    drops, playerTurn:true, playerStatus:[], enemyStatus:[], combo:0,
     statusDef:base.status, isKing:false,
   };
   if (isElite) { addLog(`⚡ Ein ELITE ${base.name} erscheint! (3× Beute)`); SFX.boss(); }
@@ -496,13 +504,21 @@ function startCombat(foeId, isBoss) {
 
 function startFinalBoss() {
   if (G.p.level < 20) { showOverlay('❌ Du musst LV 20 sein!'); return; }
-  G.combat = { ...SHADOW_KING, hp:SHADOW_KING.hp, maxHp:SHADOW_KING.maxHp, playerStatus:[], enemyStatus:[] };
+  G.combat = { ...SHADOW_KING, hp:SHADOW_KING.hp, maxHp:SHADOW_KING.maxHp, playerStatus:[], enemyStatus:[], combo:0 };
   addLog('👑 DER SHADOW KING ERWACHT!');
   enterCombatScreen('shadow_king', false, true);
 }
 
 function enterCombatScreen(sprite, isBoss, isKing) {
   showScreen('combat',null);
+  // draw dimmed area background on combat stage
+  const cbc = document.getElementById('combat-bg-canvas');
+  if (cbc) {
+    drawBackground(G.area.id, cbc);
+    const ctx = cbc.getContext('2d');
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(0,0,cbc.width,cbc.height);
+  }
   const lbl=document.getElementById('enemy-name-lbl');
   lbl.className='cname'+(isKing?' boss-name':isBoss?' boss-name':'');
   drawSprite(document.getElementById('enemy-canvas'),sprite);
@@ -520,14 +536,18 @@ function combatAction(act) {
   if(e.hp<=0){setTimeout(combatWin,400);return;}
 
   if(act==='flee'){
+    e.combo=0;
     if(Math.random()<0.45){ combatLog('🏃 Geflohen!'); SFX.flee(); setTimeout(endCombat,800); }
     else{ combatLog('😱 Flucht fehlgeschlagen!'); setTimeout(enemyTurn,700); }
     return;
   }
   if(stunned){ combatLog('💫 Betäubt! Zug übersprungen.'); setTimeout(enemyTurn,700); return; }
 
+  e.combo=(e.combo||0)+1;
+  const comboMult=1+Math.min(e.combo*0.12,0.72);
   const crit=Math.random()<0.15;
-  const dmg=Math.max(1,Math.floor((s.atk-e.def+rand(-2,3))*(crit?2:1)));
+  const dmg=Math.max(1,Math.floor((s.atk-e.def+rand(-2,3))*(crit?2:1)*comboMult));
+  if(e.combo>=3) combatLog(`🔥 COMBO ×${e.combo}!`);
   if(crit){ combatLog(`💥 KRITISCH! ${dmg} Schaden!`); SFX.crit(); }
   else    { combatLog(`⚔ Du schlägst für ${dmg} Schaden!`); SFX.hit(); }
   e.hp-=dmg;
@@ -641,6 +661,7 @@ function enemyTurn() {
   const stunned=processStatuses('enemy'); updateCombatUI();
   if(e.hp<=0){setTimeout(combatWin,400);return;}
   if(!stunned){
+    e.combo=0; // break player combo on hit
     const crit=Math.random()<0.10;
     const dmg=Math.max(1,Math.floor((e.atk-s.def+rand(-2,2))*(crit?1.8:1)));
     p.hp-=dmg; combatLog(`💢 ${e.name}: ${dmg}${crit?' Krit!':''}`);
@@ -691,6 +712,8 @@ function updateCombatUI() {
   document.getElementById('enemy-hp-bar').style.width   =pct(Math.max(0,e.hp),e.maxHp);
   document.getElementById('pcombat-hp-text').textContent=`${Math.max(0,p.hp)}/${s.maxHp}`;
   document.getElementById('pcombat-hp-bar').style.width =pct(Math.max(0,p.hp),s.maxHp);
+  const cd=document.getElementById('combo-display');
+  if(cd){const c=e.combo||0;cd.style.display=c>=2?'':'none';if(c>=2)cd.textContent=c>=5?`🔥 FEVER ×${c}!`:`🔥 COMBO ×${c}`;}
   renderStatusRow('enemy-status',e.enemyStatus);
   renderStatusRow('player-status',e.playerStatus);
 }

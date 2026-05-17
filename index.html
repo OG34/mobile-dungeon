@@ -41,7 +41,7 @@
           <span id="area-name">Enchanted Forest</span>
         </div>
         <div id="scene-wrap">
-          <canvas id="bg-canvas" width="240" height="100"></canvas>
+          <canvas id="bg-canvas" width="240" height="120"></canvas>
           <canvas id="player-canvas" width="64" height="64"></canvas>
         </div>
         <div id="step-counter">Steps: <span id="step-val">0</span></div>
@@ -53,6 +53,7 @@
       <!-- COMBAT -->
       <div id="screen-combat" class="screen">
         <div id="combat-stage">
+          <canvas id="combat-bg-canvas" width="320" height="110"></canvas>
           <div class="combatant">
             <div id="enemy-name-lbl" class="cname">Slime</div>
             <canvas id="enemy-canvas" width="64" height="64"></canvas>
@@ -69,6 +70,7 @@
             <div id="player-status" class="status-row"></div>
           </div>
         </div>
+        <div id="combo-display" style="display:none"></div>
         <div id="combat-log-box"><div id="combat-log"></div></div>
         <div id="skill-picker"></div>
         <div id="combat-item-picker"></div>
