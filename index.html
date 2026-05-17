@@ -66,9 +66,10 @@
           </div>
         </div>
         <div id="combat-log-box"><div id="combat-log"></div></div>
+        <div id="skill-picker"></div>
         <div id="combat-btns">
-          <button class="cbtn" onclick="combatAction('attack')">⚔ Attack</button>
-          <button class="cbtn" onclick="combatAction('skill')">✨ Skill</button>
+          <button class="cbtn" id="btn-attack" onclick="combatAction('attack')">⚔ Attack</button>
+          <button class="cbtn" id="btn-skills" onclick="toggleSkillPicker()">✨ Skills</button>
           <button class="cbtn" onclick="combatAction('flee')">🏃 Flee</button>
         </div>
       </div>
