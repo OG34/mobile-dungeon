@@ -58,7 +58,8 @@ body{
 .bar-fill.blue{background:var(--blue)}
 .bar-val{font-size:6px;color:var(--dim);min-width:28px;text-align:right}
 
-#hud-right{font-size:9px;color:var(--accent);white-space:nowrap}
+#hud-right{font-size:9px;color:var(--accent);white-space:nowrap;display:flex;align-items:center;gap:5px}
+#mute-btn{background:none;border:none;cursor:pointer;font-size:10px;padding:0;line-height:1}
 
 /* ── SCREENS ── */
 #screens{flex:1;overflow:hidden;position:relative}
@@ -402,6 +403,13 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
   75%{transform:translateX(4px)}
 }
 .shake{animation:shake .25s}
+
+/* hit flash */
+@keyframes hitFlash{
+  0%,100%{filter:none}
+  35%{filter:brightness(6) saturate(0)}
+}
+.hit-flash{animation:hitFlash .2s ease}
 
 /* ── FLOATING DAMAGE NUMBERS ── */
 .dmg-num{

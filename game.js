@@ -47,6 +47,52 @@ function drawSprite(canvas, key, scale=8) {
   }));
 }
 
+// ── SOUND ENGINE ────────────────────────────────────────────
+const SFX = (function() {
+  let ctx = null; let muted = false;
+  function getCtx() { if (!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)(); return ctx; }
+  function tone(freq, type, dur, vol=0.15) {
+    if (muted) return;
+    try {
+      const c=getCtx(), o=c.createOscillator(), g=c.createGain();
+      o.connect(g); g.connect(c.destination); o.type=type; o.frequency.value=freq;
+      g.gain.setValueAtTime(vol, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime+dur);
+      o.start(c.currentTime); o.stop(c.currentTime+dur+0.01);
+    } catch(_) {}
+  }
+  function seq(notes) {
+    if (muted) return;
+    try {
+      const c=getCtx(); const t=c.currentTime;
+      notes.forEach(([f,d,del,vol=0.15])=>{
+        const o=c.createOscillator(),g=c.createGain();
+        o.connect(g); g.connect(c.destination); o.type='square'; o.frequency.value=f;
+        g.gain.setValueAtTime(vol, t+del);
+        g.gain.exponentialRampToValueAtTime(0.001, t+del+d);
+        o.start(t+del); o.stop(t+del+d+0.01);
+      });
+    } catch(_) {}
+  }
+  return {
+    toggleMute() { muted=!muted; return muted; },
+    isMuted() { return muted; },
+    hit()        { tone(200,'square',0.08,0.2); tone(130,'square',0.1,0.12); },
+    crit()       { seq([[440,'square',0,0.2],[880,'square',0.05,0.25]].map(([f,t,d,v])=>[f,0.12,d,v])); tone(440,'square',0.05,0.2); tone(880,'square',0.1,0.25); },
+    dmgTake()    { tone(110,'sawtooth',0.15,0.3); },
+    flee()       { seq([[300,0.07,0],[200,0.07,0.07],[150,0.1,0.14]]); },
+    goldPickup() { tone(660,'square',0.06,0.12); tone(880,'square',0.09,0.1); },
+    itemGet()    { seq([[440,0.06,0],[550,0.06,0.07],[660,0.1,0.14]]); },
+    levelUp()    { seq([[262,0.15,0],[330,0.15,0.09],[392,0.15,0.18],[523,0.18,0.27],[659,0.2,0.36],[784,0.3,0.45,0.2]]); },
+    victory()    { seq([[392,0.2,0],[523,0.2,0.18],[659,0.2,0.36],[784,0.2,0.54],[1047,0.4,0.72,0.25]]); },
+    status()     { tone(180,'sawtooth',0.2,0.25); },
+    heal()       { tone(660,'sine',0.1,0.12); tone(880,'sine',0.14,0.1); },
+    step()       { tone(180,'square',0.03,0.04); },
+    chest()      { seq([[440,0.08,0],[554,0.08,0.09],[659,0.15,0.18,0.2]]); },
+    boss()       { seq([[110,0.3,0,0.3],[87,0.4,0.2,0.35],[73,0.5,0.45,0.4]]); },
+  };
+})();
+
 // ── BACKGROUNDS ─────────────────────────────────────────────
 function drawBackground(areaId) {
   const canvas = document.getElementById('bg-canvas');
@@ -290,6 +336,7 @@ function gainXP(amount) {
     p.statPoints+=2;
     const ns = SKILLS.find(s=>s.unlockLv===p.level);
     const extra = ns ? `\n${ns.icon} ${ns.name}\nfreigeschaltet!` : '';
+    SFX.levelUp();
     showOverlay(`⭐ LEVEL UP!\nLV ${p.level}\n+2 Stat-Punkte${extra}`);
     updateArea();
   }
@@ -328,18 +375,19 @@ function doStep() {
   G.steps++;
   document.getElementById('step-val').textContent = G.steps;
   tickQuestStep(); tickDailyStep();
+  SFX.step();
   setBusy(true); setTimeout(()=>setBusy(false),700);
 
   const ev = pick(EVENTS);
   if (ev.t==='combat'||ev.t==='boss') {
     startCombat(G.area.foes[Math.floor(Math.random()*G.area.foes.length)], ev.t==='boss');
   } else if (ev.t==='gold') {
-    const g=Math.floor((Math.random()*8+2)*p.level); earnGold(g); addLog(`💰 Du findest ${g} Gold!`); refresh();
+    const g=Math.floor((Math.random()*8+2)*p.level); earnGold(g); SFX.goldPickup(); addLog(`💰 Du findest ${g} Gold!`); refresh();
   } else if (ev.t==='heal') {
-    const amt=Math.floor(Math.random()*15+8); p.hp=Math.min(stats().maxHp,p.hp+amt); addLog(`🌿 Ein Heilkraut! +${amt} HP`); refresh();
+    const amt=Math.floor(Math.random()*15+8); p.hp=Math.min(stats().maxHp,p.hp+amt); SFX.heal(); addLog(`🌿 Ein Heilkraut! +${amt} HP`); refresh();
   } else if (ev.t==='chest') {
     const id=CHEST_LOOT[Math.floor(Math.random()*CHEST_LOOT.length)]; addInv(id);
-    addLog(`📦 Schatzkiste! ${ITEMS[id].icon} ${ITEMS[id].name} gefunden!`); refresh();
+    SFX.chest(); addLog(`📦 Schatzkiste! ${ITEMS[id].icon} ${ITEMS[id].name} gefunden!`); refresh();
   } else if (ev.t==='shrine') {
     const opts=[
       ()=>{ p.hp=stats().maxHp; addLog('⛩️ Heilschrein! HP vollständig geheilt.'); },
@@ -369,6 +417,7 @@ function applyStatus(target, type, turns, value) {
   const ex = list.find(s=>s.type===type);
   if (ex) { ex.turns=Math.max(ex.turns,turns); return; }
   list.push({type,turns,value});
+  SFX.status();
   combatLog(`${STATUS_ICONS[type]} ${target==='player'?G.p.name:G.combat.name} ist ${STATUS_LABELS[type]}!`);
 }
 
@@ -404,19 +453,23 @@ function renderStatusRow(elId,list){
 // ── COMBAT ───────────────────────────────────────────────────
 function startCombat(foeId, isBoss) {
   const base=FOES[foeId];
-  const m=(1+(G.p.level-1)*0.15)*(isBoss?2:1);
-  const drops=(DROPS[foeId]||[]).map(d=>isBoss?{...d,p:Math.min(1,d.p*3)}:d);
+  const isElite = !isBoss && Math.random() < 0.05;
+  const em = isElite ? 2.2 : 1;
+  const m=(1+(G.p.level-1)*0.15)*(isBoss?2:1)*em;
+  const goldMult = isBoss?3 : isElite?3 : 1;
+  const drops=(DROPS[foeId]||[]).map(d=>(isBoss||isElite)?{...d,p:Math.min(1,d.p*(isElite?2.5:3))}:d);
   G.combat={
-    id:foeId, isBoss, name:(isBoss?'⭐ ':'')+base.name, sprite:base.sprite,
+    id:foeId, isBoss, isElite, name:(isElite?'⚡ ELITE ':isBoss?'⭐ ':'')+base.name, sprite:base.sprite,
     hp:Math.floor(base.hp*m), maxHp:Math.floor(base.hp*m),
     atk:Math.floor(base.atk*m), def:Math.floor(base.def*m),
-    xp:Math.floor(base.xp*m*(isBoss?1.5:1)),
-    gold:[base.gold[0]*(isBoss?3:1),base.gold[1]*(isBoss?3:1)],
+    xp:Math.floor(base.xp*m*(isBoss?1.5:isElite?2:1)),
+    gold:[base.gold[0]*goldMult, base.gold[1]*goldMult],
     drops, playerTurn:true, playerStatus:[], enemyStatus:[],
     statusDef:base.status, isKing:false,
   };
-  addLog(isBoss?`🌟 Mächtiger ${base.name}! BOSS!`:`⚔ Ein ${base.name} erscheint!`);
-  enterCombatScreen(base.sprite, isBoss, false);
+  if (isElite) { addLog(`⚡ Ein ELITE ${base.name} erscheint! (3× Beute)`); SFX.boss(); }
+  else addLog(isBoss?`🌟 Mächtiger ${base.name}! BOSS!`:`⚔ Ein ${base.name} erscheint!`);
+  enterCombatScreen(base.sprite, isBoss||isElite, false);
 }
 
 function startFinalBoss() {
@@ -445,7 +498,7 @@ function combatAction(act) {
   if(e.hp<=0){setTimeout(combatWin,400);return;}
 
   if(act==='flee'){
-    if(Math.random()<0.45){ combatLog('🏃 Geflohen!'); setTimeout(endCombat,800); }
+    if(Math.random()<0.45){ combatLog('🏃 Geflohen!'); SFX.flee(); setTimeout(endCombat,800); }
     else{ combatLog('😱 Flucht fehlgeschlagen!'); setTimeout(enemyTurn,700); }
     return;
   }
@@ -453,11 +506,12 @@ function combatAction(act) {
 
   const crit=Math.random()<0.15;
   const dmg=Math.max(1,Math.floor((s.atk-e.def+rand(-2,3))*(crit?2:1)));
-  if(crit) combatLog(`💥 KRITISCH! ${dmg} Schaden!`);
-  else     combatLog(`⚔ Du schlägst für ${dmg} Schaden!`);
+  if(crit){ combatLog(`💥 KRITISCH! ${dmg} Schaden!`); SFX.crit(); }
+  else    { combatLog(`⚔ Du schlägst für ${dmg} Schaden!`); SFX.hit(); }
   e.hp-=dmg;
-  floatDmg(document.getElementById('enemy-canvas'),(crit?'💥':'')+dmg,crit?'#ffd700':'#e05252');
-  shake(document.getElementById('enemy-canvas'));
+  const ec=document.getElementById('enemy-canvas');
+  floatDmg(ec,(crit?'💥':'')+dmg,crit?'#ffd700':'#e05252');
+  shake(ec); flashHit(ec);
   updateCombatUI(); updateHUD();
   if(e.hp<=0){setTimeout(combatWin,700);return;}
   setTimeout(enemyTurn,800);
@@ -479,15 +533,18 @@ function useSkill(skillId) {
     const healed=Math.min(s.maxHp-p.hp,skill.healAmt);
     p.hp=Math.min(s.maxHp,p.hp+skill.healAmt);
     combatLog(`💚 Heilung! +${healed} HP`);
+    SFX.heal();
     floatDmg(document.getElementById('player-combat-canvas'),'+'+healed,'#52c07a');
     updateHUD(); e.playerTurn=true; setCombatBtns(true); updateCombatUI(); return;
   }
   const crit=Math.random()<0.15;
   const dmg=Math.max(1,Math.floor(s.atk*skill.dmgMult-e.def+rand(-1,2))*(crit?2:1));
   combatLog(`${skill.icon} ${skill.name}! ${dmg}${crit?' KRIT!':''}`);
+  if(crit) SFX.crit(); else SFX.hit();
   e.hp-=dmg;
-  floatDmg(document.getElementById('enemy-canvas'),skill.icon+dmg,'#e8c96b');
-  shake(document.getElementById('enemy-canvas'));
+  const ec2=document.getElementById('enemy-canvas');
+  floatDmg(ec2,skill.icon+dmg,'#e8c96b');
+  shake(ec2); flashHit(ec2);
   if(skill.burn)  applyStatus('enemy','burn',2,8);
   if(skill.drain){ const d=Math.floor(dmg*0.4); p.hp=Math.min(s.maxHp,p.hp+d); combatLog(`🩸 +${d} HP`); floatDmg(document.getElementById('player-combat-canvas'),'+'+d,'#cc44aa'); }
   updateCombatUI(); updateHUD();
@@ -542,8 +599,10 @@ function enemyTurn() {
     const crit=Math.random()<0.10;
     const dmg=Math.max(1,Math.floor((e.atk-s.def+rand(-2,2))*(crit?1.8:1)));
     p.hp-=dmg; combatLog(`💢 ${e.name}: ${dmg}${crit?' Krit!':''}`);
-    floatDmg(document.getElementById('player-combat-canvas'),'-'+dmg,'#e05252');
-    shake(document.getElementById('player-combat-canvas'));
+    SFX.dmgTake();
+    const pc=document.getElementById('player-combat-canvas');
+    floatDmg(pc,'-'+dmg,'#e05252');
+    shake(pc); flashHit(pc);
     if(e.statusDef&&Math.random()<e.statusDef.chance) applyStatus('player',e.statusDef.type,e.statusDef.turns,e.statusDef.value);
   }
   updateCombatUI(); updateHUD();
@@ -591,6 +650,7 @@ function setCombatBtns(on){document.querySelectorAll('.cbtn').forEach(b=>b.disab
 // ── VICTORY + PRESTIGE ───────────────────────────────────────
 function showVictory() {
   G.kingDefeated = true;
+  SFX.victory();
   const p = G.p;
   const wrap = document.createElement('div');
   wrap.id = 'overlay';
@@ -623,8 +683,8 @@ function doPrestige() {
   p.maxHp=100; p.maxMp=30; p.hp=100; p.mp=30;
   p.gold=keptGold; p.kills=0; p.statPoints=0;
   p.eq={weapon:null,armor:null,acc:null}; p.inv=[];
-  if(keptItem){ addInv(Object.keys(ITEMS).find(k=>ITEMS[k].name===keptItem.name)||'potion'); }
-  addInv('potion');
+  if(keptItem){ addInv(Object.keys(ITEMS).find(k=>ITEMS[k].name===keptItem.name)||'potion', true); }
+  addInv('potion', true);
   G.steps=0; G.quests=[]; G.kingDefeated=false;
   generateQuests(); updateArea(); refresh();
   document.getElementById('step-val').textContent=0;
@@ -642,10 +702,11 @@ function floatDmg(el,text,color='#e05252'){
 }
 
 // ── INVENTORY ────────────────────────────────────────────────
-function addInv(id){
+function addInv(id, silent=false){
   const item=ITEMS[id]; if(!item) return;
   if(!item.slot){ const ex=G.p.inv.find(i=>i.id===id); if(ex) ex.qty=(ex.qty||1)+1; else G.p.inv.push({id,qty:1}); }
   else G.p.inv.push({id,equipped:false});
+  if(!silent) SFX.itemGet();
 }
 
 function useItem(idx){
@@ -956,6 +1017,13 @@ setInterval(save,15000);
 function pct(v,max){return `${Math.min(100,Math.max(0,(v/max)*100))}%`;}
 function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function shake(el){el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');}
+function flashHit(el){el.classList.remove('hit-flash');void el.offsetWidth;el.classList.add('hit-flash');}
+
+function toggleMute(){
+  const muted = SFX.toggleMute();
+  const btn = document.getElementById('mute-btn');
+  if(btn) btn.textContent = muted ? '🔇' : '🔊';
+}
 
 // ── INIT ─────────────────────────────────────────────────────
 function init(){
@@ -965,7 +1033,7 @@ function init(){
   drawSprite(document.getElementById('player-canvas'),'player');
   addLog('🌟 Willkommen bei Pixel Quest RPG!');
   addLog('🗺 Drücke EXPLORE um dein Abenteuer zu beginnen.');
-  if(!G.p.inv.length){addInv('potion');addInv('wood_sword');}
+  if(!G.p.inv.length){addInv('potion',true);addInv('wood_sword',true);}
   if(!hasSave) promptName(()=>save());
   updateDailyTimer();
 }
