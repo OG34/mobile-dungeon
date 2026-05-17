@@ -417,24 +417,29 @@ const SPRITES = {
   },
 };
 
-function drawSprite(canvas, key, scale=4) {
+function drawSprite(canvas, key, scale=4, paletteOverride=null) {
   const s = SPRITES[key];
   if (!s) return;
+  const palette = paletteOverride || s.p;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.imageSmoothingEnabled = false;
-  // black outline pass: slightly larger rect behind each pixel
   ctx.fillStyle = '#000';
   s.d.forEach((row,r) => row.forEach((v,c) => {
     if (v === '.') return;
     ctx.fillRect(c*scale-1, r*scale-1, scale+2, scale+2);
   }));
-  // color pass
   s.d.forEach((row,r) => row.forEach((v,c) => {
     if (v === '.') return;
-    ctx.fillStyle = s.p[v];
+    ctx.fillStyle = palette[v] || s.p[v];
     ctx.fillRect(c*scale, r*scale, scale, scale);
   }));
+}
+
+function drawPlayer(canvas) {
+  const p = G.p; const prestige = p.prestige||0;
+  const palette = prestige>=3 ? PRESTIGE_PALETTES[3] : prestige>=2 ? PRESTIGE_PALETTES[2] : prestige>=1 ? PRESTIGE_PALETTES[1] : null;
+  drawSprite(canvas, 'player', 4, palette);
 }
 
 // ── SOUND ENGINE ────────────────────────────────────────────
@@ -622,17 +627,17 @@ const FOES = {
   bat:      { name:'Bat',      sprite:'bat',      hp:18, atk:8,  def:1,  xp:16,  gold:[2,7],   status:null },
   wolf:     { name:'Wolf',     sprite:'wolf',     hp:28, atk:9,  def:2,  xp:24,  gold:[2,8],   status:null },
   troll:    { name:'Troll',    sprite:'troll',    hp:45, atk:12, def:5,  xp:40,  gold:[8,18],  status:null },
-  skeleton: { name:'Skeleton', sprite:'skeleton', hp:38, atk:11, def:4,  xp:35,  gold:[5,15],  status:null },
-  zombie:   { name:'Zombie',   sprite:'zombie',   hp:50, atk:13, def:3,  xp:45,  gold:[6,16],  status:{type:'poison', chance:.35,turns:3,value:6} },
-  ghost:    { name:'Ghost',    sprite:'ghost',    hp:42, atk:15, def:6,  xp:55,  gold:[8,20],  status:{type:'stun',   chance:.20,turns:1,value:0} },
-  demon:    { name:'Demon',    sprite:'demon',    hp:70, atk:18, def:7,  xp:90,  gold:[15,40], status:{type:'burn',   chance:.30,turns:2,value:10} },
-  dragon:          { name:'Dragon',          sprite:'dragon',          hp:90,  atk:20, def:8,  xp:120, gold:[25,70],   status:{type:'burn',   chance:.40,turns:3,value:12} },
-  fire_elemental:  { name:'Fire Elemental',  sprite:'fire_elemental',  hp:130, atk:28, def:10, xp:170, gold:[22,55],   status:{type:'burn',   chance:.50,turns:2,value:12} },
-  lava_golem:      { name:'Lava Golem',      sprite:'lava_golem',      hp:180, atk:32, def:15, xp:230, gold:[32,80],   status:{type:'burn',   chance:.40,turns:3,value:15} },
-  phoenix:         { name:'Phoenix',         sprite:'phoenix',         hp:145, atk:35, def:8,  xp:210, gold:[28,68],   status:{type:'burn',   chance:.45,turns:2,value:14} },
-  void_shade:      { name:'Void Shade',      sprite:'void_shade',      hp:165, atk:42, def:12, xp:290, gold:[42,105],  status:{type:'stun',   chance:.30,turns:1,value:0}  },
-  shadow_spider:   { name:'Shadow Spider',   sprite:'shadow_spider',   hp:195, atk:48, def:14, xp:340, gold:[55,130],  status:{type:'poison', chance:.50,turns:4,value:18} },
-  chaos_dragon:    { name:'Chaos Dragon',    sprite:'chaos_dragon',    hp:260, atk:58, def:18, xp:480, gold:[85,210],  status:{type:'burn',   chance:.50,turns:3,value:22} },
+  skeleton: { name:'Skeleton', sprite:'skeleton', hp:38, atk:11, def:4,  xp:35,  gold:[5,15],  status:null,                                          element:'undead', weakTo:'light' },
+  zombie:   { name:'Zombie',   sprite:'zombie',   hp:50, atk:13, def:3,  xp:45,  gold:[6,16],  status:{type:'poison', chance:.35,turns:3,value:6},   element:'undead', weakTo:'light' },
+  ghost:    { name:'Ghost',    sprite:'ghost',    hp:42, atk:15, def:6,  xp:55,  gold:[8,20],  status:{type:'stun',   chance:.20,turns:1,value:0},   element:'undead', weakTo:'light' },
+  demon:    { name:'Demon',    sprite:'demon',    hp:70, atk:18, def:7,  xp:90,  gold:[15,40], status:{type:'burn',   chance:.30,turns:2,value:10},  element:'fire',   weakTo:'ice'   },
+  dragon:         { name:'Dragon',         sprite:'dragon',         hp:90,  atk:20, def:8,  xp:120, gold:[25,70],  status:{type:'burn',chance:.40,turns:3,value:12},  element:'fire', weakTo:'ice' },
+  fire_elemental: { name:'Fire Elemental', sprite:'fire_elemental', hp:130, atk:28, def:10, xp:170, gold:[22,55],  status:{type:'burn',chance:.50,turns:2,value:12},  element:'fire', weakTo:'ice' },
+  lava_golem:     { name:'Lava Golem',     sprite:'lava_golem',     hp:180, atk:32, def:15, xp:230, gold:[32,80],  status:{type:'burn',chance:.40,turns:3,value:15},  element:'fire', weakTo:'ice' },
+  phoenix:        { name:'Phoenix',        sprite:'phoenix',        hp:145, atk:35, def:8,  xp:210, gold:[28,68],  status:{type:'burn',chance:.45,turns:2,value:14},  element:'fire', weakTo:'ice' },
+  void_shade:     { name:'Void Shade',     sprite:'void_shade',     hp:165, atk:42, def:12, xp:290, gold:[42,105], status:{type:'stun',chance:.30,turns:1,value:0},   element:'void', weakTo:'light' },
+  shadow_spider:  { name:'Shadow Spider',  sprite:'shadow_spider',  hp:195, atk:48, def:14, xp:340, gold:[55,130], status:{type:'poison',chance:.50,turns:4,value:18}, element:'void', weakTo:'light' },
+  chaos_dragon:   { name:'Chaos Dragon',   sprite:'chaos_dragon',   hp:260, atk:58, def:18, xp:480, gold:[85,210], status:{type:'burn',chance:.50,turns:3,value:22},  element:'void', weakTo:'light' },
 };
 
 const DROPS = {
@@ -648,12 +653,12 @@ const DROPS = {
   demon:    [{id:'demon_armor',  p:.15},{id:'elixir',     p:.40},{id:'magic_ring',p:.18},{id:'shadow_blade',p:.08}],
   dragon:         [{id:'dragon_blade',  p:.35},{id:'elixir',       p:.60},{id:'magic_ring',  p:.30},{id:'thorn_shield', p:.20}],
   troll:          [{id:'potion',        p:.30},{id:'iron_shield',  p:.10},{id:'elixir',       p:.12},{id:'thorn_shield', p:.06}],
-  fire_elemental: [{id:'elixir',        p:.30},{id:'battle_brew',  p:.20},{id:'thorn_shield', p:.08}],
-  lava_golem:     [{id:'elixir',        p:.40},{id:'iron_shield',  p:.15},{id:'dragon_blade', p:.05}],
-  phoenix:        [{id:'elixir',        p:.35},{id:'magic_ring',   p:.20},{id:'chaos_blade',  p:.04}],
-  void_shade:     [{id:'elixir',        p:.40},{id:'void_robe',    p:.10},{id:'chaos_crystal',p:.08}],
-  shadow_spider:  [{id:'elixir',        p:.45},{id:'void_robe',    p:.12},{id:'chaos_crystal',p:.10}],
-  chaos_dragon:   [{id:'chaos_blade',   p:.40},{id:'void_robe',    p:.35},{id:'chaos_crystal',p:.30},{id:'elixir',p:.80}],
+  fire_elemental: [{id:'elixir',p:.30},{id:'battle_brew',p:.20},{id:'thorn_shield',p:.08},{id:'crit_rune',p:.08}],
+  lava_golem:     [{id:'elixir',p:.40},{id:'iron_shield',p:.15},{id:'dragon_blade',p:.05},{id:'atk_rune', p:.10}],
+  phoenix:        [{id:'elixir',p:.35},{id:'magic_ring', p:.20},{id:'chaos_blade', p:.04},{id:'crit_rune',p:.10}],
+  void_shade:     [{id:'elixir',p:.40},{id:'void_robe',  p:.10},{id:'chaos_crystal',p:.08},{id:'void_rune',p:.05}],
+  shadow_spider:  [{id:'elixir',p:.45},{id:'void_robe',  p:.12},{id:'chaos_crystal',p:.10},{id:'void_rune',p:.08}],
+  chaos_dragon:   [{id:'chaos_blade',p:.40},{id:'void_robe',p:.35},{id:'chaos_crystal',p:.30},{id:'elixir',p:.80},{id:'void_rune',p:.20}],
 };
 
 const ITEMS = {
@@ -677,16 +682,24 @@ const ITEMS = {
   pixie_pet:    { name:'Pixie',        icon:'🧚', slot:'pet',    xpBonus:0.20,                         value:400, buyable:true,  rarity:'rare'      },
   golem_pet:    { name:'Stone Golem',  icon:'🗿', slot:'pet',    def:6,                                value:450, buyable:true,  rarity:'rare'      },
   fox_pet:      { name:'Lucky Fox',    icon:'🦊', slot:'pet',    goldBonus:0.20,                       value:400, buyable:true,  rarity:'rare'      },
+  atk_rune:     { name:'ATK-Rune',    icon:'🔴', slot:'rune',   atk:8,                                value:100, buyable:true,  rarity:'uncommon'  },
+  def_rune:     { name:'DEF-Rune',    icon:'🔵', slot:'rune',   def:8,                                value:100, buyable:true,  rarity:'uncommon'  },
+  crit_rune:    { name:'Krit-Rune',   icon:'🟡', slot:'rune',   critBonus:0.08,                       value:130, buyable:true,  rarity:'rare'      },
+  mp_rune:      { name:'MP-Rune',     icon:'🟣', slot:'rune',   maxMp:18,                             value:90,  buyable:true,  rarity:'uncommon'  },
+  void_rune:    { name:'Void-Rune',   icon:'⚫', slot:'rune',   atk:12, critBonus:0.05,               value:200, buyable:false, rarity:'epic'      },
 };
 
 const SKILLS = [
-  { id:'power',   name:'Power Strike', icon:'💥', mp:15, unlockLv:1,  dmgMult:2.2,                    desc:'2.2× ATK' },
-  { id:'bash',    name:'Shield Bash',  icon:'🛡', mp:12, unlockLv:3,  dmgMult:0.6, stun:true,          desc:'0.6× + Stun' },
-  { id:'heal',    name:'Heal',         icon:'💚', mp:20, unlockLv:6,  healAmt:50,                      desc:'Heilt 50 HP' },
-  { id:'thunder', name:'Thunder',      icon:'⚡', mp:30, unlockLv:10, dmgMult:3.5, burn:true,           desc:'3.5× + Burn' },
-  { id:'blizzard',name:'Blizzard',     icon:'❄', mp:35, unlockLv:12, dmgMult:1.8, multiHit:2,          desc:'2× 1.8× Treffer' },
-  { id:'drain',   name:'Drain Life',   icon:'🩸', mp:25, unlockLv:15, dmgMult:1.8, drain:true,          desc:'1.8× + Lifesteal' },
-  { id:'meteor',  name:'Meteor',       icon:'☄', mp:50, unlockLv:18, dmgMult:4.5, burn:true,            desc:'4.5× + Burn 3T' },
+  { id:'power',      name:'Power Strike',  icon:'💥', mp:15, unlockLv:1,  dmgMult:2.2,                         desc:'2.2× ATK' },
+  { id:'bash',       name:'Shield Bash',   icon:'🛡', mp:12, unlockLv:3,  dmgMult:0.6, stun:true,              desc:'0.6× + Stun' },
+  { id:'heal',       name:'Heal',          icon:'💚', mp:20, unlockLv:6,  healAmt:50,                          desc:'Heilt 50 HP' },
+  { id:'thunder',    name:'Thunder',       icon:'⚡', mp:30, unlockLv:10, dmgMult:3.5, burn:true,  element:'light', desc:'3.5× Licht + Burn' },
+  { id:'blizzard',   name:'Blizzard',      icon:'❄', mp:35, unlockLv:12, dmgMult:1.8, multiHit:2, element:'ice',   desc:'2× 1.8× Eis' },
+  { id:'drain',      name:'Drain Life',    icon:'🩸', mp:25, unlockLv:15, dmgMult:1.8, drain:true,              desc:'1.8× + Lifesteal' },
+  { id:'meteor',     name:'Meteor',        icon:'☄', mp:50, unlockLv:18, dmgMult:4.5, burn:true,  element:'fire',  desc:'4.5× Feuer + Burn' },
+  { id:'void_blast', name:'Void Blast',    icon:'🌀', mp:55, unlockLv:25, dmgMult:4.0,             element:'void',  desc:'4.0× Void-Schaden' },
+  { id:'lava_strike',name:'Lava Strike',   icon:'🌋', mp:60, unlockLv:30, dmgMult:3.5, multiHit:2, element:'fire',  desc:'2× 3.5× Lava' },
+  { id:'holy_nova',  name:'Holy Nova',     icon:'✨', mp:65, unlockLv:35, dmgMult:5.5,             element:'light', desc:'5.5× Licht-Nova' },
 ];
 
 function unlockedSkills() { return SKILLS.filter(s => G.p.level >= s.unlockLv); }
@@ -718,13 +731,42 @@ const ACHIEVEMENTS = [
   { id:'explorer',    icon:'🌍', label:'Entdecker',         desc:'200 Schritte',                   check:G=>G.steps>=200 },
   { id:'kingslayer',  icon:'💜', label:'Königsmörder',      desc:'Shadow King besiegt',            check:G=>G.kingDefeated },
   { id:'dungeoneer',  icon:'⛏', label:'Gauntlet Läufer',   desc:'Dungeon Gauntlet abgeschlossen', check:G=>(G.dungeonClears||0)>=1 },
+  { id:'arena_win',   icon:'🏟', label:'Arena Champion',    desc:'Arena-Modus gewonnen',           check:G=>G.achievements.includes('arena_win_flag') },
+  { id:'subclass',    icon:'⚡', label:'Spezialist',        desc:'Spezialisierung gewählt',        check:G=>!!G.p.subclass },
+  { id:'enchanter',   icon:'✨', label:'Verzauberer',       desc:'Item verzaubert',                check:G=>G.p.inv.some(s=>s._enchant) },
+  { id:'runesmith',   icon:'💎', label:'Runenschmied',      desc:'Rune eingesetzt',                check:G=>G.p.inv.some(s=>s._rune) },
+  { id:'set_bonus',   icon:'🔥', label:'Set-Träger',        desc:'Set-Bonus aktiv',                check:G=>{const ids=Object.values(G.p.eq).filter(Boolean).map(e=>e.id);return ITEM_SETS.some(s=>s.pieces.every(id=>ids.includes(id)));} },
 ];
 
 // ── CLASSES ──────────────────────────────────────────────────
 const CLASSES = {
-  warrior: { name:'Krieger', icon:'⚔', desc:'+15 ATK, +10 DEF, +40 MaxHP',   bonusAtk:15, bonusDef:10, bonusHp:40, bonusMp:0  },
-  mage:    { name:'Magier',  icon:'🔮', desc:'+5 ATK, +5 DEF, +60 MaxMP',    bonusAtk:5,  bonusDef:5,  bonusHp:0,  bonusMp:60 },
-  rogue:   { name:'Schurke', icon:'🗡', desc:'+20 ATK, +3 DEF, +15% Krit',   bonusAtk:20, bonusDef:3,  bonusHp:0,  bonusMp:0, bonusCrit:0.15 },
+  warrior: { name:'Krieger',   icon:'⚔', desc:'+15 ATK, +10 DEF, +40 HP',  bonusAtk:15, bonusDef:10, bonusHp:40, bonusMp:0  },
+  mage:    { name:'Magier',    icon:'🔮', desc:'+5 ATK, +5 DEF, +60 MP',   bonusAtk:5,  bonusDef:5,  bonusHp:0,  bonusMp:60 },
+  rogue:   { name:'Schurke',   icon:'🗡', desc:'+20 ATK, +3 DEF, +15% Krit',bonusAtk:20, bonusDef:3,  bonusHp:0,  bonusMp:0, bonusCrit:0.15 },
+};
+
+// ── SUBCLASSES (LV15) ─────────────────────────────────────────
+const SUBCLASSES = {
+  berserker:    { base:'warrior', name:'Berserker',    icon:'🪓', desc:'+30 ATK, -5 DEF, Krit×2',        bonusAtk:30, bonusDef:-5, bonusHp:0, bonusMp:0, bonusCrit:0,   berserker:true },
+  paladin:      { base:'warrior', name:'Paladin',      icon:'🛡', desc:'+5 ATK, +20 DEF, +80 HP',        bonusAtk:5,  bonusDef:20, bonusHp:80,bonusMp:0, bonusCrit:0,   healOnKill:true },
+  necromancer:  { base:'mage',    name:'Nekromant',    icon:'💀', desc:'+10 ATK, +40 MP, Drain immer',   bonusAtk:10, bonusDef:0,  bonusHp:0, bonusMp:40,bonusCrit:0,   alwaysDrain:true },
+  elementalist: { base:'mage',    name:'Elementalist', icon:'🌊', desc:'+15 ATK, +30 MP, Skill+30%',     bonusAtk:15, bonusDef:0,  bonusHp:0, bonusMp:30,bonusCrit:0,   skillBonus:0.30 },
+  assassin:     { base:'rogue',   name:'Assassin',     icon:'🔪', desc:'+35 ATK, +25% Krit',             bonusAtk:35, bonusDef:0,  bonusHp:0, bonusMp:0, bonusCrit:0.25 },
+  ranger:       { base:'rogue',   name:'Ranger',       icon:'🏹', desc:'+20 ATK, Multi-Hit auto',         bonusAtk:20, bonusDef:0,  bonusHp:0, bonusMp:0, bonusCrit:0.1, autoMulti:true },
+};
+
+// ── ITEM SETS ─────────────────────────────────────────────────
+const ITEM_SETS = [
+  { id:'dragon', label:'🔥 Dragon Set', pieces:['dragon_blade','demon_armor'],   bonus:{atk:15, def:10} },
+  { id:'void',   label:'🌀 Void Set',   pieces:['chaos_blade','void_robe'],       bonus:{atk:20, def:20} },
+  { id:'shadow', label:'🌑 Shadow Set', pieces:['shadow_blade','thorn_shield'],   bonus:{atk:10, def:8}  },
+];
+
+// ── PRESTIGE PALETTES ──────────────────────────────────────────
+const PRESTIGE_PALETTES = {
+  1: ['#c8a882','#4a2e00','#e8c96b','#c8a020','#e8c96b','#ffe066','#cc4444','#ffffff','#e8c96b'],
+  2: ['#c8a882','#4a2e00','#9933ff','#4400aa','#cc88ff','#cc88ff','#cc4444','#ffffff','#7766aa'],
+  3: ['#c8a882','#4a2e00','#ff4400','#aa00ff','#ffcc00','#00ccff','#cc4444','#ffffff','#ff0088'],
 };
 
 // ── CRAFTING ─────────────────────────────────────────────────
@@ -775,7 +817,7 @@ const G = {
     hp:100, maxHp:100, mp:30, maxMp:30,
     baseAtk:8, baseDef:3, gold:0, kills:0,
     totalGoldEarned:0, statPoints:0, prestige:0,
-    class:null,
+    class:null, subclass:null,
     eq:{weapon:null,armor:null,acc:null,pet:null},
     inv:[], buffs:[],
   },
@@ -791,23 +833,41 @@ const G = {
   bestiary: {},
   dungeon: null,
   dungeonClears: 0,
+  arena: null,
   weather: { particles: [], tick: 0 },
+  battleStats: { dmgDealt:0, dmgTaken:0, highCrit:0, won:0, fled:0 },
+  lootFilter: 'common',
+  hardcore: false,
 };
 
 // ── STATS ────────────────────────────────────────────────────
 function stats() {
   const p = G.p;
   let atk=p.baseAtk, def=p.baseDef, maxHp=p.maxHp, maxMp=p.maxMp, critBonus=0;
+  const equippedIds = [];
   for (const slot of ['weapon','armor','acc','pet']) {
     const eq = p.eq[slot];
     if (eq) {
       atk+=eq.atk||0; def+=eq.def||0;
       maxHp+=eq.maxHp||0; maxMp+=eq.maxMp||0;
-      if (eq.slot==='weapon'||eq.slot==='armor'||eq.slot==='acc') {
-        const upg = eq._upgrade||0;
-        if (eq.slot==='weapon') atk+=upg*3;
-        else if (eq.slot==='armor') def+=upg*3;
-        else { atk+=upg; def+=upg; }
+      critBonus+=eq.critBonus||0;
+      if (slot!=='pet') {
+        const invSlot = p.inv.find(i=>i.id===eq.id&&i.equipped);
+        if (invSlot) {
+          const upg = invSlot._upgrade||0;
+          if (slot==='weapon') atk+=upg*3; else if (slot==='armor') def+=upg*3; else { atk+=upg; def+=upg; }
+          const runeId = invSlot._rune;
+          if (runeId && ITEMS[runeId]) {
+            const r=ITEMS[runeId];
+            atk+=r.atk||0; def+=r.def||0; maxMp+=r.maxMp||0; critBonus+=r.critBonus||0;
+          }
+          const enchant = invSlot._enchant;
+          if (enchant) {
+            atk+=enchant.atk||0; def+=enchant.def||0;
+            maxHp+=enchant.maxHp||0; maxMp+=enchant.maxMp||0;
+          }
+        }
+        equippedIds.push(eq.id);
       }
     }
   }
@@ -820,6 +880,17 @@ function stats() {
     atk+=cl.bonusAtk||0; def+=cl.bonusDef||0;
     maxHp+=cl.bonusHp||0; maxMp+=cl.bonusMp||0;
     critBonus+=cl.bonusCrit||0;
+  }
+  if (p.subclass && SUBCLASSES[p.subclass]) {
+    const sc = SUBCLASSES[p.subclass];
+    atk+=sc.bonusAtk||0; def+=sc.bonusDef||0;
+    maxHp+=sc.bonusHp||0; maxMp+=sc.bonusMp||0;
+    critBonus+=sc.bonusCrit||0;
+  }
+  for (const s of ITEM_SETS) {
+    if (s.pieces.every(id=>equippedIds.includes(id))) {
+      atk+=s.bonus.atk||0; def+=s.bonus.def||0;
+    }
   }
   return { atk, def, maxHp, maxMp, critBonus };
 }
@@ -856,7 +927,8 @@ function gainXP(amount) {
     SFX.levelUp();
     showOverlay(`⭐ LEVEL UP!\nLV ${p.level}\n+2 Stat-Punkte${extra}`);
     updateArea();
-    if (p.level===5 && !p.class) setTimeout(showClassSelect, 800);
+    if (p.level===5  && !p.class)    setTimeout(showClassSelect, 800);
+    if (p.level===15 && !p.subclass) setTimeout(showSubclassSelect, 800);
   }
   checkAchievements();
   refresh();
@@ -886,11 +958,14 @@ function updateArea() {
 
 // ── EXPLORE ──────────────────────────────────────────────────
 const EVENTS = [
-  {t:'combat',   w:42},{t:'gold',    w:14},{t:'heal',    w:9},
-  {t:'chest',    w:7}, {t:'shrine',  w:5}, {t:'boss',    w:4},
-  {t:'merchant', w:5}, {t:'stranger',w:4}, {t:'trap',    w:4},{t:'dungeon',w:3},{t:'nothing',w:2},
+  {t:'combat',   w:38},{t:'gold',    w:12},{t:'heal',    w:8},
+  {t:'chest',    w:6}, {t:'shrine',  w:5}, {t:'boss',    w:3},
+  {t:'merchant', w:4}, {t:'stranger',w:3}, {t:'trap',    w:3},
+  {t:'dungeon',  w:3}, {t:'arena',   w:2}, {t:'smith',   w:3},
+  {t:'oracle',   w:2}, {t:'thief',   w:2}, {t:'meteor',  w:2},
+  {t:'divine',   w:2}, {t:'nothing', w:2},
 ];
-const CHEST_LOOT = ['potion','potion','potion','elixir','iron_sword','leather','iron_shield','health_ring','magic_ring','battle_brew'];
+const CHEST_LOOT = ['potion','potion','elixir','iron_sword','leather','iron_shield','health_ring','magic_ring','battle_brew','atk_rune','def_rune','crit_rune','mp_rune'];
 
 function pick(arr) {
   const total=arr.reduce((s,e)=>s+(e.w||e.p||0),0);
@@ -940,6 +1015,25 @@ function doStep() {
     addLog(`🪤 Falle! -${dmg} HP aber ${g} Gold gefunden!`); refresh();
   } else if (ev.t==='dungeon') {
     addLog('⛏ Ein Dungeon-Eingang! Wagst du das Gauntlet?'); startDungeon();
+  } else if (ev.t==='arena') {
+    addLog('🏟 Eine Arena! Kämpfe 10 Runden für Ruhm!'); startArena();
+  } else if (ev.t==='smith') {
+    addLog('🔨 Ein Wanderschmied! Er kann dein Equipment stärken.'); showSmith();
+  } else if (ev.t==='oracle') {
+    addLog('🔮 Das Orakel spricht...'); showOracle();
+  } else if (ev.t==='thief') {
+    const stolen=Math.floor(p.gold*0.15+5*p.level);
+    p.gold=Math.max(0,p.gold-stolen);
+    addLog(`🦹 Ein Dieb! ${stolen} Gold gestohlen! Er flieht!`);
+    SFX.dmgTake(); refresh();
+  } else if (ev.t==='meteor') {
+    const dmg=Math.max(5,Math.floor(p.maxHp*0.25)); const g=Math.floor(8*p.level*Math.random()+p.level*5);
+    p.hp=Math.max(1,p.hp-dmg); earnGold(g); SFX.boss();
+    addLog(`☄️ Meteorschauer! -${dmg} HP aber +${g} Gold!`); refresh();
+  } else if (ev.t==='divine') {
+    const heal=stats().maxHp-p.hp; const mp=stats().maxMp-p.mp;
+    p.hp=stats().maxHp; p.mp=stats().maxMp;
+    SFX.heal(); addLog(`✨ Göttliche Gnade! Vollständig geheilt! (+${heal} HP, +${mp} MP)`); refresh();
   } else {
     const msgs=['🌲 Nichts passiert.','🌫️ Seltsamer Nebel...','🍄 Bunte Pilze.','🐦 Vögel zwitschern.','💨 Der Wind flüstert.','🕸️ Überall Spinnweben.','🌙 Der Mond steht tief.'];
     addLog(msgs[Math.floor(Math.random()*msgs.length)]);
@@ -1042,7 +1136,7 @@ function enterCombatScreen(sprite, isBoss, isKing) {
   const lbl=document.getElementById('enemy-name-lbl');
   lbl.className='cname'+(isKing?' boss-name':isBoss?' boss-name':'');
   drawSprite(document.getElementById('enemy-canvas'),sprite);
-  drawSprite(document.getElementById('player-combat-canvas'),'player');
+  drawPlayer(document.getElementById('player-combat-canvas'));
   updateCombatUI(); setCombatBtns(true); hideSkillPicker(); hideCombatItems();
 }
 
@@ -1065,15 +1159,24 @@ function combatAction(act) {
 
   e.combo=(e.combo||0)+1;
   const comboMult=1+Math.min(e.combo*0.12,0.72);
-  const crit=Math.random()<(0.15+(stats().critBonus||0));
-  const dmg=Math.max(1,Math.floor((s.atk-e.def+rand(-2,3))*(crit?2:1)*comboMult));
-  if(e.combo>=3) combatLog(`🔥 COMBO ×${e.combo}!`);
-  if(crit){ combatLog(`💥 KRITISCH! ${dmg} Schaden!`); SFX.crit(); }
-  else    { combatLog(`⚔ Du schlägst für ${dmg} Schaden!`); SFX.hit(); }
-  e.hp-=dmg;
+  const crit=Math.random()<(0.15+(s.critBonus||0));
+  const sc=p.subclass?SUBCLASSES[p.subclass]:null;
+  const hits=(sc&&sc.autoMulti&&Math.random()<0.35)?2:1;
+  let totalDmg=0;
   const ec=document.getElementById('enemy-canvas');
-  floatDmg(ec,(crit?'💥':'')+dmg,crit?'#ffd700':'#e05252');
-  shake(ec); flashHit(ec);
+  for(let h=0;h<hits;h++){
+    let dmg=Math.max(1,Math.floor((s.atk-e.def+rand(-2,3))*(crit?2:1)*comboMult));
+    if(sc&&sc.berserker&&crit) dmg=Math.floor(dmg*2);
+    totalDmg+=dmg; e.hp-=dmg;
+    floatDmg(ec,(crit?'💥':'')+dmg,crit?'#ffd700':'#e05252');
+    shake(ec); flashHit(ec);
+  }
+  G.battleStats.dmgDealt+=totalDmg;
+  if(crit&&totalDmg>G.battleStats.highCrit) G.battleStats.highCrit=totalDmg;
+  if(e.combo>=3) combatLog(`🔥 COMBO ×${e.combo}!`);
+  if(crit){ combatLog(`💥 KRITISCH! ${totalDmg} Schaden!`); SFX.crit(); }
+  else if(hits>1){ combatLog(`🏹 Ranger-Doppelschlag! ${totalDmg} Schaden!`); SFX.hit(); }
+  else    { combatLog(`⚔ Du schlägst für ${totalDmg} Schaden!`); SFX.hit(); }
   updateCombatUI(); updateHUD();
   if(e.hp<=0){setTimeout(combatWin,700);return;}
   setTimeout(enemyTurn,800);
@@ -1114,16 +1217,22 @@ function useSkill(skillId) {
     if(e.hp<=0){setTimeout(combatWin,700);return;}
     setTimeout(enemyTurn,800); return;
   }
-  const crit=Math.random()<0.15;
-  const dmg=Math.max(1,Math.floor(s.atk*skill.dmgMult-e.def+rand(-1,2))*(crit?2:1));
+  const crit=Math.random()<(0.15+(s.critBonus||0));
+  const scSub=p.subclass?SUBCLASSES[p.subclass]:null;
+  const elemBonus=(skill.element&&FOES[e.id]&&FOES[e.id].weakTo===skill.element)?1.5:1;
+  const skillMult=skill.dmgMult*(scSub&&scSub.skillBonus?(1+scSub.skillBonus):1)*elemBonus;
+  let dmg=Math.max(1,Math.floor(s.atk*skillMult-e.def+rand(-1,2))*(crit?2:1));
+  if(elemBonus>1) combatLog(`🎯 SCHWÄCHE! ${skill.element.toUpperCase()}`);
   combatLog(`${skill.icon} ${skill.name}! ${dmg}${crit?' KRIT!':''}`);
   if(crit) SFX.crit(); else SFX.hit();
-  e.hp-=dmg;
-  floatDmg(ec2,skill.icon+dmg,'#e8c96b');
+  e.hp-=dmg; G.battleStats.dmgDealt+=dmg;
+  if(dmg>G.battleStats.highCrit&&crit) G.battleStats.highCrit=dmg;
+  floatDmg(ec2,skill.icon+dmg,elemBonus>1?'#00ffaa':'#e8c96b');
   shake(ec2); flashHit(ec2);
-  if(skill.stun)  applyStatus('enemy','stun',1,0);
-  if(skill.burn)  applyStatus('enemy','burn',skill.id==='meteor'?3:2,skill.id==='meteor'?14:8);
-  if(skill.drain){ const d=Math.floor(dmg*0.4); p.hp=Math.min(s.maxHp,p.hp+d); combatLog(`🩸 +${d} HP`); floatDmg(document.getElementById('player-combat-canvas'),'+'+d,'#cc44aa'); }
+  if(skill.stun) applyStatus('enemy','stun',1,0);
+  if(skill.burn) applyStatus('enemy','burn',skill.id==='meteor'?3:2,skill.id==='meteor'?14:8);
+  const doDrain=skill.drain||(scSub&&scSub.alwaysDrain);
+  if(doDrain){ const d=Math.floor(dmg*0.4); p.hp=Math.min(s.maxHp,p.hp+d); combatLog(`🩸 +${d} HP`); floatDmg(document.getElementById('player-combat-canvas'),'+'+d,'#cc44aa'); }
   updateCombatUI(); updateHUD();
   if(e.hp<=0){setTimeout(combatWin,700);return;}
   setTimeout(enemyTurn,800);
@@ -1184,7 +1293,8 @@ function enemyTurn() {
     e.combo=0; // break player combo on hit
     const crit=Math.random()<0.10;
     const dmg=Math.max(1,Math.floor((e.atk-s.def+rand(-2,2))*(crit?1.8:1)));
-    p.hp-=dmg; combatLog(`💢 ${e.name}: ${dmg}${crit?' Krit!':''}`);
+    p.hp-=dmg; G.battleStats.dmgTaken+=dmg;
+    combatLog(`💢 ${e.name}: ${dmg}${crit?' Krit!':''}`);
     SFX.dmgTake();
     const pc=document.getElementById('player-combat-canvas');
     floatDmg(pc,'-'+dmg,'#e05252');
@@ -1198,11 +1308,37 @@ function enemyTurn() {
 
 function defeatPlayer(){
   combatLog('💀 Du wurdest besiegt...'); setCombatBtns(false);
+  G.battleStats.fled++;
   setTimeout(()=>{
+    if(G.hardcore){
+      saveHighscore();
+      endCombat();
+      showHardcoreGameOver();
+      return;
+    }
     const p=G.p; const lost=Math.floor(p.gold*0.1);
     p.gold=Math.max(0,p.gold-lost); p.hp=Math.max(1,Math.floor(stats().maxHp*0.3));
+    G.dungeon=null; G.arena=null;
     endCombat(); addLog(`💀 Respawn. Verloren: ${lost} Gold.`);
   },1400);
+}
+
+function showHardcoreGameOver() {
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.97);z-index:200';
+  wrap.innerHTML=`<div id="overlay-box" style="text-align:center;border-color:#ff0000">
+    💀 GAME OVER 💀<br><br>
+    <span style="font-size:7px;color:var(--dim)">Hardcore-Held gefallen<br>
+    LV ${G.p.level} · ${G.p.kills} Kills · ${G.steps} Steps</span><br><br>
+    <button onclick="hardcoreReset()" style="display:block;width:100%;background:#2a0000;color:#ff4444;border:2px solid #ff0000;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer">🔄 Neu starten</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function hardcoreReset(){
+  document.getElementById('overlay')?.remove();
+  localStorage.removeItem('pq_save');
+  location.reload();
 }
 
 function combatWin() {
@@ -1212,14 +1348,18 @@ function combatWin() {
   combatLog(`🎉 Sieg! +${e.xp} XP  +${g} Gold`);
   tickQuestKill(e.id); tickDailyKill(e.id);
   for(const drop of e.drops){ if(Math.random()<drop.p){ addInv(drop.id); const it=ITEMS[drop.id]; combatLog(`📦 ${it.rarity==='legendary'?'🌟':it.rarity==='epic'?'💜':''} ${it.name}!`); } }
+  G.battleStats.won++;
   const xp=e.xp; const isKing=e.isKing;
-  const isDungeon=!!G.dungeon;
+  const isDungeon=!!G.dungeon; const isArena=!!G.arena;
+  const sc=G.p.subclass?SUBCLASSES[G.p.subclass]:null;
+  if(sc&&sc.healOnKill){ const h=Math.floor(stats().maxHp*0.08); G.p.hp=Math.min(stats().maxHp,G.p.hp+h); combatLog(`🛡 Paladin: +${h} HP`); }
   setTimeout(()=>{
     endCombat();
     gainXP(xp);
     addLog(`✅ ${e.name} besiegt!`);
     if(isKing) showVictory();
     if(isDungeon) dungeonNextRoom();
+    if(isArena) arenaNextRound();
   },1100);
 }
 
@@ -1333,6 +1473,7 @@ function doPrestige() {
   G.steps=0; G.quests=[]; G.kingDefeated=false;
   generateQuests(); updateArea(); refresh();
   document.getElementById('step-val').textContent=0;
+  saveHighscore(0,'Prestige');
   addLog(`⭐ Prestige ${p.prestige}! +${bonusAtk} ATK +${bonusDef} DEF Bonus. Abenteuer beginnt neu!`);
   showOverlay(`⭐ PRESTIGE ${p.prestige}\n+${bonusAtk} ATK\n+${bonusDef} DEF\nBasisbonus permanent!`);
   save();
@@ -1412,6 +1553,222 @@ function dungeonComplete() {
   SFX.victory();
   showOverlay(`🏆 GAUNTLET KLAR!\n5/5 Räume!\n${ITEMS[r1].icon} ${ITEMS[r1].name}\n+2 Elixiere`);
   refresh();
+}
+
+// ── SUBCLASS SELECTION ───────────────────────────────────────
+function showSubclassSelect() {
+  if (!G.p.class || G.p.subclass) return;
+  const base = G.p.class;
+  const opts = Object.entries(SUBCLASSES).filter(([,sc])=>sc.base===base);
+  const btnStyle='display:block;width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);border-bottom:3px solid var(--accent2);padding:12px 10px;margin-bottom:8px;font-family:\'Press Start 2P\',monospace;font-size:7px;cursor:pointer;text-align:left';
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:90vw;text-align:center">
+    ⚡ SPEZIALISIERUNG ⚡<br><br>
+    <span style="font-size:6px;color:var(--dim)">LV 15 — Wähle deinen Weg!</span><br><br>
+    ${opts.map(([id,sc])=>`<button style="${btnStyle}" onclick="chooseSubclass('${id}')">${sc.icon} ${sc.name}<br><span style="color:var(--dim);font-size:6px">${sc.desc}</span></button>`).join('')}
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function chooseSubclass(id) {
+  document.getElementById('overlay')?.remove();
+  G.p.subclass = id;
+  const sc = SUBCLASSES[id];
+  addLog(`${sc.icon} Spezialisierung: ${sc.name}! ${sc.desc}`);
+  showOverlay(`${sc.icon} ${sc.name}!\n${sc.desc}`);
+  refresh();
+}
+
+// ── RUNE SOCKET ───────────────────────────────────────────────
+function showRuneMenu(invIdx) {
+  const slot=G.p.inv[invIdx]; if(!slot||!slot.equipped) return;
+  const item=ITEMS[slot.id]; if(!item||item.slot==='pet'||item.slot==='rune') return;
+  const runes=G.p.inv.filter((s,i)=>ITEMS[s.id]&&ITEMS[s.id].slot==='rune'&&i!==invIdx);
+  const current=slot._rune?ITEMS[slot._rune]:null;
+  const btnStyle='display:block;width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px;margin-bottom:5px;font-family:\'Press Start 2P\',monospace;font-size:6px;cursor:pointer;text-align:left';
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:90vw;text-align:center">
+    💎 RUNE EINSETZEN<br><span style="font-size:6px;color:var(--dim)">${item.name}${current?` · aktuell: ${current.name}`:' · leer'}</span><br><br>
+    ${runes.length?runes.map((s,ri)=>{const r=ITEMS[s.id];const parts=[];if(r.atk)parts.push(`+${r.atk}ATK`);if(r.def)parts.push(`+${r.def}DEF`);if(r.maxMp)parts.push(`+${r.maxMp}MP`);if(r.critBonus)parts.push(`+${Math.round(r.critBonus*100)}%Krit`);return `<button style="${btnStyle}" onclick="socketRune(${invIdx},${G.p.inv.indexOf(s)})">${r.icon} ${r.name}<span style="color:var(--dim);font-size:5px"> ${parts.join(' ')}</span></button>`;}).join(''):'<div style="font-size:7px;color:var(--dim);padding:8px">Keine Runen im Inventar.</div>'}
+    ${current?`<button style="${btnStyle};color:var(--red)" onclick="removeRune(${invIdx})">✖ Rune entfernen</button>`:''}
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:none;color:var(--dim);font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function socketRune(itemIdx, runeIdx) {
+  const slot=G.p.inv[itemIdx]; const runeSlot=G.p.inv[runeIdx];
+  if(!slot||!runeSlot) return;
+  if(slot._rune){ const oldRune={id:slot._rune,qty:1}; G.p.inv.push(oldRune); }
+  slot._rune=runeSlot.id;
+  runeSlot.qty=(runeSlot.qty||1)-1; if(runeSlot.qty<=0) G.p.inv.splice(runeIdx,1);
+  addLog(`💎 ${ITEMS[runeSlot.id].name} in ${ITEMS[slot.id].name} eingesetzt!`);
+  document.getElementById('overlay')?.remove(); refresh();
+}
+
+function removeRune(itemIdx) {
+  const slot=G.p.inv[itemIdx]; if(!slot||!slot._rune) return;
+  addInv(slot._rune, true); slot._rune=null;
+  addLog('💎 Rune entfernt.'); document.getElementById('overlay')?.remove(); refresh();
+}
+
+// ── ENCHANTING ────────────────────────────────────────────────
+function showEnchantMenu(invIdx) {
+  const slot=G.p.inv[invIdx]; if(!slot||!slot.equipped) return;
+  const item=ITEMS[slot.id]; if(!item||item.slot==='pet'||item.slot==='rune') return;
+  const elixirs=G.p.inv.filter(s=>s.id==='elixir');
+  const total=elixirs.reduce((s,e)=>s+(e.qty||1),0);
+  const current=slot._enchant;
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:250px;max-width:90vw;text-align:center">
+    ✨ VERZAUBERN<br><span style="font-size:6px;color:var(--dim)">${item.name}${current?` · Bonus: +${current.val} ${current.stat}`:'· keine Verzauberung'}</span><br><br>
+    <span style="font-size:7px;color:var(--dim)">Kostet 1 Elixier (du hast: ${total})</span><br><br>
+    ${total>0?`<button onclick="doEnchant(${invIdx})" style="display:block;width:100%;background:var(--panel);color:var(--accent);border:1px solid var(--accent);border-bottom:2px solid var(--accent2);padding:10px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;margin-bottom:8px">✨ Zufällig verzaubern</button>`:'<div style="font-size:7px;color:var(--dim);padding:8px">Kein Elixier!</div>'}
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:none;color:var(--dim);font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function doEnchant(invIdx) {
+  const slot=G.p.inv[invIdx]; if(!slot) return;
+  const elixirSlot=G.p.inv.find(s=>s.id==='elixir'); if(!elixirSlot) return;
+  elixirSlot.qty=(elixirSlot.qty||1)-1; if(elixirSlot.qty<=0) G.p.inv.splice(G.p.inv.indexOf(elixirSlot),1);
+  const stats_opts=['atk','def','maxHp','maxMp'];
+  const stat=stats_opts[Math.floor(Math.random()*stats_opts.length)];
+  const val=rand(3,9);
+  slot._enchant={stat,val};
+  const enchObj={};enchObj[stat]=val;slot._enchant=enchObj;
+  addLog(`✨ ${ITEMS[slot.id].name} verzaubert! +${val} ${stat.toUpperCase()}`);
+  document.getElementById('overlay')?.remove(); refresh();
+}
+
+// ── ARENA MODE ────────────────────────────────────────────────
+function startArena() {
+  if (G.arena) return;
+  G.arena = { round:0, maxRounds:10, score:0 };
+  addLog('🏟 Arena! 10 Runden, kämpfe für Ruhm!');
+  setBusy(false);
+  setTimeout(()=>startCombat(G.area.foes[Math.floor(Math.random()*G.area.foes.length)], false), 300);
+}
+
+function arenaNextRound() {
+  if (!G.arena) return;
+  G.arena.round++;
+  G.arena.score+=G.p.kills;
+  if (G.arena.round>=G.arena.maxRounds) {
+    arenaComplete();
+  } else {
+    addLog(`🏟 Runde ${G.arena.round+1}/${G.arena.maxRounds}...`);
+    const foes=G.area.foes;
+    setTimeout(()=>startCombat(foes[Math.floor(Math.random()*foes.length)], G.arena.round>=8), 1200);
+  }
+}
+
+function arenaComplete() {
+  const score=G.arena.score+G.arena.maxRounds*G.p.level;
+  G.arena=null;
+  saveHighscore(score, 'Arena');
+  SFX.victory();
+  const g=Math.floor(score*2.5); earnGold(g);
+  addInv('elixir'); if(G.p.level>=20) addInv('chaos_crystal');
+  showOverlay(`🏆 ARENA CHAMPION!\nScore: ${score}\n+${g} Gold\n+Elixier`);
+  refresh();
+}
+
+// ── SMITH NPC ─────────────────────────────────────────────────
+function showSmith() {
+  const equipped=Object.values(G.p.eq).filter(e=>e&&e.slot!=='pet');
+  const btnStyle='display:block;width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);border-bottom:2px solid var(--accent2);padding:8px;margin-bottom:5px;font-family:\'Press Start 2P\',monospace;font-size:6px;cursor:pointer;text-align:left';
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:100';
+  const costs=[0,60,180,450];
+  const rows=equipped.map(item=>{
+    const invSlot=G.p.inv.find(i=>i.id===item.id&&i.equipped); if(!invSlot) return '';
+    const upg=invSlot._upgrade||0; const idx=G.p.inv.indexOf(invSlot);
+    const cost=costs[upg+1]||0;
+    return upg<3?`<button style="${btnStyle}" onclick="upgradeItem(${idx});document.getElementById('overlay').remove()">${item.icon} ${item.name} +${upg}→+${upg+1} · ${cost}🪙</button>`:`<div style="font-size:6px;color:var(--accent);padding:4px">${item.icon} ${item.name} MAX</div>`;
+  }).join('');
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:90vw;text-align:center">
+    🔨 Wanderschmied<br><br>${rows||'<div style="font-size:7px;color:var(--dim)">Nichts ausgerüstet.</div>'}
+    <button onclick="document.getElementById('overlay').remove()" style="margin-top:8px;background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">🚶 Weiter</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+// ── ORACLE NPC ────────────────────────────────────────────────
+function showOracle() {
+  const foePool=G.area.foes; const foeId=foePool[Math.floor(Math.random()*foePool.length)];
+  const drops=DROPS[foeId]||[]; const top=drops.slice().sort((a,b)=>b.p-a.p)[0];
+  const hint=top?`${ITEMS[top.id]?.icon||'?'} ${ITEMS[top.id]?.name||'?'} von ${FOES[foeId]?.name||foeId}`:'Nichts...';
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="text-align:center;min-width:240px;max-width:90vw">
+    🔮 Das Orakel spricht...<br><br>
+    <span style="font-size:7px;color:var(--dim)">"Suche nach...</span><br><br>
+    <span style="font-size:9px;color:var(--accent)">${hint}</span><br><br>
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:8px 20px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">🙏 Dankeschön</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+// ── HIGHSCORE ─────────────────────────────────────────────────
+function saveHighscore(bonus=0, source='Run') {
+  const score=G.p.kills*G.p.level+G.steps+bonus;
+  try {
+    const hs=JSON.parse(localStorage.getItem('pq_hs')||'[]');
+    hs.push({name:G.p.name+(G.hardcore?'[HC]':''), score, level:G.p.level, kills:G.p.kills, source, date:new Date().toLocaleDateString('de-DE')});
+    hs.sort((a,b)=>b.score-a.score);
+    localStorage.setItem('pq_hs',JSON.stringify(hs.slice(0,8)));
+  }catch(_){}
+}
+
+function showHighscore() {
+  let hs=[]; try{hs=JSON.parse(localStorage.getItem('pq_hs')||'[]');}catch(_){}
+  const rows=hs.length?hs.map((h,i)=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:7px"><span>${i+1}. ${h.name}</span><span style="color:var(--accent)">${h.score}</span></div>`).join(''):'<div style="font-size:7px;color:var(--dim);padding:8px">Noch keine Einträge.</div>';
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:90vw">
+    🏆 HIGHSCORE<br><br><div style="text-align:left">${rows}</div><br>
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+// ── STATS SCREEN ──────────────────────────────────────────────
+function showStats() {
+  const bs=G.battleStats; const s=stats();
+  const rows=[
+    ['Schaden ausgeteilt',bs.dmgDealt],['Schaden erhalten',bs.dmgTaken],
+    ['Höchster Krit',bs.highCrit],['Kämpfe gewonnen',bs.won],['Mal geflohen',bs.fled],
+    ['Gesamt ATK',s.atk],['Gesamt DEF',s.def],['Gesamt MaxHP',s.maxHp],['Gesamt MaxMP',s.maxMp],
+    ['Achievements',`${G.achievements.length}/${ACHIEVEMENTS.length}`],
+    ['Dungeon Clears',G.dungeonClears],
+  ].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:7px"><span style="color:var(--dim)">${k}</span><span style="color:var(--accent)">${v}</span></div>`).join('');
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:90vw;max-height:80vh;overflow-y:auto">
+    📊 STATISTIK<br><br><div style="text-align:left">${rows}</div><br>
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+// ── LOOT FILTER ───────────────────────────────────────────────
+function showLootFilter() {
+  const opts=['common','uncommon','rare','epic','legendary'];
+  const labels={common:'Alle',uncommon:'Uncommon+',rare:'Rare+',epic:'Epic+',legendary:'Nur Legendary'};
+  const btnStyle='display:block;width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px;margin-bottom:5px;font-family:\'Press Start 2P\',monospace;font-size:7px;cursor:pointer';
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:240px;max-width:90vw;text-align:center">
+    🗑 LOOT FILTER<br><span style="font-size:6px;color:var(--dim)">Aktuell: ${labels[G.lootFilter]||'Alle'}</span><br><br>
+    ${opts.map(o=>`<button style="${btnStyle};${G.lootFilter===o?'border-color:var(--accent);color:var(--accent)':''}" onclick="G.lootFilter='${o}';document.getElementById('overlay').remove();addLog('🗑 Filter: ${labels[o]}')">${labels[o]}</button>`).join('')}
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:none;color:var(--dim);font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖</button>
+  </div>`;
+  document.body.appendChild(wrap);
 }
 
 // ── WORLD MAP ────────────────────────────────────────────────
@@ -1558,8 +1915,14 @@ function floatDmg(el,text,color='#e05252'){
 }
 
 // ── INVENTORY ────────────────────────────────────────────────
+const RARITY_ORDER = ['common','uncommon','rare','epic','legendary'];
 function addInv(id, silent=false){
   const item=ITEMS[id]; if(!item) return;
+  if (!silent && G.lootFilter && G.lootFilter!=='common' && item.slot && item.slot!=='pet' && item.slot!=='rune') {
+    const minIdx=RARITY_ORDER.indexOf(G.lootFilter);
+    const itemIdx=RARITY_ORDER.indexOf(item.rarity||'common');
+    if(itemIdx<minIdx) { addLog(`🗑 [Filter] ${item.icon} ${item.name} ignoriert.`); return; }
+  }
   if(!item.slot){ const ex=G.p.inv.find(i=>i.id===id); if(ex) ex.qty=(ex.qty||1)+1; else G.p.inv.push({id,qty:1}); }
   else G.p.inv.push({id,equipped:false});
   if(!silent) SFX.itemGet();
@@ -1614,14 +1977,17 @@ function updateInvScreen(){
 
 function showUpgradeMenu(idx) {
   const slot=G.p.inv[idx]; const item=ITEMS[slot.id];
-  const upg=slot._upgrade||0;
-  const costs=[0,80,250,600];
+  const upg=slot._upgrade||0; const costs=[0,80,250,600];
+  const runeId=slot._rune; const enchant=slot._enchant;
+  const btnStyle='display:block;width:100%;background:var(--panel);border:1px solid var(--border);padding:8px;font-family:\'Press Start 2P\',monospace;font-size:6px;cursor:pointer;margin-bottom:6px';
   const wrap=document.createElement('div'); wrap.id='overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:100';
-  wrap.innerHTML=`<div id="overlay-box" style="min-width:240px;max-width:90vw;text-align:center">
-    ${item.icon} ${item.name} +${upg}<br><br>
-    ${upg<3?`<button onclick="upgradeItem(${idx});document.getElementById('overlay').remove()" style="display:block;width:100%;background:var(--panel);color:var(--accent);border:1px solid var(--accent);border-bottom:2px solid var(--accent2);padding:10px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;margin-bottom:6px">✨ Aufwerten +${upg+1}<br><span style="font-size:6px;color:var(--dim)">${costs[upg+1]}🪙</span></button>`:'<div style="font-size:7px;color:var(--accent)">MAX +3</div>'}
-    <button onclick="useItem(${idx});document.getElementById('overlay').remove()" style="display:block;width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);padding:8px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;margin-bottom:6px">🔄 Aus/Anlegen</button>
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:250px;max-width:90vw;text-align:center">
+    ${item.icon} ${item.name} +${upg}${runeId?` ${ITEMS[runeId]?.icon}`:''}${enchant?` ✨`:''}<br><br>
+    ${upg<3?`<button onclick="upgradeItem(${idx});document.getElementById('overlay').remove()" style="${btnStyle};color:var(--accent);border-color:var(--accent)">✨ Aufwerten +${upg+1} · ${costs[upg+1]}🪙</button>`:`<div style="font-size:7px;color:var(--accent);margin-bottom:6px">MAX +3</div>`}
+    <button onclick="document.getElementById('overlay').remove();showRuneMenu(${idx})" style="${btnStyle};color:#aa66ff">💎 Rune einsetzen${runeId?` (${ITEMS[runeId]?.name})`:''}</button>
+    <button onclick="document.getElementById('overlay').remove();showEnchantMenu(${idx})" style="${btnStyle};color:#55ddff">✨ Verzaubern${enchant?' (aktiv)':''}</button>
+    <button onclick="useItem(${idx});document.getElementById('overlay').remove()" style="${btnStyle};color:var(--text)">🔄 Aus/Anlegen</button>
     <button onclick="document.getElementById('overlay').remove()" style="background:none;border:none;color:var(--dim);font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖</button>
   </div>`;
   document.body.appendChild(wrap);
@@ -1665,6 +2031,21 @@ function updateShopScreen(){
     if(item.maxMp) parts.push(`MP+${item.maxMp}`);
     if(item.hp)    parts.push(`Heilt ${item.hp}`);
     if(item.mp)    parts.push(`+${item.mp}MP`);
+    const row=document.createElement('div'); row.className='shop-row';
+    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Buy</button>`;
+    buy.appendChild(row);
+  });
+  // runes section
+  const runeHeader=document.createElement('div');
+  runeHeader.style.cssText='padding:6px 0;font-size:7px;color:#aa66ff;width:100%';
+  runeHeader.textContent='💎 Runen'; buy.appendChild(runeHeader);
+  Object.entries(ITEMS).filter(([,it])=>it.buyable&&it.slot==='rune').forEach(([id,item])=>{
+    const price=Math.ceil(item.value*1.5);
+    const parts=[];
+    if(item.atk) parts.push(`ATK+${item.atk}`);
+    if(item.def) parts.push(`DEF+${item.def}`);
+    if(item.maxMp) parts.push(`MP+${item.maxMp}`);
+    if(item.critBonus) parts.push(`+${Math.round(item.critBonus*100)}%Krit`);
     const row=document.createElement('div'); row.className='shop-row';
     row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Buy</button>`;
     buy.appendChild(row);
@@ -1839,11 +2220,22 @@ function updateCharScreen(){
   for(const sl of ['weapon','armor','acc','pet']){
     const el=document.getElementById(`eq-${sl}`); if(!el) continue;
     const eq=p.eq[sl];
-    const upg=eq&&eq._upgrade?` +${eq._upgrade}`:'';
-    el.innerHTML=`${icons[sl]} <span>${eq?eq.name+upg:'Empty'}</span>`;
+    const invSlot=eq?p.inv.find(i=>i.id===eq.id&&i.equipped):null;
+    const upg=invSlot&&invSlot._upgrade?` +${invSlot._upgrade}`:'';
+    const rune=invSlot&&invSlot._rune?` ${ITEMS[invSlot._rune]?.icon||''}`:'' ;
+    const enc=invSlot&&invSlot._enchant?' ✨':'';
+    el.innerHTML=`${icons[sl]} <span>${eq?eq.name+upg+rune+enc:'Empty'}</span>`;
   }
   const clEl=document.getElementById('s-class');
-  if(clEl) clEl.textContent=p.class?`${CLASSES[p.class].icon} ${CLASSES[p.class].name}`:'–';
+  if(clEl){
+    let ct=p.class?`${CLASSES[p.class].icon} ${CLASSES[p.class].name}`:'–';
+    if(p.subclass&&SUBCLASSES[p.subclass]) ct+=` › ${SUBCLASSES[p.subclass].icon} ${SUBCLASSES[p.subclass].name}`;
+    clEl.textContent=ct;
+  }
+  // active item sets
+  const equippedIds=Object.values(p.eq).filter(Boolean).map(e=>e.id);
+  const setSel=document.getElementById('s-sets');
+  if(setSel) setSel.textContent=ITEM_SETS.filter(s=>s.pieces.every(id=>equippedIds.includes(id))).map(s=>s.label).join(', ')||'–';
   updateInvScreen();
 }
 
@@ -1863,8 +2255,8 @@ function showScreen(name,btn){
   document.getElementById(`screen-${name}`).classList.add('active');
   if(btn){btn.classList.add('active');}
   else{const order=['explore','quests','char','shop'];const nb=document.querySelectorAll('.nav-btn');const i=order.indexOf(name);if(i>=0&&nb[i])nb[i].classList.add('active');}
-  if(name==='char')   {updateCharScreen();drawSprite(document.getElementById('char-canvas'),'player');}
-  if(name==='explore'){drawSprite(document.getElementById('player-canvas'),'player');drawBackground(G.area.id);}
+  if(name==='char')   {updateCharScreen();drawPlayer(document.getElementById('char-canvas'));}
+  if(name==='explore'){drawPlayer(document.getElementById('player-canvas'));drawBackground(G.area.id);}
   if(name==='quests') updateQuestScreen();
   if(name==='shop')   updateShopScreen();
 }
@@ -1881,7 +2273,15 @@ function showOverlay(msg){
 function promptName(onDone){
   const wrap=document.createElement('div'); wrap.id='name-overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:100';
-  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:88vw">⚔ PIXEL QUEST RPG<br><br><span style="font-size:7px;color:var(--dim)">Dein Heldenname:</span><br><input id="name-inp" type="text" maxlength="10" value="Hero" autocomplete="off"><button id="name-start-btn" onclick="confirmName()">▶ START</button></div>`;
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:88vw">⚔ PIXEL QUEST RPG<br><br>
+    <span style="font-size:7px;color:var(--dim)">Dein Heldenname:</span><br>
+    <input id="name-inp" type="text" maxlength="10" value="Hero" autocomplete="off">
+    <div style="margin:8px 0;display:flex;align-items:center;gap:8px;justify-content:center">
+      <input type="checkbox" id="hc-check" onchange="G.hardcore=this.checked">
+      <label for="hc-check" style="font-size:6px;color:#ff4444;cursor:pointer">☠ HARDCORE (Permadeath)</label>
+    </div>
+    <button id="name-start-btn" onclick="confirmName()">▶ START</button>
+  </div>`;
   document.body.appendChild(wrap);
   document.getElementById('name-inp').focus(); document.getElementById('name-inp').select();
   document.getElementById('name-inp').addEventListener('keydown',e=>{if(e.key==='Enter')confirmName();});
@@ -1901,6 +2301,7 @@ function save(){
   try{localStorage.setItem('pq_save',JSON.stringify({
     p:G.p, steps:G.steps, quests:G.quests, kingDefeated:G.kingDefeated,
     achievements:G.achievements, bestiary:G.bestiary, dungeonClears:G.dungeonClears,
+    battleStats:G.battleStats, lootFilter:G.lootFilter, hardcore:G.hardcore,
   }));}catch(_){}
 }
 
@@ -1910,7 +2311,10 @@ function load(){
     const d=JSON.parse(raw); Object.assign(G.p,d.p);
     G.steps=d.steps||0; G.quests=d.quests||[]; G.kingDefeated=d.kingDefeated||false;
     G.achievements=d.achievements||[]; G.bestiary=d.bestiary||{}; G.dungeonClears=d.dungeonClears||0;
+    G.battleStats=d.battleStats||{dmgDealt:0,dmgTaken:0,highCrit:0,won:0,fled:0};
+    G.lootFilter=d.lootFilter||'common'; G.hardcore=d.hardcore||false;
     if(!G.p.eq.pet) G.p.eq.pet=null;
+    if(!G.p.subclass) G.p.subclass=null;
     document.getElementById('step-val').textContent=G.steps; return true;
   }catch(_){return false;}
 }
@@ -1934,7 +2338,7 @@ function init(){
   const hasSave=load();
   if(!loadDailyQuests()) generateDailyQuests();
   generateQuests(); updateArea(); refresh();
-  drawSprite(document.getElementById('player-canvas'),'player');
+  drawPlayer(document.getElementById('player-canvas'));
   addLog('🌟 Willkommen bei Pixel Quest RPG!');
   addLog('🗺 Drücke EXPLORE um dein Abenteuer zu beginnen.');
   if(!G.p.inv.length){addInv('potion',true);addInv('wood_sword',true);}

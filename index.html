@@ -47,9 +47,12 @@
         </div>
         <div id="step-counter">Steps: <span id="step-val">0</span></div>
         <div id="explore-quick-btns">
-          <button class="qbtn" onclick="showWorldMap()">🗺 Karte</button>
-          <button class="qbtn" onclick="showCrafting()">⚗ Craft</button>
+          <button class="qbtn" onclick="showWorldMap()">🗺</button>
+          <button class="qbtn" onclick="showCrafting()">⚗</button>
           <button class="qbtn" onclick="showAchievements()">🏅</button>
+          <button class="qbtn" onclick="showStats()">📊</button>
+          <button class="qbtn" onclick="showHighscore()">🏆</button>
+          <button class="qbtn" onclick="showLootFilter()">🗑</button>
         </div>
         <button id="boss-btn" onclick="startFinalBoss()" style="display:none">💀 SHADOW KING — FINAL BOSS</button>
         <button id="explore-btn" onclick="doStep()">⚔ EXPLORE</button>
@@ -103,7 +106,9 @@
           <div class="stat-row"><span>MaxHP</span><span id="s-maxhp">100</span><button class="salloc" onclick="allocateStat('vit')" title="VIT +15HP">+</button></div>
           <div class="stat-row"><span>MaxMP</span><span id="s-maxmp">30</span><button class="salloc" onclick="allocateStat('wis')" title="WIS +8MP">+</button></div>
           <div class="stat-row"><span>Kills</span><span id="s-kills">0</span></div>
-          <div class="stat-row"><span>Klasse</span><span id="s-class">–</span></div>
+          <div class="stat-row"><span>Klasse</span><span id="s-class" style="font-size:6px">–</span></div>
+          <div class="stat-row"><span>Sets</span><span id="s-sets" style="font-size:6px;color:var(--green)">–</span></div>
+          <div class="stat-row"><span>Modus</span><span id="s-hardcore" style="font-size:6px;color:#ff4444">Normal</span></div>
         </div>
         <h3>Equipment</h3>
         <div class="panel">
