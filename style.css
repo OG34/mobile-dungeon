@@ -589,3 +589,36 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
   cursor:pointer;
   margin-top:4px;
 }
+
+/* ── WEATHER CANVAS ── */
+#weather-canvas{
+  position:absolute;
+  top:0;left:0;
+  width:100%;height:100%;
+  pointer-events:none;
+  z-index:3;
+  image-rendering:pixelated;
+}
+
+/* ── QUICK BUTTONS ── */
+#explore-quick-btns{
+  display:flex;
+  gap:6px;
+  width:100%;
+  justify-content:center;
+}
+.qbtn{
+  background:var(--panel);
+  color:var(--dim);
+  border:1px solid var(--border);
+  padding:5px 10px;
+  font-family:'Press Start 2P',monospace;
+  font-size:6px;
+  cursor:pointer;
+  flex:1;
+}
+.qbtn:active{background:var(--border);color:var(--accent)}
+
+/* ── CLASS / PET RARITY ── */
+.inv-item.pet{border-color:#52c07a}
+#s-class{color:var(--accent)}

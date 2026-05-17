@@ -43,8 +43,14 @@
         <div id="scene-wrap">
           <canvas id="bg-canvas" width="240" height="120"></canvas>
           <canvas id="player-canvas" width="64" height="64"></canvas>
+          <canvas id="weather-canvas" width="240" height="120"></canvas>
         </div>
         <div id="step-counter">Steps: <span id="step-val">0</span></div>
+        <div id="explore-quick-btns">
+          <button class="qbtn" onclick="showWorldMap()">🗺 Karte</button>
+          <button class="qbtn" onclick="showCrafting()">⚗ Craft</button>
+          <button class="qbtn" onclick="showAchievements()">🏅</button>
+        </div>
         <button id="boss-btn" onclick="startFinalBoss()" style="display:none">💀 SHADOW KING — FINAL BOSS</button>
         <button id="explore-btn" onclick="doStep()">⚔ EXPLORE</button>
         <div id="log-box"><div id="log"></div></div>
@@ -97,15 +103,17 @@
           <div class="stat-row"><span>MaxHP</span><span id="s-maxhp">100</span><button class="salloc" onclick="allocateStat('vit')" title="VIT +15HP">+</button></div>
           <div class="stat-row"><span>MaxMP</span><span id="s-maxmp">30</span><button class="salloc" onclick="allocateStat('wis')" title="WIS +8MP">+</button></div>
           <div class="stat-row"><span>Kills</span><span id="s-kills">0</span></div>
+          <div class="stat-row"><span>Klasse</span><span id="s-class">–</span></div>
         </div>
         <h3>Equipment</h3>
         <div class="panel">
           <div class="equip-row" id="eq-weapon">🗡 <span>Empty</span></div>
           <div class="equip-row" id="eq-armor">🛡 <span>Empty</span></div>
           <div class="equip-row" id="eq-acc">💍 <span>Empty</span></div>
+          <div class="equip-row" id="eq-pet">🐾 <span>Empty</span></div>
         </div>
         <h3>Inventory <span id="inv-gold-lbl" style="color:var(--dim);font-size:7px">🪙 0</span></h3>
-        <div id="inv-tip">Tap to equip/use · Long press to sell</div>
+        <div id="inv-tip">Tap equipped item to upgrade · Long press to sell</div>
         <div id="inv-grid"></div>
         <div style="height:8px"></div>
       </div>
