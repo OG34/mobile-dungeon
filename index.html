@@ -40,10 +40,12 @@
           <span id="area-icon">🌲</span>
           <span id="area-name">Enchanted Forest</span>
         </div>
-        <div id="player-wrap">
+        <div id="scene-wrap">
+          <canvas id="bg-canvas" width="240" height="100"></canvas>
           <canvas id="player-canvas" width="64" height="64"></canvas>
-          <div id="step-counter">Steps: <span id="step-val">0</span></div>
         </div>
+        <div id="step-counter">Steps: <span id="step-val">0</span></div>
+        <button id="boss-btn" onclick="startFinalBoss()" style="display:none">💀 SHADOW KING — FINAL BOSS</button>
         <button id="explore-btn" onclick="doStep()">⚔ EXPLORE</button>
         <div id="log-box"><div id="log"></div></div>
       </div>
@@ -108,6 +110,12 @@
 
       <!-- QUESTS -->
       <div id="screen-quests" class="screen">
+        <div id="daily-header">
+          <h2>⭐ Tagesquests</h2>
+          <span id="daily-timer" class="dtimer"></span>
+        </div>
+        <div id="daily-quest-list"></div>
+        <button id="daily-bonus-btn" onclick="claimDailyBonus()" style="display:none" class="quest-claim daily-bonus">⭐ TAGESBONUS HOLEN</button>
         <h2>Quests</h2>
         <div id="quest-hint">Schließe Quests ab für Belohnungen!</div>
         <div id="quest-list"></div>
