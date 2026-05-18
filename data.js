@@ -9,6 +9,7 @@ const AREAS = [
   { id:'underwater',name:'Abyssal Kingdom',   icon:'🌊', min:51, max:65, foes:['sea_serpent','coral_crab','deep_kraken'] },
   { id:'sky',       name:'Sky Fortress',      icon:'⛅', min:66, max:80, foes:['storm_hawk','wind_giant','thunder_wyrm'] },
   { id:'ice',       name:'Ice Tundra',        icon:'❄',  min:81, max:99, foes:['ice_golem','frost_troll','blizzard_dragon','glacial_spirit'] },
+  { id:'void_rift', name:'Dimensionsriss', icon:'🌀', min:1, max:50, foes:['void_lich','chaos_dragon','void_shade','shadow_spider','void_shade'], secret:true },
 ];
 
 const FOES = {
@@ -226,6 +227,7 @@ const AREA_BOSSES = {
   underwater:{ name:'🦑 Kraken-König',        foeId:'deep_kraken', hpMult:3.5, atkMult:2.0, xpMult:6,  goldMult:6,  drops:[{id:'chaos_crystal',p:.4},{id:'celestial_bow',p:.2},{id:'elixir',p:1}] },
   sky:       { name:'⚡ Donner-Imperator',    foeId:'thunder_wyrm',hpMult:3.5, atkMult:2.0, xpMult:6,  goldMult:6,  drops:[{id:'crystal_crown',p:.3},{id:'chaos_blade',p:.2},{id:'elixir',p:1}] },
   ice:       { name:'❄ Gletscher-Titan',      foeId:'blizzard_dragon',hpMult:3.5,atkMult:2.0,xpMult:6, goldMult:6,  drops:[{id:'dragon_scale',p:.3},{id:'crystal_crown',p:.3},{id:'elixir',p:1}] },
+  void_rift: { name:'👑 Dimensionsherrscher', foeId:'void_lich', hpMult:6, atkMult:3, xpMult:8, goldMult:8, drops:[{id:'chaos_crystal',p:.5},{id:'void_robe',p:.4},{id:'chaos_blade',p:.2},{id:'elixir',p:1}] },
 };
 
 // ── SHADOW KING ──────────────────────────────────────────────
@@ -453,6 +455,24 @@ const CRAFTING = [
   { id:'ck_mpotion',  label:'💧 Mana-Trank ×2 (Kräuter×2)',  requires:[{id:'herbs',qty:2,res:true}], result:'mp_potion', resultQty:2, resReq:true },
   { id:'ck_mega',     label:'🧪 Mega-Trank (Trank×3+Kräuter)',requires:[{id:'potion',qty:3},{id:'herbs',qty:2,res:true}], result:'mega_potion', resultQty:1, resReq:true },
   { id:'c_revive',    label:'💎 Wiederbelebungsstein (Kristall+Elixier)', requires:[{id:'chaos_crystal',qty:1},{id:'elixir',qty:2}], result:'revive_gem', resultQty:1 },
+  { id:'c_steel_sword', label:'⚔ Stahl-Schwert (Erz×8)',           requires:[{id:'ore',qty:8,res:true}],                                              result:'iron_sword',  resultQty:1, resReq:true },
+  { id:'c_chain',       label:'🛡 Kettenrüstung (Erz×6+Holz×3)',   requires:[{id:'ore',qty:6,res:true},{id:'wood',qty:3,res:true}],                   result:'chain_mail',  resultQty:1, resReq:true },
+  { id:'c_atk_rune',    label:'💎 ATK-Rune (Erz×4+Kräuter×2)',     requires:[{id:'ore',qty:4,res:true},{id:'herbs',qty:2,res:true}],                  result:'atk_rune',    resultQty:1, resReq:true },
+  { id:'c_def_rune',    label:'🛡 DEF-Rune (Erz×3+Holz×3)',        requires:[{id:'ore',qty:3,res:true},{id:'wood',qty:3,res:true}],                   result:'def_rune',    resultQty:1, resReq:true },
+  { id:'c_storm_boots', label:'👢 Sturm-Stiefel (Erz×5+Holz×4)',   requires:[{id:'ore',qty:5,res:true},{id:'wood',qty:4,res:true}],                   result:'storm_boots', resultQty:1, resReq:true },
+  { id:'c_battle_helm', label:'🪖 Kampf-Helm (Erz×6+Kräuter×3)',   requires:[{id:'ore',qty:6,res:true},{id:'herbs',qty:3,res:true}],                  result:'shadow_helm', resultQty:1, resReq:true },
+  { id:'c_mana_pot',    label:'💧 Mana-Kristall (Kräuter×5+Erz×2)',requires:[{id:'herbs',qty:5,res:true},{id:'ore',qty:2,res:true}],                  result:'mana_crystal',resultQty:1, resReq:true },
+];
+
+// ── PRESTIGE SHOP ────────────────────────────────────────────
+const PRESTIGE_SHOP = [
+  { id:'atk_up',     label:'⚔ +10 Basis-ATK',        cost:1, max:5, desc:'Permanent +10 ATK nach Prestige' },
+  { id:'hp_up',      label:'❤ +50 Basis-HP',          cost:1, max:5, desc:'Permanent +50 MaxHP nach Prestige' },
+  { id:'def_up',     label:'🛡 +5 Basis-DEF',         cost:1, max:5, desc:'Permanent +5 DEF nach Prestige' },
+  { id:'mp_up',      label:'💙 +20 Basis-MP',         cost:1, max:3, desc:'Permanent +20 MaxMP nach Prestige' },
+  { id:'gold_keep',  label:'🪙 Mehr Gold behalten',   cost:2, max:3, desc:'50%→60%→70% Gold behalten' },
+  { id:'start_item', label:'🎒 Start-Item +1',         cost:2, max:2, desc:'Behalte +1 extra Item nach Prestige' },
+  { id:'xp_boost',   label:'⭐ +15% XP dauerhaft',   cost:3, max:2, desc:'Permanent +15% XP' },
 ];
 
 // ── QUESTS ──────────────────────────────────────────────────

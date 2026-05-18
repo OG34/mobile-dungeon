@@ -722,3 +722,48 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
   72% {opacity:1}
   100%{opacity:0}
 }
+
+/* ── BOSS PHASE 2 SCREEN FLASH ── */
+@keyframes phase2Flash{
+  0%  {opacity:0}
+  15% {opacity:.55}
+  35% {opacity:.2}
+  55% {opacity:.45}
+  100%{opacity:0}
+}
+.phase2-flash{
+  position:fixed;inset:0;background:#ff0000;
+  pointer-events:none;z-index:400;
+  animation:phase2Flash .7s ease-out forwards;
+}
+
+/* ── ENEMY LUNGE ANIMATION ── */
+@keyframes enemyLunge{
+  0%  {transform:translateX(0)}
+  30% {transform:translateX(-18px) scale(1.1)}
+  60% {transform:translateX(0) scale(1)}
+  100%{transform:translateX(0)}
+}
+.enemy-lunge{animation:enemyLunge .35s ease-out}
+
+/* ── COMBO BADGE ── */
+#combo-display{
+  font-family:'Press Start 2P',monospace;
+  font-size:11px;
+  font-weight:bold;
+  text-align:center;
+  padding:4px 8px;
+  color:#ff6600;
+  text-shadow:0 0 8px #ff6600,1px 1px 0 #000;
+  animation:comboPulse .3s ease-out;
+}
+@keyframes comboPulse{
+  0%  {transform:scale(1.4)}
+  100%{transform:scale(1)}
+}
+
+/* ── ITEM COMPARE POPUP ── */
+.compare-row{display:flex;justify-content:space-between;font-size:6px;padding:2px 0;border-bottom:1px solid var(--border)}
+.compare-better{color:var(--green)}
+.compare-worse {color:#e05252}
+.compare-same  {color:var(--dim)}

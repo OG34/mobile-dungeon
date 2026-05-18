@@ -879,6 +879,8 @@ function enemyTurn() {
     G.combat.atk = Math.floor(G.combat.atk * 1.5);
     combatLog(`💥 ${G.combat.name} Phase 2! ATK ×1.5!`);
     SFX.boss();
+    const fl=document.createElement('div'); fl.className='phase2-flash'; document.body.appendChild(fl);
+    setTimeout(()=>fl.remove(),800);
   }
   const p=G.p; const e=G.combat;
   // Decrement combat skill buffs
@@ -912,6 +914,8 @@ function enemyTurn() {
       p.hp-=dmg; G.battleStats.dmgTaken+=dmg;
       combatLog(`💢 ${e.name}: ${dmg}${crit?' Krit!':''}`);
       SFX.dmgTake();
+      const ec3=document.getElementById('enemy-canvas');
+      if(ec3){ec3.classList.remove('enemy-lunge');void ec3.offsetWidth;ec3.classList.add('enemy-lunge');setTimeout(()=>ec3.classList.remove('enemy-lunge'),400);}
       const pc=document.getElementById('player-combat-canvas');
       floatDmg(pc,'-'+dmg,'#e05252');
       shake(pc); flashHit(pc);
@@ -987,9 +991,11 @@ function combatWin() {
   const sc=G.p.subclass?SUBCLASSES[G.p.subclass]:null;
   if(sc&&sc.healOnKill){ const h=Math.floor(stats().maxHp*0.08); G.p.hp=Math.min(stats().maxHp,G.p.hp+h); combatLog(`🛡 Paladin: +${h} HP`); }
   if(isBossRush) G.bossRush.score=(G.bossRush.score||0)+xp*2;
+  const seasonalReward=e._seasonalReward;
   setTimeout(()=>{
     endCombat();
     gainXP(xp);
+    if(seasonalReward){ for(let i=0;i<(seasonalReward.qty||1);i++) addInv(seasonalReward.id); addLog(`🎁 Event-Belohnung: ${ITEMS[seasonalReward.id]?.icon} ×${seasonalReward.qty}!`); }
     addLog(`✅ ${e.name} besiegt!`);
     if(isKing){ showVictory(); checkSpeedrunComplete(); }
     if(isDungeon) dungeonNextRoom();
@@ -1017,7 +1023,15 @@ function updateCombatUI() {
   document.getElementById('pcombat-hp-text').textContent=`${Math.max(0,p.hp)}/${s.maxHp}`;
   document.getElementById('pcombat-hp-bar').style.width =pct(Math.max(0,p.hp),s.maxHp);
   const cd=document.getElementById('combo-display');
-  if(cd){const c=e.combo||0;cd.style.display=c>=2?'':'none';if(c>=2)cd.textContent=c>=5?`🔥 FEVER ×${c}!`:`🔥 COMBO ×${c}`;}
+  if(cd){
+    const c=e.combo||0;
+    if(c>=2){
+      cd.style.display='block';
+      const prev=cd.textContent;
+      const next=c>=8?`🔥🔥 MAX FEVER ×${c}!!`:c>=5?`🔥 FEVER ×${c}!`:`🔥 COMBO ×${c}`;
+      if(prev!==next){cd.textContent=next;cd.classList.remove('comboPulse');void cd.offsetWidth;cd.classList.add('comboPulse');}
+    } else {cd.style.display='none';}
+  }
   renderStatusRow('enemy-status',e.enemyStatus);
   renderStatusRow('player-status',e.playerStatus);
 }
@@ -1119,25 +1133,66 @@ function doPrestige() {
   document.getElementById('overlay')?.remove();
   const p = G.p;
   p.prestige = (p.prestige||0) + 1;
-  const bonusAtk = p.prestige * 5;
-  const bonusDef = p.prestige * 3;
-  const keptGold = Math.floor(p.gold * 0.3);
-  // keep one equipped item
-  const keptItem = Object.values(p.eq).find(v=>v);
+  const bonusAtk = p.prestige * 5 + ((G.prestigeUpgrades?.atk_up||0)*10);
+  const bonusDef = p.prestige * 3 + ((G.prestigeUpgrades?.def_up||0)*5);
+  const bonusHp  = (G.prestigeUpgrades?.hp_up||0)*50;
+  const bonusMp  = (G.prestigeUpgrades?.mp_up||0)*20;
+  const goldPct  = 0.3 + (G.prestigeUpgrades?.gold_keep||0)*0.1;
+  const keptGold = Math.floor(p.gold * goldPct);
+  // keep equipped items (base 1 + start_item upgrades)
+  const keepSlots = 1 + (G.prestigeUpgrades?.start_item||0);
+  const keptItems = Object.values(p.eq).filter(v=>v).slice(0,keepSlots);
   p.level=1; p.xp=0; p.xpNext=100;
   p.baseAtk=8+bonusAtk; p.baseDef=3+bonusDef;
-  p.maxHp=100; p.maxMp=30; p.hp=100; p.mp=30;
+  p.maxHp=100+bonusHp; p.maxMp=30+bonusMp; p.hp=p.maxHp; p.mp=p.maxMp;
   p.gold=keptGold; p.kills=0; p.statPoints=0;
   p.eq={weapon:null,armor:null,acc:null,pet:null,helm:null,gloves:null,boots:null}; p.inv=[];
-  if(keptItem){ addInv(Object.keys(ITEMS).find(k=>ITEMS[k].name===keptItem.name)||'potion', true); }
+  keptItems.forEach(it=>{ addInv(Object.keys(ITEMS).find(k=>ITEMS[k].name===it.name)||'potion', true); });
   addInv('potion', true);
+  G.prestigeCoins = (G.prestigeCoins||0) + 3;
   G.steps=0; G.quests=[]; G.kingDefeated=false;
   generateQuests(); updateArea(); refresh();
   document.getElementById('step-val').textContent=0;
   saveHighscore(0,'Prestige');
-  addLog(`⭐ Prestige ${p.prestige}! +${bonusAtk} ATK +${bonusDef} DEF Bonus. Abenteuer beginnt neu!`);
-  showOverlay(`⭐ PRESTIGE ${p.prestige}\n+${bonusAtk} ATK\n+${bonusDef} DEF\nBasisbonus permanent!`);
+  addLog(`⭐ Prestige ${p.prestige}! +${bonusAtk} ATK +${bonusDef} DEF. +3 Prestige-Münzen!`);
+  showOverlay(`⭐ PRESTIGE ${p.prestige}\n+${bonusAtk} ATK\n+${bonusDef} DEF\n+3 💫 Prestige-Münzen!`);
+  setTimeout(()=>{ if(confirm('Prestige-Shop öffnen?')) showPrestigeShop(); }, 1500);
   save();
+}
+
+function showPrestigeShop() {
+  const pu = G.prestigeUpgrades = G.prestigeUpgrades||{};
+  const coins = G.prestigeCoins||0;
+  const rows = PRESTIGE_SHOP.map(s=>{
+    const owned=pu[s.id]||0; const maxed=owned>=s.max;
+    const canBuy=!maxed&&coins>=s.cost;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-size:6px;color:${maxed?'var(--accent)':'var(--text)'}">${s.label}${maxed?' ✓MAX':''}</div>
+        <div style="font-size:5px;color:var(--dim);margin-top:2px">${s.desc} · ${owned}/${s.max}</div>
+      </div>
+      <button onclick="buyPrestigeUpgrade('${s.id}')" ${canBuy?'':'disabled'} style="background:${canBuy?'var(--accent)':'var(--panel)'};color:${canBuy?'var(--bg)':'var(--dim)'};border:1px solid ${canBuy?'var(--accent)':'var(--border)'};padding:5px 7px;font-family:'Press Start 2P',monospace;font-size:6px;cursor:${canBuy?'pointer':'default'}">💫${s.cost}</button>
+    </div>`;
+  }).join('');
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:290px;max-width:90vw;max-height:85vh;overflow-y:auto">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:4px">💫 PRESTIGE-SHOP</div>
+    <div style="text-align:center;font-size:7px;color:var(--dim);margin-bottom:10px">💫 ${coins} Prestige-Münzen verfügbar</div>
+    <div style="text-align:left">${rows}</div><br>
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function buyPrestigeUpgrade(id) {
+  const s=PRESTIGE_SHOP.find(x=>x.id===id); if(!s) return;
+  G.prestigeUpgrades=G.prestigeUpgrades||{};
+  if((G.prestigeUpgrades[id]||0)>=s.max){showOverlay('❌ Bereits maximal!');return;}
+  if((G.prestigeCoins||0)<s.cost){showOverlay('❌ Nicht genug Prestige-Münzen!');return;}
+  G.prestigeCoins-=s.cost; G.prestigeUpgrades[id]=(G.prestigeUpgrades[id]||0)+1;
+  addLog(`💫 ${s.label} erworben!`); SFX.levelUp();
+  document.getElementById('overlay')?.remove(); save(); showPrestigeShop();
 }
 
 // ── CLASS SELECTION ──────────────────────────────────────────
@@ -1454,20 +1509,23 @@ function showLootFilter() {
 function showWorldMap() {
   const wrap=document.createElement('div'); wrap.id='overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
-  const lvl=G.p.level;
+  const lvl=G.p.level; const prestige=G.p.prestige||0;
   const nodes=AREAS.map((a,i)=>{
-    const locked=lvl<a.min;
+    const isSecret=a.secret;
+    const secretUnlocked=isSecret&&prestige>=5;
+    const locked=(isSecret&&!secretUnlocked)||(lvl<a.min);
     const active=G.area.id===a.id;
-    const col=active?'var(--accent)':locked?'#333':'#556';
-    const tx=active?'var(--text)':locked?'#444':'#aaa';
+    const col=active?'var(--accent)':locked?'#333':isSecret?'#9952e0':'#556';
+    const tx=active?'var(--text)':locked?'#444':isSecret?'#cc88ff':'#aaa';
     const clickable=!locked&&!active;
+    const lockReason=isSecret&&!secretUnlocked?'🔒 Prestige 5 erforderlich':locked?'Benötigt LV '+a.min:active?'Aktuelles Gebiet':'Reisen → '+a.name;
     return `<div style="display:flex;align-items:center;gap:10px;margin:4px 0;${clickable?'cursor:pointer;':''}opacity:${locked?0.4:1}"
       ${clickable?`onclick="travelToArea('${a.id}')"`:''}
-      title="${locked?'Benötigt LV '+a.min:active?'Aktuelles Gebiet':'Reisen → '+a.name}">
+      title="${lockReason}">
       <div style="width:36px;height:36px;border:2px solid ${col};display:flex;align-items:center;justify-content:center;font-size:18px;background:${active?'#1a1a30':clickable?'#111':'transparent'}">${locked?'🔒':a.icon}</div>
       <div style="text-align:left;flex:1">
-        <div style="font-size:7px;color:${tx}">${a.name}${active?' ◀':''}</div>
-        <div style="font-size:6px;color:var(--dim)">LV ${a.min}–${a.max}${clickable?' · Tippen zum Reisen':''}</div>
+        <div style="font-size:7px;color:${tx}">${isSecret&&!secretUnlocked?'???':a.name}${active?' ◀':''}${isSecret&&secretUnlocked?' 🌟':''}</div>
+        <div style="font-size:6px;color:var(--dim)">${isSecret?'🔒 Prestige 5':'LV '+a.min+'–'+a.max}${clickable?' · Tippen zum Reisen':''}</div>
       </div>
     </div>`;
   }).join('');
@@ -1480,6 +1538,7 @@ function showWorldMap() {
 }
 function travelToArea(areaId) {
   const a = AREAS.find(a=>a.id===areaId); if(!a) return;
+  if(a.secret && (G.p.prestige||0)<5){showOverlay('🔒 Dimensionsriss: Prestige 5 erforderlich!');return;}
   if(G.p.level < a.min){showOverlay('❌ Level zu niedrig!');return;}
   if(G.combat){showOverlay('❌ Beende zuerst den Kampf!');return;}
   G.area = a;
@@ -1517,10 +1576,13 @@ function showBestiary() {
         </div>
       </div>`;
     }).join('');
+    const weakLine=f.weakTo?`<span style="color:#52c07a;font-size:5px">⚡ Schwach: ${f.weakTo}</span>`:
+                   f.element?`<span style="color:var(--dim);font-size:5px">Element: ${f.element}</span>`:'';
+    const dropIds=(DROPS[id]||[]).slice(0,3).map(d=>ITEMS[d.id]?.icon||'').join('');
     return `<div style="padding:6px 0;border-bottom:1px solid var(--border)">
-      <div style="display:flex;justify-content:space-between;font-size:7px;margin-bottom:2px">
-        <span>${f.icon||'👾'} ${name}</span>
-        <span style="color:var(--dim);font-size:6px">Gesehen:${b.seen} Kills:${b.killed}</span>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:7px;margin-bottom:2px">
+        <span>${f.icon||'👾'} ${name} ${weakLine}</span>
+        <span style="color:var(--dim);font-size:6px">👁${b.seen} 💀${b.killed}${dropIds?' '+dropIds:''}</span>
       </div>
       ${milestoneHtml}
     </div>`;
@@ -1663,7 +1725,36 @@ function addInv(id, silent=false, forceUnidentified=false){
   if(!silent) {
     SFX.itemGet();
     if(item.rarity==='epic'||item.rarity==='legendary') showRarePopup(item);
+    // Auto-equip suggestion for gear when slot is empty
+    if(item.slot && item.slot!=='rune' && !G.combat) {
+      const cur=G.p.eq[item.slot];
+      const curItem=cur?ITEMS[cur.id]:null;
+      const newScore=(item.atk||0)+(item.def||0)+(item.maxHp||0)*0.1+(item.critBonus||0)*20;
+      const curScore=curItem?(curItem.atk||0)+(curItem.def||0)+(curItem.maxHp||0)*0.1+(curItem.critBonus||0)*20:0;
+      if(!curItem || newScore>curScore) {
+        setTimeout(()=>{
+          const newIdx=G.p.inv.findIndex(i=>i.id===id&&!i.equipped&&!i._unidentified);
+          if(newIdx>=0) showAutoEquipPrompt(newIdx, item, curItem);
+        }, 400);
+      }
+    }
   }
+}
+
+function showAutoEquipPrompt(idx, item, curItem) {
+  const btnStyle='display:block;width:100%;border:1px solid var(--border);padding:8px;font-family:\'Press Start 2P\',monospace;font-size:7px;cursor:pointer;margin-bottom:5px';
+  const compareText=curItem?`(ersetzt ${curItem.icon} ${curItem.name})`:'(Slot leer)';
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:240px;text-align:center">
+    🔄 Besser als aktuell!<br><br>
+    <span style="font-size:18px">${item.icon}</span><br>
+    <span style="color:var(--accent);font-size:7px">${item.name}</span><br>
+    <span style="font-size:6px;color:var(--dim)">${compareText}</span><br><br>
+    <button onclick="useItem(${idx});document.getElementById('overlay').remove()" style="${btnStyle};background:var(--green);color:var(--bg);border-color:var(--green)">✅ Ausrüsten</button>
+    <button onclick="document.getElementById('overlay').remove()" style="${btnStyle};background:var(--panel);color:var(--dim)">✖ Später</button>
+  </div>`;
+  document.body.appendChild(wrap);
 }
 
 function identifyItem(idx) {
@@ -1745,7 +1836,7 @@ function updateInvScreen(){
       div.onclick=()=>{ showOverlay(`📜 Unidentifiziertes Item\n\n[${item.slot}]\n\nSchriftrolle benutzen?`); setTimeout(()=>{ if(confirm('Schriftrolle benutzen?')) identifyItem(idx); },300); };
     } else {
       div.innerHTML=`${item.icon}${upgLabel}<small>${item.name.slice(0,9)}</small>${slot.qty>1?`<small>x${slot.qty}</small>`:''}`;
-      div.onclick=()=>{ if(slot.equipped&&item.slot&&item.slot!=='pet'){ showUpgradeMenu(idx); } else if(!item.slot){ showConsumableMenu(idx); } else { useItem(idx); } };
+      div.onclick=()=>{ if(slot.equipped&&item.slot&&item.slot!=='pet'){ showUpgradeMenu(idx); } else if(!item.slot){ showConsumableMenu(idx); } else if(item.slot&&!slot.equipped){ showItemCompare(idx); } else { useItem(idx); } };
     }
     let t;
     div.addEventListener('touchstart',()=>{t=setTimeout(()=>{ if(!slot.equipped)sellItem(idx); },600);},{passive:true});
@@ -1753,6 +1844,38 @@ function updateInvScreen(){
     div.addEventListener('touchmove',()=>clearTimeout(t),{passive:true});
     grid.appendChild(div);
   });
+}
+
+function showItemCompare(idx) {
+  const slot=G.p.inv[idx]; if(!slot) return; const item=ITEMS[slot.id]; if(!item||!item.slot) return;
+  const eqSlot=item.slot; const cur=G.p.eq[eqSlot]; const curItem=cur?ITEMS[cur.id]:null;
+  const upg=slot._upgrade||0;
+  const newAtk=(item.atk||0)+(eqSlot==='weapon'?upg*3:upg);
+  const newDef=(item.def||0)+(eqSlot==='armor'||eqSlot==='helm'?upg*3:upg);
+  const curAtk=curItem?(curItem.atk||0):0; const curDef=curItem?(curItem.def||0):0;
+  const diff=(s,n,c)=>{const d=n-c;return d>0?`<span class="compare-better">+${d}</span>`:d<0?`<span class="compare-worse">${d}</span>`:`<span class="compare-same">±0</span>`;};
+  const rows=[
+    curItem?`<div class="compare-row"><span>ATK</span><span>${curAtk}→${newAtk} ${diff('atk',newAtk,curAtk)}</span></div>`:'',
+    curItem?`<div class="compare-row"><span>DEF</span><span>${curDef}→${newDef} ${diff('def',newDef,curDef)}</span></div>`:'',
+    item.maxHp?`<div class="compare-row"><span>HP</span><span>${curItem?.maxHp||0}→${item.maxHp}</span></div>`:'',
+    item.critBonus?`<div class="compare-row"><span>KRIT</span><span>+${Math.floor(item.critBonus*100)}%</span></div>`:'',
+    item.evasion?`<div class="compare-row"><span>AUSW.</span><span>+${Math.floor(item.evasion*100)}%</span></div>`:'',
+  ].filter(Boolean).join('');
+  const curLine=curItem?`<div style="font-size:6px;color:var(--dim);margin-bottom:6px">Aktuell: ${curItem.icon} ${curItem.name}</div>`:'<div style="font-size:6px;color:var(--dim);margin-bottom:6px">Slot leer</div>';
+  const btnStyle='display:block;width:100%;background:var(--panel);border:1px solid var(--border);padding:8px;font-family:\'Press Start 2P\',monospace;font-size:6px;cursor:pointer;margin-bottom:6px';
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:100';
+  const sellPrice=Math.floor(item.value*0.5);
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:240px;max-width:90vw;text-align:center">
+    <span style="font-size:16px">${item.icon}</span><br>
+    <span style="color:var(--accent)">${item.name}</span> <span style="font-size:6px;color:var(--dim)">[${item.rarity||'common'}]</span><br><br>
+    ${curLine}
+    ${rows?`<div style="margin-bottom:10px">${rows}</div>`:''}
+    <button onclick="useItem(${idx});document.getElementById('overlay').remove()" style="${btnStyle};color:var(--green);border-color:var(--green)">✅ Ausrüsten</button>
+    <button onclick="sellItem(${idx});document.getElementById('overlay').remove();refresh()" style="${btnStyle};color:var(--dim)">💱 Verkaufen (${sellPrice}🪙)</button>
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:none;color:var(--dim);font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖</button>
+  </div>`;
+  document.body.appendChild(wrap);
 }
 
 function showConsumableMenu(idx) {
@@ -2669,6 +2792,44 @@ function doReset() {
   localStorage.removeItem('pq_save'); location.reload();
 }
 
+// ── SEASONAL EVENT ───────────────────────────────────────────
+const SEASONAL_EVENTS = {
+  spring: { name:'🌸 Frühlingsfest',  month:[3,4,5],  bonus:'×1.5 XP',   foe:'goblin',  icon:'🌸', reward:'battle_brew', rewardQty:3 },
+  summer: { name:'☀ Sommerschlacht', month:[6,7,8],  bonus:'×1.5 Gold',  foe:'dragon',  icon:'☀', reward:'elixir',      rewardQty:4 },
+  autumn: { name:'🍂 Erntedunkel',   month:[9,10,11],bonus:'+20% Drops',  foe:'skeleton',icon:'🍂', reward:'mana_crystal', rewardQty:2 },
+  winter: { name:'❄ Winterfluch',   month:[12,1,2], bonus:'2× Drops',   foe:'ice_golem',icon:'❄', reward:'chaos_crystal',rewardQty:1 },
+};
+
+function getSeasonalEvent() {
+  const m=new Date().getMonth()+1;
+  return Object.values(SEASONAL_EVENTS).find(e=>e.month.includes(m))||SEASONAL_EVENTS.spring;
+}
+
+function showSeasonalDungeon() {
+  const ev=getSeasonalEvent();
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
+  const foe=FOES[ev.foe]||FOES.goblin;
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;text-align:center">
+    <div style="font-size:12px;margin-bottom:6px">${ev.icon}</div>
+    <div style="color:var(--accent);font-size:9px;margin-bottom:8px">${ev.name}</div>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:12px">Saisonales Event aktiv!<br>Bonus: ${ev.bonus}</div>
+    <div style="font-size:7px;margin-bottom:14px">Gegner: ${foe.icon} ${foe.name}<br><span style="font-size:6px;color:var(--dim)">Belohnung: ${ITEMS[ev.reward]?.icon} ${ITEMS[ev.reward]?.name} ×${ev.rewardQty}</span></div>
+    <button onclick="startSeasonalFight('${ev.foe}','${ev.reward}',${ev.rewardQty})" style="width:100%;background:var(--accent);color:var(--bg);border:none;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin-bottom:6px">${ev.icon} EVENT-KAMPF!</button>
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function startSeasonalFight(foeId, rewardId, rewardQty) {
+  document.getElementById('overlay')?.remove();
+  const ev=getSeasonalEvent();
+  startCombat(foeId, true);
+  // Mark seasonal reward to give after win
+  G.combat._seasonalReward={id:rewardId,qty:rewardQty,bonus:ev.bonus};
+  addLog(`${ev.icon} ${ev.name}: Event-Kampf beginnt!`);
+}
+
 // ── TUTORIAL ──────────────────────────────────────────────────
 const TUTORIAL_HINTS = [
   '💡 Drücke EXPLORE um dein Abenteuer zu starten!',
@@ -2796,6 +2957,7 @@ function save(){
     speedrun:G.speedrun, storyShown:G.storyShown,
     guild:G.guild, dayNight:G.dayNight, heroSprite:G.heroSprite, worldBossSteps:G.worldBossSteps,
     difficulty:G.difficulty, tutorialStep:G.tutorialStep,
+    prestigeCoins:G.prestigeCoins, prestigeUpgrades:G.prestigeUpgrades,
   }));}catch(_){}
 }
 
@@ -2813,6 +2975,7 @@ function load(){
     G.guild=d.guild||null; G.dayNight=d.dayNight||6; G.heroSprite=d.heroSprite||'warrior';
     G.worldBossSteps=d.worldBossSteps||0;
     G.difficulty=d.difficulty||'normal'; G.tutorialStep=d.tutorialStep||99;
+    G.prestigeCoins=d.prestigeCoins||0; G.prestigeUpgrades=d.prestigeUpgrades||{};
     if(!G.p.eq.pet) G.p.eq.pet=null;
     if(!G.p.subclass) G.p.subclass=null;
     if(!G.p.eq.helm) G.p.eq.helm=null;
