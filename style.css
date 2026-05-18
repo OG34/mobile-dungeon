@@ -767,3 +767,54 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 .compare-better{color:var(--green)}
 .compare-worse {color:#e05252}
 .compare-same  {color:var(--dim)}
+
+/* ── LANDSCAPE LAYOUT ── */
+@media (orientation: landscape) and (max-height: 500px) {
+  #app { flex-direction: row; max-width: 100%; }
+  #hud { flex-direction: column; width: 90px; height: 100dvh; border-bottom: none; border-right: 2px solid var(--border); padding: 6px 4px; gap: 6px; flex-shrink: 0; }
+  #hud-center { flex-direction: column; }
+  #screens { flex: 1; overflow-y: auto; }
+  #bottom-nav { position: static; flex-direction: column; width: 64px; height: 100dvh; border-top: none; border-left: 2px solid var(--border); padding: 8px 0; }
+  .nav-btn { flex: 1; width: 100%; }
+  #scene-wrap canvas { width: 160px; height: 80px; }
+}
+
+/* ── TOUCH TARGETS ── */
+.qbtn { min-width: 44px; min-height: 44px; font-size: 18px; }
+.cbtn { min-height: 48px; font-size: 8px; padding: 10px 6px; }
+.nav-btn { min-height: 52px; padding: 8px 4px; }
+button.salloc { min-width: 32px; min-height: 32px; }
+#explore-btn { min-height: 52px; font-size: 10px; padding: 14px; }
+.skill-btn { min-height: 44px; padding: 10px 12px; }
+.shop-row button { min-height: 40px; padding: 8px 10px; }
+
+/* ── SWIPE HINT ── */
+#swipe-hint {
+  position: fixed; bottom: 76px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 6px; color: var(--dim);
+  pointer-events: none; opacity: 0;
+  transition: opacity .4s;
+  font-family: 'Press Start 2P', monospace;
+}
+#swipe-hint.show { opacity: 1; }
+
+/* ── ENDGAME CHALLENGER ── */
+.challenger-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 6px;
+}
+.challenger-active { border-left: 3px solid var(--accent); padding-left: 8px; }
+
+/* ── INSTALL BANNER ── */
+#install-banner {
+  position: fixed; bottom: 66px; left: 0; right: 0;
+  background: var(--surface); border-top: 1px solid var(--accent);
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; z-index: 250; font-size: 7px;
+}
+#install-banner button {
+  background: var(--accent); color: var(--bg);
+  border: none; padding: 6px 10px;
+  font-family: 'Press Start 2P', monospace; font-size: 6px; cursor: pointer;
+}

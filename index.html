@@ -1,9 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a12">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PixelQuest">
+  <meta name="description" content="Ein Pixel-Rollenspiel – erkunde Dungeons, kämpfe gegen Monster, werde zur Legende!">
   <title>Pixel Quest RPG</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -38,14 +45,14 @@
       <div id="screen-explore" class="screen active">
         <div id="area-banner">
           <span id="area-icon">🌲</span>
-          <span id="area-name">Enchanted Forest</span>
+          <span id="area-name">Verzauberter Wald</span>
         </div>
         <div id="scene-wrap">
           <canvas id="bg-canvas" width="240" height="120"></canvas>
           <canvas id="player-canvas" width="64" height="64"></canvas>
           <canvas id="weather-canvas" width="240" height="120"></canvas>
         </div>
-        <div id="step-counter">Steps: <span id="step-val">0</span><span id="daynightlbl" style="font-size:6px;color:var(--dim);margin-left:8px">☀️ Tag</span></div>
+        <div id="step-counter">Schritte: <span id="step-val">0</span><span id="daynightlbl" style="font-size:6px;color:var(--dim);margin-left:8px">☀️ Tag</span></div>
         <div id="speedrun-timer" style="display:none;font-size:8px;color:#ff8800;font-family:'Press Start 2P',monospace">⏱ 00:00</div>
         <div id="explore-quick-btns">
           <button class="qbtn" onclick="showWorldMap()">🗺</button>
@@ -75,11 +82,11 @@
         <div id="explore-quick-btns4">
           <button class="qbtn" onclick="showStoryChains()">📖</button>
           <button class="qbtn" onclick="showDailyChallenge()">🎯</button>
-          <button class="qbtn" onclick="showBattleHistory()">⚔</button>
+          <button class="qbtn" onclick="showBattleHistory()">📜</button>
           <button class="qbtn" onclick="showBestiary()">📗</button>
         </div>
-        <button id="boss-btn" onclick="startFinalBoss()" style="display:none">💀 SHADOW KING — FINAL BOSS</button>
-        <button id="explore-btn" onclick="doStep()">⚔ EXPLORE</button>
+        <button id="boss-btn" onclick="startFinalBoss()" style="display:none">💀 SHADOW KING — ENDBOSS</button>
+        <button id="explore-btn" onclick="doStep()">⚔ ERKUNDEN</button>
         <div id="log-box"><div id="log"></div></div>
       </div>
 
@@ -88,7 +95,7 @@
         <div id="combat-stage">
           <canvas id="combat-bg-canvas" width="320" height="110"></canvas>
           <div class="combatant">
-            <div id="enemy-name-lbl" class="cname">Slime</div>
+            <div id="enemy-name-lbl" class="cname">Schleim</div>
             <canvas id="enemy-canvas" width="64" height="64"></canvas>
             <div class="bar-track slim"><div id="enemy-hp-bar" class="bar-fill red"></div></div>
             <span id="enemy-hp-text" class="bar-val">10/10</span>
@@ -96,7 +103,7 @@
           </div>
           <div id="vs-icon">⚔</div>
           <div class="combatant">
-            <div id="pcombat-name" class="cname">Hero</div>
+            <div id="pcombat-name" class="cname">Held</div>
             <canvas id="player-combat-canvas" width="64" height="64"></canvas>
             <div class="bar-track slim"><div id="pcombat-hp-bar" class="bar-fill red"></div></div>
             <span id="pcombat-hp-text" class="bar-val">100/100</span>
@@ -108,17 +115,17 @@
         <div id="skill-picker"></div>
         <div id="combat-item-picker"></div>
         <div id="combat-btns">
-          <button class="cbtn" id="btn-attack" onclick="combatAction('attack')">⚔ Attack</button>
+          <button class="cbtn" id="btn-attack" onclick="combatAction('attack')">⚔ Angriff</button>
           <button class="cbtn" id="btn-skills" onclick="toggleSkillPicker()">✨ Skills</button>
           <button class="cbtn" id="btn-items" onclick="toggleCombatItems()">🎒 Items</button>
-          <button class="cbtn" onclick="combatAction('flee')">🏃 Flee</button>
-          <button class="cbtn" id="auto-battle-btn" onclick="toggleAutoBattle()" style="grid-column:1/-1">⚡ Auto: OFF</button>
+          <button class="cbtn" onclick="combatAction('flee')">🏃 Fliehen</button>
+          <button class="cbtn" id="auto-battle-btn" onclick="toggleAutoBattle()" style="grid-column:1/-1">⚡ Auto: AUS</button>
         </div>
       </div>
 
       <!-- CHARACTER + INVENTORY -->
       <div id="screen-char" class="screen">
-        <h2>Character</h2>
+        <h2>Charakter</h2>
         <canvas id="char-canvas" width="64" height="64" style="margin:8px auto"></canvas>
         <div id="stat-points-banner" style="display:none" class="sp-banner">⭐ <span id="sp-count">0</span> Stat-Punkte verfügbar!</div>
         <div class="panel">
@@ -135,18 +142,18 @@
           <div class="stat-row"><span>Sets</span><span id="s-sets" style="font-size:6px;color:var(--green)">–</span></div>
           <div class="stat-row"><span>Modus</span><span id="s-hardcore" style="font-size:6px;color:#ff4444">Normal</span></div>
         </div>
-        <h3>Equipment</h3>
+        <h3>Ausrüstung</h3>
         <div class="panel">
-          <div class="equip-row" id="eq-weapon">🗡 <span>Empty</span></div>
-          <div class="equip-row" id="eq-armor">🛡 <span>Empty</span></div>
-          <div class="equip-row" id="eq-helm">🪖 <span>Empty</span></div>
-          <div class="equip-row" id="eq-gloves">🧤 <span>Empty</span></div>
-          <div class="equip-row" id="eq-boots">👢 <span>Empty</span></div>
-          <div class="equip-row" id="eq-acc">💍 <span>Empty</span></div>
-          <div class="equip-row" id="eq-pet">🐾 <span>Empty</span></div>
+          <div class="equip-row" id="eq-weapon">🗡 <span>Leer</span></div>
+          <div class="equip-row" id="eq-armor">🛡 <span>Leer</span></div>
+          <div class="equip-row" id="eq-helm">🪖 <span>Leer</span></div>
+          <div class="equip-row" id="eq-gloves">🧤 <span>Leer</span></div>
+          <div class="equip-row" id="eq-boots">👢 <span>Leer</span></div>
+          <div class="equip-row" id="eq-acc">💍 <span>Leer</span></div>
+          <div class="equip-row" id="eq-pet">🐾 <span>Leer</span></div>
         </div>
-        <h3>Inventory <span id="inv-gold-lbl" style="color:var(--dim);font-size:7px">🪙 0</span></h3>
-        <div id="inv-tip">Tap equipped item to upgrade · Long press to sell</div>
+        <h3>Inventar <span id="inv-gold-lbl" style="color:var(--dim);font-size:7px">🪙 0</span></h3>
+        <div id="inv-tip">Item antippen zum Ausrüsten · Lang drücken zum Verkaufen</div>
         <div id="inv-grid"></div>
         <div style="height:8px"></div>
       </div>
@@ -181,9 +188,9 @@
 
     <!-- BOTTOM NAV -->
     <nav id="bottom-nav">
-      <button class="nav-btn active" onclick="showScreen('explore',this)">🗺<br><small>Explore</small></button>
+      <button class="nav-btn active" onclick="showScreen('explore',this)">🗺<br><small>Erkunden</small></button>
       <button class="nav-btn" onclick="showScreen('quests',this)">📜<br><small>Quests</small></button>
-      <button class="nav-btn" onclick="showScreen('char',this)">🧙<br><small>Char</small></button>
+      <button class="nav-btn" onclick="showScreen('char',this)">🧙<br><small>Charakter</small></button>
       <button class="nav-btn" onclick="showScreen('shop',this)">🏪<br><small>Shop</small></button>
     </nav>
 
@@ -191,5 +198,12 @@
   <script src="sprites.js"></script>
   <script src="data.js"></script>
   <script src="game.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>

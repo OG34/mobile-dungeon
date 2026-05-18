@@ -366,7 +366,7 @@ function allocateStat(type) {
 }
 
 // ── LEVELING ─────────────────────────────────────────────────
-function xpFor(lvl) { return Math.floor(100 * Math.pow(1.4, lvl-1)); }
+function xpFor(lvl) { return Math.floor(80 * Math.pow(1.3, lvl-1)); }
 
 function gainXP(amount) {
   const p = G.p;
@@ -381,7 +381,7 @@ function gainXP(amount) {
     p.xp -= p.xpNext;
     p.level++;
     p.xpNext = xpFor(p.level);
-    p.baseAtk+=1; p.baseDef+=1; p.maxHp+=10; p.maxMp+=3;
+    p.baseAtk+=1; p.baseDef+=1; p.maxHp+=15; p.maxMp+=5;
     p.hp=Math.min(p.hp+10, stats().maxHp); p.mp=Math.min(p.mp+3, stats().maxMp);
     p.statPoints+=2;
     p.talentPoints = (p.talentPoints||0) + 1;
@@ -457,7 +457,7 @@ function doStep() {
   if (G.steps % 5 === 0) { G.dayNight = (G.dayNight + 1) % 24; updateDayNight(); }
   tickQuestStep(); tickDailyStep();
   SFX.step();
-  p.mp = Math.min(stats().maxMp, p.mp + 3);
+  p.mp = Math.min(stats().maxMp, p.mp + Math.max(3, Math.floor(stats().maxMp * 0.05)));
   setBusy(true); setTimeout(()=>setBusy(false),700);
 
   const ev = pick(EVENTS);
@@ -480,7 +480,7 @@ function doStep() {
     const opts=[
       ()=>{ p.hp=stats().maxHp; addLog('⛩️ Heilschrein! HP vollständig geheilt.'); },
       ()=>{ p.mp=stats().maxMp; addLog('⛩️ Zauberschrein! MP vollständig.'); },
-      ()=>{ const x=15*p.level; gainXP(x); addLog(`⛩️ Weisheitsschrein! +${x} XP.`); },
+      ()=>{ const x=25*p.level; gainXP(x); addLog(`⛩️ Weisheitsschrein! +${x} XP.`); },
       ()=>{ const g=10*p.level; earnGold(g); addLog(`⛩️ Glücksschrein! +${g} Gold.`); },
     ];
     opts[Math.floor(Math.random()*opts.length)](); refresh();
@@ -1019,6 +1019,7 @@ function combatWin() {
   if(isBossRush) G.bossRush.score=(G.bossRush.score||0)+xp*2;
   const seasonalReward=e._seasonalReward;
   const isDailyChallenge=e._dailyChallenge;
+  const challengerIdx=e._challengerIdx;
   setTimeout(()=>{
     endCombat();
     gainXP(xp);
@@ -1029,6 +1030,19 @@ function combatWin() {
       for(let i=0;i<dc.rewardQty;i++) addInv(dc.reward);
       gainXP(dc.xp); earnGold(dc.gold);
       SFX.victory(); addLog(`${dc.icon} Tages-Herausforderung abgeschlossen! +${dc.xp}XP +${dc.gold}G`);
+      save();
+    }
+    if(challengerIdx !== undefined && (G.challengerCleared||0) <= challengerIdx) {
+      const CHALL_REWARDS=[
+        { xp:2000, gold:1000, item:'chaos_crystal' },
+        { xp:3500, gold:1800, item:'void_robe' },
+        { xp:5000, gold:2500, item:'chaos_blade' },
+        { xp:8000, gold:4000, item:'crystal_crown' },
+        { xp:12000,gold:6000, item:'celestial_bow' },
+      ];
+      const cr=CHALL_REWARDS[challengerIdx];
+      if(cr){ gainXP(cr.xp); earnGold(cr.gold); addInv(cr.item); SFX.victory(); addLog(`🏆 Herausforderer Stufe ${challengerIdx+1} bezwungen! ${ITEMS[cr.item]?.icon} ${ITEMS[cr.item]?.name} erhalten!`); }
+      G.challengerCleared=(G.challengerCleared||0)+1;
       save();
     }
     addLog(`✅ ${e.name} besiegt!`);
@@ -2036,7 +2050,7 @@ function renderShopSell(){
   G.p.inv.forEach((slot,idx)=>{
     const item=ITEMS[slot.id]; if(!item) return; const price=Math.floor(item.value*0.5);
     const row=document.createElement('div'); row.className='shop-row';
-    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}${slot.qty>1?` x${slot.qty}`:''}</div><div class="shop-stat">${slot.equipped?'[equipped]':''}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${slot.equipped?'disabled':''} onclick="sellItem(${idx});updateShopScreen()">Sell</button>`;
+    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}${slot.qty>1?` x${slot.qty}`:''}</div><div class="shop-stat">${slot.equipped?'[equipped]':''}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${slot.equipped?'disabled':''} onclick="sellItem(${idx});updateShopScreen()">Verkaufen</button>`;
     list.appendChild(row);
   });
 }
@@ -2054,7 +2068,7 @@ function updateShopScreen(){
     if(item.hp)    parts.push(`Heilt ${item.hp}`);
     if(item.mp)    parts.push(`+${item.mp}MP`);
     const row=document.createElement('div'); row.className='shop-row';
-    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Buy</button>`;
+    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Kaufen</button>`;
     buy.appendChild(row);
   });
   // runes section
@@ -2069,7 +2083,7 @@ function updateShopScreen(){
     if(item.maxMp) parts.push(`MP+${item.maxMp}`);
     if(item.critBonus) parts.push(`+${Math.round(item.critBonus*100)}%Krit`);
     const row=document.createElement('div'); row.className='shop-row';
-    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Buy</button>`;
+    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Kaufen</button>`;
     buy.appendChild(row);
   });
   // pets section
@@ -2083,7 +2097,7 @@ function updateShopScreen(){
     if(item.xpBonus) parts.push(`XP+${Math.round(item.xpBonus*100)}%`);
     if(item.goldBonus) parts.push(`Gold+${Math.round(item.goldBonus*100)}%`);
     const row=document.createElement('div'); row.className='shop-row';
-    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Buy</button>`;
+    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Kaufen</button>`;
     buy.appendChild(row);
   });
   if(G.shopMode==='sell') renderShopSell();
@@ -3305,7 +3319,89 @@ function init(){
   if(srEl) srEl.style.display=G.speedrun.active?'block':'none';
   if(G.speedrun.active) window._speedrunInterval=setInterval(updateSpeedrunTimer,1000);
   const abBtn=document.getElementById('auto-battle-btn');
-  if(abBtn) abBtn.textContent=G.autoBattle?'⚡ Auto: ON':'⚡ Auto: OFF';
+  if(abBtn) abBtn.textContent=G.autoBattle?'⚡ Auto: AN':'⚡ Auto: AUS';
+  initSwipeGestures();
+  initInstallBanner();
+  MUSIC.play(G.area.id);
+}
+
+// ── SWIPE NAVIGATION ─────────────────────────────────────────
+function initSwipeGestures() {
+  const SCREENS = ['explore','quests','char','shop'];
+  let tx=0, ty=0;
+  const screens = document.getElementById('screens');
+  if (!screens) return;
+  screens.addEventListener('touchstart', e => { tx=e.touches[0].clientX; ty=e.touches[0].clientY; }, {passive:true});
+  screens.addEventListener('touchend', e => {
+    if (G.combat) return;
+    const dx=e.changedTouches[0].clientX-tx;
+    const dy=e.changedTouches[0].clientY-ty;
+    if (Math.abs(dx)<Math.abs(dy)*1.5 || Math.abs(dx)<50) return;
+    const cur=SCREENS.findIndex(s=>document.getElementById('screen-'+s)?.classList.contains('active'));
+    const next=dx<0?Math.min(cur+1,SCREENS.length-1):Math.max(cur-1,0);
+    if (next!==cur) { const btns=document.querySelectorAll('.nav-btn'); showScreen(SCREENS[next], btns[next]); }
+  }, {passive:true});
+}
+
+// ── PWA INSTALL BANNER ────────────────────────────────────────
+function initInstallBanner() {
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); deferredPrompt = e;
+    const b = document.createElement('div'); b.id='install-banner';
+    b.innerHTML=`<span style="flex:1">📲 Als App installieren!</span><button onclick="doInstall()">Installieren</button><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--dim);font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;padding:4px">✖</button>`;
+    document.body.appendChild(b);
+    window._installPrompt = deferredPrompt;
+  });
+}
+function doInstall() {
+  if (window._installPrompt) { window._installPrompt.prompt(); document.getElementById('install-banner')?.remove(); }
+}
+
+// ── ENDGAME CHALLENGER MODE ───────────────────────────────────
+function showChallenger() {
+  const p = G.p; const cleared = G.kingDefeated;
+  if (!cleared) { showOverlay('❌ Besiege zuerst den Shadow King!'); return; }
+  const tier = Math.max(0, (p.prestige||0));
+  const challenges = [
+    { name:'Wächter-Prüfung',  mult:1.5, xp:2000, gold:1000, reward:'chaos_crystal' },
+    { name:'Schattenwächter',  mult:2.0, xp:3500, gold:1800, reward:'void_robe' },
+    { name:'Dimensionsherr',   mult:3.0, xp:5000, gold:2500, reward:'chaos_blade' },
+    { name:'Ewiger Champion',  mult:4.0, xp:8000, gold:4000, reward:'crystal_crown' },
+    { name:'Legendärer Titan', mult:6.0, xp:12000,gold:6000, reward:'celestial_bow' },
+  ];
+  const rows = challenges.map((c,i)=>{
+    const done=(G.challengerCleared||0)>i;
+    return `<div class="challenger-row${done?' challenger-active':''}">
+      <span style="color:${done?'var(--green)':'var(--text)'}">${done?'✅ ':''} ${c.name}</span>
+      <button onclick="startChallengerFight(${i})" ${done?'disabled':''} style="background:${done?'var(--panel)':'var(--accent)'};color:${done?'var(--dim)':'var(--bg)'};border:none;padding:5px 8px;font-family:'Press Start 2P',monospace;font-size:5px;cursor:${done?'default':'pointer'}">⚔ ${done?'Klar':'Kämpfen'}</button>
+    </div>`;
+  }).join('');
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:90vw;text-align:center">
+    <div style="color:var(--accent);font-size:9px;margin-bottom:4px">⚔ HERAUSFORDERER</div>
+    <div style="font-size:6px;color:var(--dim);margin-bottom:12px">Endgame-Bosse für Legendäre Belohnungen</div>
+    ${rows}
+    <br><button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function startChallengerFight(idx) {
+  document.getElementById('overlay')?.remove();
+  const CHALL=[
+    { foe:'dark_mage',   mult:1.5 },
+    { foe:'chaos_dragon',mult:2.0 },
+    { foe:'void_lich',   mult:3.0 },
+    { foe:'blizzard_dragon',mult:4.0 },
+    { foe:'deep_kraken', mult:6.0 },
+  ];
+  const c=CHALL[idx]; if(!c) return;
+  startCombat(c.foe, true);
+  G.combat._challengerIdx=idx;
+  G.combat._challengerMult=c.mult;
+  addLog(`⚔ Herausforderer Stufe ${idx+1}!`);
 }
 
 init();
