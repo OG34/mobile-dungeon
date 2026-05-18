@@ -1562,7 +1562,7 @@ function startCombat(foeId, isBoss) {
 
 function startFinalBoss() {
   if (G.p.level < 20) { showOverlay('❌ Du musst LV 20 sein!'); return; }
-  G.combat = { ...SHADOW_KING, hp:SHADOW_KING.hp, maxHp:SHADOW_KING.maxHp, playerStatus:[], enemyStatus:[], combo:0 };
+  G.combat = { ...SHADOW_KING, hp:SHADOW_KING.hp, maxHp:SHADOW_KING.maxHp, playerStatus:[], enemyStatus:[], combo:0, isBoss:true };
   addLog('👑 DER SHADOW KING ERWACHT!');
   enterCombatScreen('shadow_king', false, true);
 }
@@ -1745,7 +1745,7 @@ function showCombatItems(){
   const picker=document.getElementById('combat-item-picker'); picker.innerHTML='';
   const cons=G.p.inv.filter(s=>ITEMS[s.id]&&!ITEMS[s.id].slot);
   if(!cons.length){picker.innerHTML='<div style="font-size:7px;color:var(--dim);padding:8px;text-align:center">Keine Tränke.</div>';}
-  else{ G.p.inv.forEach((slot,idx)=>{const item=ITEMS[slot.id];if(!item||item.slot)return;const btn=document.createElement('button');btn.className='skill-btn';const desc=item.buffAtk?`+${item.buffAtk}ATK ${item.buffLeft}K`:`${item.hp?'+'+item.hp+'HP':''} ${item.mp?'+'+item.mp+'MP':''}`.trim();btn.innerHTML=`<span>${item.icon} ${item.name}${slot.qty>1?` x${slot.qty}`:''}</span><span class="skill-unlock">${desc}</span>`;btn.onclick=()=>useItemInCombat(idx);picker.appendChild(btn);}); }
+  else{ G.p.inv.forEach((slot,idx)=>{const item=ITEMS[slot.id];if(!item||item.slot)return;const btn=document.createElement('button');btn.className='skill-btn';const desc=item.buffAtk?`+${item.buffAtk}ATK ${item.buffLeft}K`:item.buffDef?`+${item.buffDef}DEF ${item.buffLeft}K`:`${item.hp?'+'+item.hp+'HP':''} ${item.mp?'+'+item.mp+'MP':''}`.trim();btn.innerHTML=`<span>${item.icon} ${item.name}${slot.qty>1?` x${slot.qty}`:''}</span><span class="skill-unlock">${desc}</span>`;btn.onclick=()=>useItemInCombat(idx);picker.appendChild(btn);}); }
   picker.classList.add('open'); document.getElementById('btn-items').textContent='🎒 Items ▼';
 }
 function hideCombatItems(){document.getElementById('combat-item-picker').classList.remove('open');const b=document.getElementById('btn-items');if(b)b.textContent='🎒 Items';}
@@ -1854,7 +1854,7 @@ function combatWin() {
   }
   combatLog(`🎉 Sieg! +${e.xp} XP  +${g} Gold`);
   tickQuestKill(e.id); tickDailyKill(e.id);
-  for(const drop of e.drops){ if(Math.random()<drop.p){ addInv(drop.id); const it=ITEMS[drop.id]; combatLog(`📦 ${it.rarity==='legendary'?'🌟':it.rarity==='epic'?'💜':''} ${it.name}!`); } }
+  for(const drop of (e.drops||[])){ if(Math.random()<drop.p){ addInv(drop.id); const it=ITEMS[drop.id]; if(it) combatLog(`📦 ${it.rarity==='legendary'?'🌟':it.rarity==='epic'?'💜':''} ${it.name}!`); } }
   G.battleStats.won++;
   const xp=e.xp; const isKing=e.isKing;
   const isDungeon=!!G.dungeon; const isArena=!!G.arena; const isBossRush=!!G.bossRush;
@@ -2249,17 +2249,35 @@ function showHighscore() {
 
 // ── STATS SCREEN ──────────────────────────────────────────────
 function showStats() {
-  const bs=G.battleStats; const s=stats();
+  const bs=G.battleStats; const s=stats(); const p=G.p;
+  const h=G.dayNight; const isNight=h>=21||h<5;
+  const timeStr=`${h.toString().padStart(2,'0')}:00 ${isNight?'🌙':'☀️'}`;
+  const row=(k,v,c='var(--accent)')=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:7px"><span style="color:var(--dim)">${k}</span><span style="color:${c}">${v}</span></div>`;
   const rows=[
-    ['Schaden ausgeteilt',bs.dmgDealt],['Schaden erhalten',bs.dmgTaken],
-    ['Höchster Krit',bs.highCrit],['Kämpfe gewonnen',bs.won],['Mal geflohen',bs.fled],
-    ['Gesamt ATK',s.atk],['Gesamt DEF',s.def],['Gesamt MaxHP',s.maxHp],['Gesamt MaxMP',s.maxMp],
-    ['Achievements',`${G.achievements.length}/${ACHIEVEMENTS.length}`],
-    ['Dungeon Clears',G.dungeonClears],
-  ].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:7px"><span style="color:var(--dim)">${k}</span><span style="color:var(--accent)">${v}</span></div>`).join('');
+    row('── KAMPF ──','','var(--dim)'),
+    row('Schaden ausgeteilt',bs.dmgDealt),
+    row('Schaden erhalten',bs.dmgTaken),
+    row('Höchster Krit',bs.highCrit),
+    row('Kämpfe gewonnen',bs.won),
+    row('Mal geflohen',bs.fled),
+    row('── WERTE ──','','var(--dim)'),
+    row('ATK / DEF',`${s.atk} / ${s.def}`),
+    row('MaxHP / MaxMP',`${s.maxHp} / ${s.maxMp}`),
+    row('Krit-Chance',`${((0.15+(s.critBonus||0))*100).toFixed(0)}%`),
+    row('Lifesteal',s.lifesteal>0?`${(s.lifesteal*100).toFixed(0)}%`:'–'),
+    row('Ausweichen',s.evasion>0?`${(s.evasion*100).toFixed(0)}%`:'–'),
+    row('── WELT ──','','var(--dim)'),
+    row('Uhrzeit',timeStr,isNight?'#aaccff':'#ffcc44'),
+    row('Ressourcen',`🪵${G.resources.wood} 🪨${G.resources.ore} 🌿${G.resources.herbs}`),
+    row('Gilde',G.guild?`${G.guild.name} (${GUILD_RANKS[Math.min(G.guild.rank,5)]})`:'–'),
+    row('Schritte',G.steps),
+    row('Dungeon Clears',G.dungeonClears),
+    row('Achievements',`${G.achievements.length}/${ACHIEVEMENTS.length}`),
+    row('Talent-Punkte',`${p.talentPoints} verfügbar`),
+  ].join('');
   const wrap=document.createElement('div'); wrap.id='overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
-  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:90vw;max-height:80vh;overflow-y:auto">
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;max-width:92vw;max-height:85vh;overflow-y:auto">
     📊 STATISTIK<br><br><div style="text-align:left">${rows}</div><br>
     <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖</button>
   </div>`;
@@ -2459,7 +2477,7 @@ function identifyItem(idx) {
   const slot=G.p.inv[idx]; if(!slot||!slot._unidentified) return;
   const scrollIdx=G.p.inv.findIndex(i=>i.id==='id_scroll');
   if(scrollIdx===-1){ showOverlay('❌ Keine Schriftrolle!\nKaufe eine im Shop.'); return; }
-  const sc=G.p.inv[scrollIdx]; sc.qty=(sc.qty||1)-1; if(sc.qty<=0) G.p.inv.splice(scrollIdx>idx?scrollIdx:scrollIdx,1);
+  const sc=G.p.inv[scrollIdx]; sc.qty=(sc.qty||1)-1; if(sc.qty<=0) G.p.inv.splice(scrollIdx,1);
   delete slot._unidentified;
   const item=ITEMS[slot.id];
   addLog(`🔍 Enthüllt: ${item.icon} ${item.name}! (${item.rarity})`);
@@ -2468,10 +2486,35 @@ function identifyItem(idx) {
 
 function useItem(idx){
   const p=G.p; const slot=p.inv[idx]; if(!slot) return; const item=ITEMS[slot.id]; if(!item) return;
+  if(slot.id==='id_scroll'){
+    const unids=p.inv.map((s,i)=>({s,i})).filter(({s})=>s._unidentified);
+    if(!unids.length){showOverlay('❌ Keine unbekannten Items!');return;}
+    if(unids.length===1){identifyItem(unids[0].i);document.getElementById('overlay')?.remove();refresh();return;}
+    const wrap=document.createElement('div');wrap.id='overlay';
+    wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+    const rows=unids.map(({s,i})=>`<button onclick="identifyItem(${i});document.getElementById('overlay').remove();refresh()" style="display:block;width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:5px;text-align:left">❓ ??? [${ITEMS[s.id]?.slot||'?'}]</button>`).join('');
+    wrap.innerHTML=`<div id="overlay-box" style="min-width:250px;text-align:center">📜 Welches Item identifizieren?<br><br>${rows}<button onclick="document.getElementById('overlay').remove()" style="background:none;border:none;color:var(--dim);font-family:inherit;font-size:7px;cursor:pointer">✖</button></div>`;
+    document.body.appendChild(wrap);
+    return;
+  }
   if(!item.slot){
     const s=stats();
-    if(item.hp) p.hp=Math.min(s.maxHp,p.hp+(item.hp||0));
+    if(item.hp) { p.hp=Math.min(s.maxHp,p.hp+(item.hp||0)); SFX.heal(); }
     if(item.mp) p.mp=Math.min(s.maxMp,p.mp+(item.mp||0));
+    if(item.buffAtk){
+      p.buffs=p.buffs||[];
+      const ex=p.buffs.find(b=>b.type==='atk');
+      if(ex) ex.left=Math.max(ex.left,item.buffLeft);
+      else p.buffs.push({type:'atk',val:item.buffAtk,left:item.buffLeft});
+      addLog(`⚗ +${item.buffAtk} ATK für ${item.buffLeft} Kämpfe!`);
+    }
+    if(item.buffDef){
+      p.buffs=p.buffs||[];
+      const ex=p.buffs.find(b=>b.type==='def');
+      if(ex) ex.left=Math.max(ex.left,item.buffLeft);
+      else p.buffs.push({type:'def',val:item.buffDef,left:item.buffLeft});
+      addLog(`🍃 +${item.buffDef} DEF für ${item.buffLeft} Kämpfe!`);
+    }
     slot.qty=(slot.qty||1)-1; if(slot.qty<=0) p.inv.splice(idx,1); addLog(`🧪 ${item.name} benutzt!`);
   } else {
     const es=item.slot;
@@ -2521,15 +2564,20 @@ function updateInvScreen(){
 
 function showConsumableMenu(idx) {
   const slot=G.p.inv[idx]; if(!slot) return; const item=ITEMS[slot.id]; if(!item) return;
-  const btnStyle='display:block;width:100%;background:var(--panel);border:1px solid var(--border);padding:8px;font-family:\'Press Start 2P\',monospace;font-size:6px;cursor:pointer;margin-bottom:6px';
+  const btnStyle='display:block;width:100%;background:var(--panel);border:1px solid var(--border);padding:8px;font-family:\'Press Start 2P\',monospace;font-size:6px;cursor:pointer;margin-bottom:6px;text-align:left';
+  const desc=item.hp?`Heilt ${item.hp} HP`:item.buffAtk?`+${item.buffAtk} ATK (${item.buffLeft} Kämpfe)`:item.buffDef?`+${item.buffDef} DEF (${item.buffLeft} Kämpfe)`:item.mp?`+${item.mp} MP`:item.id==='id_scroll'?'Identifiziert unbekannte Items':'';
+  const sellPrice=Math.floor(item.value*0.5);
+  const isScroll=item.id==='id_scroll';
   const wrap=document.createElement('div'); wrap.id='overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:100';
   wrap.innerHTML=`<div id="overlay-box" style="min-width:240px;max-width:90vw;text-align:center">
-    ${item.icon} ${item.name}<br><br>
+    <span style="font-size:18px">${item.icon}</span><br>
+    <span style="color:var(--accent)">${item.name}</span>${slot.qty>1?`<span style="font-size:6px;color:var(--dim)"> ×${slot.qty}</span>`:''}<br>
+    <span style="font-size:6px;color:var(--dim)">${desc}</span><br><br>
     <button onclick="useItem(${idx});document.getElementById('overlay').remove()" style="${btnStyle};color:var(--green)">🧪 Benutzen</button>
-    <button onclick="recycleItem(${idx})" style="${btnStyle};color:#ffaa44">♻ Zerlegen</button>
-    <button onclick="sellItem(${idx});document.getElementById('overlay').remove();refresh()" style="${btnStyle};color:var(--dim)">💱 Verkaufen</button>
-    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:none;color:var(--dim);font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖</button>
+    ${!isScroll?`<button onclick="recycleItem(${idx})" style="${btnStyle};color:#ffaa44">♻ Zerlegen → Ressourcen</button>`:''}
+    <button onclick="sellItem(${idx});document.getElementById('overlay').remove();refresh()" style="${btnStyle};color:var(--dim)">💱 Verkaufen (${sellPrice}🪙)</button>
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:none;color:var(--dim);font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;margin-top:4px">✖</button>
   </div>`;
   document.body.appendChild(wrap);
 }
