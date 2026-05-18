@@ -927,16 +927,16 @@ function bgBat(ctx, x, y) {
 
 // ── AREAS ───────────────────────────────────────────────────
 const AREAS = [
-  { id:'forest',    name:'Enchanted Forest', icon:'🌲', min:1,  max:4,  foes:['slime','rat','goblin','wolf'] },
-  { id:'cave',      name:'Goblin Caves',     icon:'🦇', min:3,  max:7,  foes:['goblin','bat','troll','rat'] },
-  { id:'dungeon',   name:'Dark Dungeon',     icon:'⛏',  min:6,  max:11, foes:['skeleton','goblin','wolf','bat'] },
-  { id:'graveyard', name:'Cursed Graveyard', icon:'💀', min:9,  max:15, foes:['skeleton','zombie','ghost'] },
-  { id:'castle',    name:'Shadow Castle',    icon:'🏰', min:13, max:20, foes:['ghost','demon','dragon'] },
-  { id:'volcanic',  name:'Volcanic Ruins',    icon:'🌋', min:21, max:28, foes:['fire_elemental','lava_golem','phoenix'] },
-  { id:'void',      name:'Void Realm',        icon:'🌀', min:29, max:50, foes:['void_shade','shadow_spider','chaos_dragon'] },
+  { id:'forest',    name:'Enchanted Forest', icon:'🌲', min:1,  max:4,  foes:['slime','rat','goblin','wolf','mushroom_man','giant_spider'] },
+  { id:'cave',      name:'Goblin Caves',     icon:'🦇', min:3,  max:7,  foes:['goblin','bat','troll','rat','lizardman','dire_wolf'] },
+  { id:'dungeon',   name:'Dark Dungeon',     icon:'⛏',  min:6,  max:11, foes:['skeleton','goblin','wolf','bat','dark_mage'] },
+  { id:'graveyard', name:'Cursed Graveyard', icon:'💀', min:9,  max:15, foes:['skeleton','zombie','ghost','vampire','wraith'] },
+  { id:'castle',    name:'Shadow Castle',    icon:'🏰', min:13, max:20, foes:['ghost','demon','dragon','corrupted_knight','dark_sorcerer'] },
+  { id:'volcanic',  name:'Volcanic Ruins',    icon:'🌋', min:21, max:28, foes:['fire_elemental','lava_golem','phoenix','magma_titan'] },
+  { id:'void',      name:'Void Realm',        icon:'🌀', min:29, max:50, foes:['void_shade','shadow_spider','chaos_dragon','void_lich'] },
   { id:'underwater',name:'Abyssal Kingdom',   icon:'🌊', min:51, max:65, foes:['sea_serpent','coral_crab','deep_kraken'] },
   { id:'sky',       name:'Sky Fortress',      icon:'⛅', min:66, max:80, foes:['storm_hawk','wind_giant','thunder_wyrm'] },
-  { id:'ice',       name:'Ice Tundra',        icon:'❄',  min:81, max:99, foes:['ice_golem','frost_troll','blizzard_dragon'] },
+  { id:'ice',       name:'Ice Tundra',        icon:'❄',  min:81, max:99, foes:['ice_golem','frost_troll','blizzard_dragon','glacial_spirit'] },
 ];
 
 const FOES = {
@@ -966,6 +966,19 @@ const FOES = {
   ice_golem:      { name:'Ice Golem',      icon:'🧊', sprite:'ice_golem',      hp:700, atk:120,def:40, xp:1400,gold:[280,720],status:{type:'stun',chance:.30,turns:1,value:0},   element:'ice',  weakTo:'fire' },
   frost_troll:    { name:'Frost Troll',    icon:'❄', sprite:'frost_troll',    hp:820, atk:130,def:35, xp:1600,gold:[320,850],status:{type:'poison',chance:.35,turns:3,value:40}, element:'ice',  weakTo:'fire' },
   blizzard_dragon:{ name:'Blizzard Dragon',icon:'🌨', sprite:'blizzard_dragon',hp:1000,atk:150,def:45, xp:2000,gold:[450,1200],status:{type:'burn',chance:.50,turns:4,value:45},  element:'ice',  weakTo:'fire' },
+  // NEW ENEMIES
+  mushroom_man: { name:'Pilzmann',    icon:'🍄', sprite:'mushroom_man', hp:20, atk:5,  def:1,  xp:14,  gold:[2,7],   status:{type:'poison',chance:.30,turns:2,value:4},  element:'nature' },
+  dire_wolf:    { name:'Direwolf',    icon:'🐺', sprite:'wolf', palette:['#555555','#222222','#888888','#111111','#dd2222','#cccccc'], hp:38, atk:13, def:3,  xp:30,  gold:[4,12],  status:null },
+  giant_spider: { name:'Riesenspinne',icon:'🕷', sprite:'shadow_spider', palette:['#226600','#113300','#449922','#111111','#88ff44','#aabbaa'], hp:30, atk:10, def:2,  xp:28,  gold:[3,10],  status:{type:'poison',chance:.40,turns:2,value:5}, element:'nature' },
+  lizardman:    { name:'Echsenmann',  icon:'🦎', sprite:'goblin', palette:['#336633','#224422','#aabb88','#cc5522','#888844','#556633','#ddcc66','#111111'], hp:35, atk:11, def:4,  xp:32,  gold:[5,14],  status:null },
+  dark_mage:    { name:'Dunkelmagier',icon:'🧙', sprite:'dark_mage', hp:48, atk:16, def:2,  xp:55,  gold:[10,28],  status:{type:'burn',chance:.35,turns:2,value:8},   element:'void' },
+  vampire:      { name:'Vampir',      icon:'🧛', sprite:'vampire', hp:55, atk:17, def:5,  xp:65,  gold:[12,32],  status:{type:'poison',chance:.25,turns:3,value:7},  element:'undead', weakTo:'light' },
+  wraith:       { name:'Geist-Wraith',icon:'👻', sprite:'ghost', palette:['#8855cc','#5522aa','#bb88ff','#222222','#cc44ff','#ffffff'], hp:58, atk:20, def:8,  xp:75,  gold:[14,38],  status:{type:'stun',chance:.30,turns:1,value:0}, element:'undead', weakTo:'light' },
+  corrupted_knight:{ name:'Gefallener Ritter',icon:'⚔', sprite:'skeleton', palette:['#444466','#2222aa','#6666cc','#111133','#8888dd'], hp:80, atk:22, def:12, xp:100, gold:[20,60],  status:{type:'stun',chance:.20,turns:1,value:0} },
+  dark_sorcerer:{ name:'Dunkelzauberer',icon:'🔮', sprite:'dark_mage', palette:['#c8b0a0','#111111','#1a0030','#3a0060','#ffaa00','#ff44aa','#2a0a00'], hp:72, atk:25, def:6,  xp:110, gold:[22,55],  status:{type:'burn',chance:.45,turns:2,value:12}, element:'void' },
+  magma_titan:  { name:'Magma-Titan', icon:'🌋', sprite:'lava_golem', palette:['#cc2200','#881100','#ff6600','#ffaa00','#ff4400','#440000'], hp:220, atk:38, def:18, xp:280, gold:[40,100], status:{type:'burn',chance:.50,turns:3,value:18}, element:'fire', weakTo:'ice' },
+  void_lich:    { name:'Void-Lich',   icon:'💀', sprite:'void_lich', hp:200, atk:55, def:14, xp:380, gold:[65,160], status:{type:'poison',chance:.45,turns:3,value:22}, element:'void', weakTo:'light' },
+  glacial_spirit:{ name:'Eisgeist',   icon:'❄', sprite:'ghost', palette:['#aaddff','#6699cc','#ddeeff','#222244','#aaccff','#ffffff'], hp:780, atk:125,def:36, xp:1450,gold:[290,740], status:{type:'stun',chance:.35,turns:1,value:0}, element:'ice', weakTo:'fire' },
 };
 
 const DROPS = {
@@ -996,6 +1009,19 @@ const DROPS = {
   ice_golem:      [{id:'elixir',p:.75},{id:'id_scroll',p:.45},{id:'iron_gloves',p:.15},{id:'resist_ring',p:.12}],
   frost_troll:    [{id:'elixir',p:.80},{id:'id_scroll',p:.50},{id:'void_boots',p:.12},{id:'shadow_helm',p:.08}],
   blizzard_dragon:[{id:'chaos_blade',p:.50},{id:'void_robe',p:.45},{id:'chaos_crystal',p:.40},{id:'elixir',p:.90},{id:'id_scroll',p:.60},{id:'resist_ring',p:.25}],
+  // new enemy drops
+  mushroom_man:   [{id:'herbs',p:.55},{id:'potion',p:.15}],
+  dire_wolf:      [{id:'potion',p:.22},{id:'leather',p:.10}],
+  giant_spider:   [{id:'potion',p:.20},{id:'poison_fang',p:.10}],
+  lizardman:      [{id:'potion',p:.20},{id:'iron_sword',p:.06},{id:'leather',p:.08}],
+  dark_mage:      [{id:'mp_rune',p:.12},{id:'magic_staff',p:.08},{id:'elixir',p:.25},{id:'mp_potion',p:.20}],
+  vampire:        [{id:'elixir',p:.30},{id:'blood_pendant',p:.10},{id:'magic_ring',p:.15}],
+  wraith:         [{id:'elixir',p:.25},{id:'void_rune',p:.06},{id:'magic_ring',p:.12}],
+  corrupted_knight:[{id:'elixir',p:.35},{id:'runed_sword',p:.08},{id:'iron_shield',p:.12},{id:'chain_mail',p:.10}],
+  dark_sorcerer:  [{id:'elixir',p:.40},{id:'cursed_blade',p:.05},{id:'crit_rune',p:.12},{id:'mage_robe',p:.10}],
+  magma_titan:    [{id:'elixir',p:.45},{id:'berserker_axe',p:.06},{id:'atk_rune',p:.12},{id:'berserker_plate',p:.05}],
+  void_lich:      [{id:'elixir',p:.50},{id:'void_gloves',p:.08},{id:'void_rune',p:.10},{id:'chaos_crystal',p:.06},{id:'crystal_crown',p:.04}],
+  glacial_spirit: [{id:'elixir',p:.50},{id:'crystal_crown',p:.06},{id:'def_rune',p:.15},{id:'shadow_boots',p:.08}],
 };
 
 const ITEMS = {
@@ -1058,6 +1084,37 @@ const ITEMS = {
   rare_fish:     { name:'Seltener Fisch', icon:'🐠', slot:null, hp:0,  value:90, buyable:false, rarity:'rare'   },
   // Artifact
   soul_gem: { name:'Seelen-Stein', icon:'💎', slot:'acc', atk:2, def:2, artifact:true, value:600, buyable:false, rarity:'legendary' },
+  // ── NEW WEAPONS ─────────────────────────────────────────────
+  bone_dagger:    { name:'Knochendolch',      icon:'🗡', slot:'weapon', wType:'dagger', atk:8,  critBonus:0.12,               value:90,   buyable:false, rarity:'uncommon'  },
+  runed_sword:    { name:'Runenschwert',       icon:'⚔', slot:'weapon', atk:16, critBonus:0.08,                               value:260,  buyable:true,  rarity:'rare'      },
+  berserker_axe:  { name:'Berserker-Axt',      icon:'🪓', slot:'weapon', wType:'axe',  atk:26, def:-3,                       value:480,  buyable:false, rarity:'epic'      },
+  plague_scythe:  { name:'Pest-Sense',         icon:'⚔', slot:'weapon', atk:20,                                              value:520,  buyable:false, rarity:'epic'      },
+  cursed_blade:   { name:'Verfluchte Klinge',  icon:'🌑', slot:'weapon', atk:22, lifesteal:0.18,                              value:580,  buyable:false, rarity:'epic'      },
+  celestial_bow:  { name:'Himmels-Bogen',      icon:'🏹', slot:'weapon', wType:'bow',  atk:35,                               value:1200, buyable:false, rarity:'legendary' },
+  poison_fang:    { name:'Giftfang',           icon:'🦷', slot:'weapon', atk:6,                                              value:120,  buyable:false, rarity:'uncommon'  },
+  // ── NEW ARMOR ───────────────────────────────────────────────
+  chain_mail:     { name:'Kettenhemd',         icon:'🔗', slot:'armor',  atk:0,  def:7,                                      value:110,  buyable:true,  rarity:'uncommon'  },
+  mage_robe:      { name:'Magiermantel',       icon:'👘', slot:'armor',  atk:0,  def:5,  maxMp:20,                           value:140,  buyable:true,  rarity:'uncommon'  },
+  dragon_scale:   { name:'Drachenschuppe',     icon:'🔴', slot:'armor',  atk:0,  def:30, maxHp:20,                           value:1100, buyable:false, rarity:'legendary' },
+  berserker_plate:{ name:'Berserker-Platte',   icon:'⚫', slot:'armor',  atk:8,  def:16,                                    value:600,  buyable:false, rarity:'epic'      },
+  // ── NEW ACCESSORIES ─────────────────────────────────────────
+  speed_ring:     { name:'Schnelligkeitsring', icon:'💠', slot:'acc',   evasion:0.12,                                        value:220,  buyable:true,  rarity:'rare'      },
+  mana_crystal:   { name:'Mana-Kristall',      icon:'🔷', slot:'acc',   maxMp:40,                                            value:280,  buyable:true,  rarity:'rare'      },
+  blood_pendant:  { name:'Blut-Amulett',       icon:'🔴', slot:'acc',   lifesteal:0.12,                                      value:450,  buyable:false, rarity:'epic'      },
+  battle_medallion:{ name:'Kampf-Medaillon',   icon:'🏅', slot:'acc',   atk:8,  critBonus:0.05,                              value:380,  buyable:true,  rarity:'rare'      },
+  // ── NEW HELMETS ─────────────────────────────────────────────
+  horned_helm:    { name:'Gehörnter Helm',     icon:'🪖', slot:'helm',  atk:6,  def:6,                                       value:280,  buyable:false, rarity:'rare'      },
+  crystal_crown:  { name:'Kristallkrone',      icon:'👑', slot:'helm',  def:10, maxMp:30, critBonus:0.07,                    value:750,  buyable:false, rarity:'legendary' },
+  // ── NEW GLOVES ──────────────────────────────────────────────
+  claw_gauntlets: { name:'Klauenhandschuhe',   icon:'🧤', slot:'gloves',atk:8,  critBonus:0.12,                              value:320,  buyable:false, rarity:'rare'      },
+  battle_gauntlets:{ name:'Kampfhandschuhe',   icon:'🥊', slot:'gloves',atk:10, def:3,                                      value:200,  buyable:true,  rarity:'uncommon'  },
+  // ── NEW BOOTS ───────────────────────────────────────────────
+  shadow_boots:   { name:'Schattenstiefel',    icon:'👟', slot:'boots', def:6,  evasion:0.10,                               value:280,  buyable:false, rarity:'rare'      },
+  storm_boots:    { name:'Sturmstiefel',       icon:'⚡', slot:'boots', def:4,  maxMp:15,                                   value:160,  buyable:true,  rarity:'uncommon'  },
+  // ── NEW CONSUMABLES ─────────────────────────────────────────
+  mega_potion:    { name:'Mega-Trank',         icon:'🧪', slot:null,    hp:150,                                              value:120,  buyable:false, rarity:'rare'      },
+  mp_potion:      { name:'Mana-Trank',         icon:'💧', slot:null,    mp:50,                                               value:60,   buyable:true,  rarity:'uncommon'  },
+  revive_gem:     { name:'Wiederbelebungsstein',icon:'💎', slot:null,   hp:999, mp:999,                                      value:200,  buyable:true,  rarity:'rare'      },
 };
 
 const SKILLS = [
@@ -1186,6 +1243,16 @@ const NPC_MERCHANT_LINES = [
   '🧙 "Ps-st... ich hab was Besonderes für dich."',
   '🧙 "Kaufst du oder schaust du nur?"',
   '🧙 "Das Schwert? Er braucht es nicht mehr."',
+  '🧙 "Zehn Helden waren hier. Du bist der einzige, der noch lebt."',
+  '🧙 "Das Amulett ist ein bisschen verflucht. ...Aber günstig!"',
+  '🧙 "Eile dich, die Preise steigen bald!"',
+  '🧙 "Dieses Item ist unbezahlbar... Für dich: 50% Rabatt."',
+  '🧙 "Den letzten Käufer hab ich nie wiedergesehen. Ich frag lieber nicht."',
+  '🧙 "Frisch gestohlen, äh, gefunden im Wald!"',
+  '🧙 "Ich schwöre, diese Klinge singt bei Vollmond."',
+  '🧙 "Wer nicht kauft, bereut es. Wer kauft, bereut es vielleicht auch – aber mit besseren Items!"',
+  '🧙 "Der Drache? Toter Drache. Sehr gute Ware."',
+  '🧙 "Ich hab nichts geklaut. Alles... ehm... gefunden. Ja."',
 ];
 const NPC_STRANGER_LINES = [
   '🤫 "Hüte dich vor dem Schatten..."',
@@ -1193,6 +1260,60 @@ const NPC_STRANGER_LINES = [
   '🤫 "Der König wird dich töten. Sei vorsichtig."',
   '🤫 "Folge dem Mondlicht... und du findest deinen Weg."',
   '🤫 "Ich habe tausend Helden gesehen. Keiner kehrte zurück."',
+  '🤫 "Das Schwert tötet den Mann, nicht der Mann das Schwert."',
+  '🤫 "Die Stille vor dem Kampf ist lauter als der Kampf selbst."',
+  '🤫 "Im Grab liegt mehr Gold als im Schatz. Und mehr Skelette."',
+  '🤫 "Trau keinem, der im Dunkeln lächelt."',
+  '🤫 "Drachen sammeln Gold. Helden sammeln Drachen. Ich sammle Weisheiten."',
+  '🤫 "Wer Angst hat, lebt länger. Aber langweiliger."',
+  '🤫 "Die Dunkelheit hat Augen. Und Hunger."',
+  '🤫 "Jedes Monster war einmal ein Held, der zu weit gegangen ist."',
+  '🤫 "Der Shadow King war ein Kind, das nie aufgehört hat zu weinen."',
+  '🤫 "Manche Dungeons verlassen dich nie – auch wenn du sie verlässt."',
+];
+const NPC_ELDER_LINES = [
+  '🧓 "Stärke wächst nicht mit dem Level. Stärke wächst mit den Narben."',
+  '🧓 "In meiner Jugend war der Shadow King noch ein freundlicher Bäcker."',
+  '🧓 "Vergiss das Gold nicht. Es ist die einzige Sprache, die alle verstehen."',
+  '🧓 "Die größten Helden gaben sich nie zufrieden. Das war ihr Untergang – und ihr Ruhm."',
+  '🧓 "Kämpf nicht, weil du stark bist. Kämpf, weil du aufgehört hast, Angst zu haben."',
+  '🧓 "Ein Held ohne Narben hat nie wirklich gekämpft."',
+  '🧓 "Ich kannte deinen Vorgänger. Er sagte auch \'kein Problem\'."',
+  '🧓 "Manchmal ist fliehen der mutigste Zug."',
+  '🧓 "Dieser Wald ist alt. Älter als die Götter. Respektiere ihn."',
+  '🧓 "Das beste Schwert ist das, das du nicht ziehen musstest."',
+];
+const NPC_GUARD_LINES = [
+  '💂 "Halt! ...Ach, du bist\'s. Weiter."',
+  '💂 "Heute Nacht keine Ruhe. Die Monster werden mutiger."',
+  '💂 "Ich stehe hier seit drei Tagen. Bitte bring mir ein Brot."',
+  '💂 "Jenseits dieser Grenze ist das Land des Shadow Kings. Viel Glück."',
+  '💂 "Kein Durchgang ohne... na, für einen Helden machen wir eine Ausnahme."',
+  '💂 "Die letzte Patrouille ist nicht zurückgekehrt. Die davor auch nicht."',
+  '💂 "Wenn du überlebst, sag mir wie."',
+  '💂 "Mein Schwert ist rostig aber mein Mut ist... auch etwas angerostet."',
+];
+const NPC_FLAVOR_LINES = [
+  '🌿 Ein Schmetterling folgt dir eine Weile.',
+  '🍄 Seltsame Pilze leuchten im Dunkeln.',
+  '💀 Ein altes Skelett lehnt friedlich an einem Baum. Kein Feind.',
+  '🌙 Der Mond wirft lange Schatten auf den Weg.',
+  '🪨 Ein merkwürdig geformter Stein – er fühlt sich warm an.',
+  '🌊 Das Rauschen von fernem Wasser ist zu hören.',
+  '🦋 Goldene Schmetterlinge tanzen um dich herum.',
+  '⚡ Statische Elektrizität liegt in der Luft.',
+  '🌸 Der Geruch von Blumen – ungewöhnlich für diesen Ort.',
+  '🔮 Eine vergessene Laterne brennt noch, niemand weiß warum.',
+  '🐦 Ein Rabenschrei in der Ferne.',
+  '💨 Ein kalter Wind flüstert deinen Namen.',
+  '🗿 Eine alte Statue blinzelt. ...Oder war das Einbildung?',
+  '🌑 Für einen Moment wird die Welt absolut still.',
+  '✨ Glitzernder Staub fällt aus dem Nichts.',
+  '🌲 Die Bäume raunen leise. Oder ist es der Wind?',
+  '🕸 Spinnweben glitzern im Mondlicht.',
+  '🦗 Das Zirpen der Grillen verstummt plötzlich.',
+  '🌫️ Dichter Nebel zieht auf – und verschwindet wieder.',
+  '🪶 Eine schwarze Feder liegt auf dem Weg.',
 ];
 
 // ── BESTIARY MILESTONES ───────────────────────────────────────
@@ -1233,6 +1354,9 @@ const CRAFTING = [
   { id:'ck_strength', label:'🍵 Stärke-Sud (Kräuter+Erz)', requires:[{id:'herbs',qty:2,res:true},{id:'ore',qty:1,res:true}], result:'strength_brew', resultQty:1, resReq:true },
   { id:'ck_bigpot',   label:'🧴 Großer Trank (Kräuter+Holz)', requires:[{id:'herbs',qty:3,res:true},{id:'wood',qty:2,res:true}], result:'big_potion', resultQty:1, resReq:true },
   { id:'ck_roast',    label:'🍃 Geröstetes Kraut (Kräuter×4)', requires:[{id:'herbs',qty:4,res:true}], result:'roasted_herb', resultQty:2, resReq:true },
+  { id:'ck_mpotion',  label:'💧 Mana-Trank ×2 (Kräuter×2)',  requires:[{id:'herbs',qty:2,res:true}], result:'mp_potion', resultQty:2, resReq:true },
+  { id:'ck_mega',     label:'🧪 Mega-Trank (Trank×3+Kräuter)',requires:[{id:'potion',qty:3},{id:'herbs',qty:2,res:true}], result:'mega_potion', resultQty:1, resReq:true },
+  { id:'c_revive',    label:'💎 Wiederbelebungsstein (Kristall+Elixier)', requires:[{id:'chaos_crystal',qty:1},{id:'elixir',qty:2}], result:'revive_gem', resultQty:1 },
 ];
 
 // ── QUESTS ──────────────────────────────────────────────────
@@ -1313,7 +1437,7 @@ const G = {
 // ── STATS ────────────────────────────────────────────────────
 function stats() {
   const p = G.p;
-  let atk=p.baseAtk, def=p.baseDef, maxHp=p.maxHp, maxMp=p.maxMp, critBonus=0, resist=0, mpRegen=0;
+  let atk=p.baseAtk, def=p.baseDef, maxHp=p.maxHp, maxMp=p.maxMp, critBonus=0, resist=0, mpRegen=0, eqEvasion=0, eqLifesteal=0;
   const equippedIds = [];
   for (const slot of ['weapon','armor','acc','pet','helm','gloves','boots']) {
     const eq = p.eq[slot];
@@ -1322,6 +1446,7 @@ function stats() {
       maxHp+=eq.maxHp||0; maxMp+=eq.maxMp||0;
       critBonus+=eq.critBonus||0; resist+=eq.resist||0;
       mpRegen+=eq.mpRegen||0;
+      eqEvasion+=eq.evasion||0; eqLifesteal+=eq.lifesteal||0;
       if (slot!=='pet') {
         const invSlot = p.inv.find(i=>i.id===eq.id&&i.equipped);
         if (invSlot) {
@@ -1372,8 +1497,8 @@ function stats() {
   if (t.hp_pct)  maxHp= Math.floor(maxHp* (1 + (t.hp_pct ||0)*0.08));
   mpRegen += (t.mp_regen||0)*2;
   return { atk, def, maxHp, maxMp, critBonus, resist, mpRegen,
-    lifesteal: (t.lifesteal||0)*0.05,
-    evasion:   (t.evasion  ||0)*0.08,
+    lifesteal: (t.lifesteal||0)*0.05 + eqLifesteal,
+    evasion:   (t.evasion  ||0)*0.08 + eqEvasion,
     goldFind:  (t.gold_find||0)*0.20,
     xpBoost:   (t.xp_boost ||0)*0.15,
     critDmg:   (t.crit_dmg ||0)*0.15,
@@ -1462,7 +1587,7 @@ const EVENTS = [
   {t:'divine',   w:2}, {t:'gather',  w:5}, {t:'pvp',     w:1},
   {t:'fish',     w:4}, {t:'inn',     w:3}, {t:'nothing', w:2},
 ];
-const CHEST_LOOT = ['potion','potion','elixir','iron_sword','leather','iron_shield','health_ring','magic_ring','battle_brew','atk_rune','def_rune','crit_rune','mp_rune'];
+const CHEST_LOOT = ['potion','potion','elixir','iron_sword','leather','iron_shield','health_ring','magic_ring','battle_brew','atk_rune','def_rune','crit_rune','mp_rune','chain_mail','mage_robe','runed_sword','mp_potion','bone_dagger','battle_gauntlets','storm_boots'];
 
 function pick(arr) {
   const total=arr.reduce((s,e)=>s+(e.w||e.p||0),0);
@@ -1512,7 +1637,8 @@ function doStep() {
   } else if (ev.t==='merchant') {
     addLog(NPC_MERCHANT_LINES[Math.floor(Math.random()*NPC_MERCHANT_LINES.length)]); showMerchant();
   } else if (ev.t==='stranger') {
-    addLog(NPC_STRANGER_LINES[Math.floor(Math.random()*NPC_STRANGER_LINES.length)]); showStranger();
+    const allNPC=[...NPC_STRANGER_LINES,...NPC_ELDER_LINES,...NPC_GUARD_LINES];
+    addLog(allNPC[Math.floor(Math.random()*allNPC.length)]); showStranger();
   } else if (ev.t==='trap') {
     const dmg=Math.max(1,Math.floor(p.hp*0.2));
     p.hp=Math.max(1,p.hp-dmg);
@@ -1556,8 +1682,7 @@ function doStep() {
   } else if (ev.t==='inn') {
     addLog('🏠 Du entdeckst ein Wirtshaus. Ausruhen?'); showInn();
   } else {
-    const msgs=['🌲 Nichts passiert.','🌫️ Seltsamer Nebel...','🍄 Bunte Pilze.','🐦 Vögel zwitschern.','💨 Der Wind flüstert.','🕸️ Überall Spinnweben.','🌙 Der Mond steht tief.'];
-    addLog(msgs[Math.floor(Math.random()*msgs.length)]);
+    addLog(NPC_FLAVOR_LINES[Math.floor(Math.random()*NPC_FLAVOR_LINES.length)]);
   }
 }
 
