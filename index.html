@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -52,7 +52,7 @@
           <canvas id="player-canvas" width="64" height="64"></canvas>
           <canvas id="weather-canvas" width="240" height="120"></canvas>
         </div>
-        <div id="step-counter">Schritte: <span id="step-val">0</span><span id="daynightlbl" style="font-size:6px;color:var(--dim);margin-left:8px">☀️ Tag</span></div>
+        <div id="step-counter">Explorations: <span id="step-val">0</span><span id="daynightlbl" style="font-size:6px;color:var(--dim);margin-left:8px">☀ Day</span></div>
 <div id="explore-quick-btns">
           <button class="qbtn" onclick="showWorldMap()"><span class="qbtn-icon">🗺</span><span class="qbtn-label">Karte</span></button>
           <button class="qbtn" onclick="showCrafting()"><span class="qbtn-icon">⚗</span><span class="qbtn-label">Craft</span></button>
@@ -61,8 +61,8 @@
           <button class="qbtn" onclick="showStoryChains()"><span class="qbtn-icon">📖</span><span class="qbtn-label">Story</span></button>
           <button class="qbtn" onclick="showMoreMenu()"><span class="qbtn-icon">☰</span><span class="qbtn-label">Mehr</span></button>
         </div>
-        <button id="boss-btn" onclick="startFinalBoss()" style="display:none">💀 SHADOW KING — ENDBOSS</button>
-        <button id="explore-btn" onclick="doStep()">⚔ ERKUNDEN</button>
+        <button id="boss-btn" onclick="startFinalBoss()" style="display:none">💀 SHADOW KING — FINAL BOSS</button>
+        <button id="explore-btn" onclick="doStep()">⚔ EXPLORE</button>
         <div id="log-box"><div id="log"></div></div>
       </div>
 
@@ -91,19 +91,19 @@
         <div id="skill-picker"></div>
         <div id="combat-item-picker"></div>
         <div id="combat-btns">
-          <button class="cbtn" id="btn-attack" onclick="combatAction('attack')">⚔ Angriff</button>
+          <button class="cbtn" id="btn-attack" onclick="combatAction('attack')">⚔ Attack</button>
           <button class="cbtn" id="btn-skills" onclick="toggleSkillPicker()">✨ Skills</button>
           <button class="cbtn" id="btn-items" onclick="toggleCombatItems()">🎒 Items</button>
-          <button class="cbtn" onclick="combatAction('flee')">🏃 Fliehen</button>
-          <button class="cbtn" id="auto-battle-btn" onclick="toggleAutoBattle()" style="grid-column:1/-1">⚡ Auto: AUS</button>
+          <button class="cbtn" onclick="combatAction('flee')">🏃 Flee</button>
+          <button class="cbtn" id="auto-battle-btn" onclick="toggleAutoBattle()" style="grid-column:1/-1">⚡ Auto: OFF</button>
         </div>
       </div>
 
       <!-- CHARACTER + INVENTORY -->
       <div id="screen-char" class="screen">
-        <h2>Charakter</h2>
+        <h2>Character</h2>
         <canvas id="char-canvas" width="64" height="64" style="margin:8px auto"></canvas>
-        <div id="stat-points-banner" style="display:none" class="sp-banner">⭐ <span id="sp-count">0</span> Stat-Punkte verfügbar!</div>
+        <div id="stat-points-banner" style="display:none" class="sp-banner">⭐ <span id="sp-count">0</span> Stat Points available!</div>
         <div class="panel">
           <div class="stat-row"><span>Level</span><span id="s-level">1</span></div>
           <div class="stat-row"><span>XP</span><span id="s-xp">0 / 100</span></div>
@@ -114,22 +114,22 @@
           <div class="stat-row"><span>MaxHP</span><span id="s-maxhp">100</span><button class="salloc" onclick="allocateStat('vit')" title="VIT +15HP">+</button></div>
           <div class="stat-row"><span>MaxMP</span><span id="s-maxmp">30</span><button class="salloc" onclick="allocateStat('wis')" title="WIS +8MP">+</button></div>
           <div class="stat-row"><span>Kills</span><span id="s-kills">0</span></div>
-          <div class="stat-row"><span>Klasse</span><span id="s-class" style="font-size:6px">–</span></div>
+          <div class="stat-row"><span>Class</span><span id="s-class" style="font-size:6px">–</span></div>
           <div class="stat-row"><span>Sets</span><span id="s-sets" style="font-size:6px;color:var(--green)">–</span></div>
-          <div class="stat-row"><span>Modus</span><span id="s-hardcore" style="font-size:6px;color:#ff4444">Normal</span></div>
+          <div class="stat-row"><span>Mode</span><span id="s-hardcore" style="font-size:6px;color:#ff4444">Normal</span></div>
         </div>
-        <h3>Ausrüstung</h3>
+        <h3>Equipment</h3>
         <div class="panel">
-          <div class="equip-row" id="eq-weapon">🗡 <span>Leer</span></div>
-          <div class="equip-row" id="eq-armor">🛡 <span>Leer</span></div>
-          <div class="equip-row" id="eq-helm">🪖 <span>Leer</span></div>
-          <div class="equip-row" id="eq-gloves">🧤 <span>Leer</span></div>
-          <div class="equip-row" id="eq-boots">👢 <span>Leer</span></div>
-          <div class="equip-row" id="eq-acc">💍 <span>Leer</span></div>
-          <div class="equip-row" id="eq-pet">🐾 <span>Leer</span></div>
+          <div class="equip-row" id="eq-weapon">🗡 <span>Empty</span></div>
+          <div class="equip-row" id="eq-armor">🛡 <span>Empty</span></div>
+          <div class="equip-row" id="eq-helm">🪖 <span>Empty</span></div>
+          <div class="equip-row" id="eq-gloves">🧤 <span>Empty</span></div>
+          <div class="equip-row" id="eq-boots">👢 <span>Empty</span></div>
+          <div class="equip-row" id="eq-acc">💍 <span>Empty</span></div>
+          <div class="equip-row" id="eq-pet">🐾 <span>Empty</span></div>
         </div>
-        <h3>Inventar <span id="inv-gold-lbl" style="color:var(--dim);font-size:7px">🪙 0</span></h3>
-        <div id="inv-tip">Item antippen zum Ausrüsten · Lang drücken zum Verkaufen</div>
+        <h3>Inventory <span id="inv-gold-lbl" style="color:var(--dim);font-size:7px">🪙 0</span></h3>
+        <div id="inv-tip">Tap to equip · Long press to sell</div>
         <div id="inv-grid"></div>
         <div style="height:8px"></div>
       </div>
@@ -137,13 +137,13 @@
       <!-- QUESTS -->
       <div id="screen-quests" class="screen">
         <div id="daily-header">
-          <h2>⭐ Tagesquests</h2>
+          <h2>⭐ Daily Quests</h2>
           <span id="daily-timer" class="dtimer"></span>
         </div>
         <div id="daily-quest-list"></div>
-        <button id="daily-bonus-btn" onclick="claimDailyBonus()" style="display:none" class="quest-claim daily-bonus">⭐ TAGESBONUS HOLEN</button>
+        <button id="daily-bonus-btn" onclick="claimDailyBonus()" style="display:none" class="quest-claim daily-bonus">⭐ CLAIM DAILY BONUS</button>
         <h2>Quests</h2>
-        <div id="quest-hint">Schließe Quests ab für Belohnungen!</div>
+        <div id="quest-hint">Complete quests for rewards!</div>
         <div id="quest-list"></div>
         <div style="height:8px"></div>
       </div>
@@ -153,8 +153,8 @@
         <h2>Shop</h2>
         <div id="shop-gold">🪙 Gold: <span id="shop-gold-val">0</span></div>
         <div class="shop-tabs">
-          <button class="stab active" onclick="shopTab('buy',this)">Kaufen</button>
-          <button class="stab" onclick="shopTab('sell',this)">Verkaufen</button>
+          <button class="stab active" onclick="shopTab('buy',this)">Buy</button>
+          <button class="stab" onclick="shopTab('sell',this)">Sell</button>
         </div>
         <div id="shop-buy-list"></div>
         <div id="shop-sell-list" style="display:none"></div>
@@ -164,13 +164,14 @@
 
     <!-- BOTTOM NAV -->
     <nav id="bottom-nav">
-      <button class="nav-btn active" onclick="showScreen('explore',this)">🗺<br><small>Erkunden</small></button>
+      <button class="nav-btn active" onclick="showScreen('explore',this)">🗺<br><small>Explore</small></button>
       <button class="nav-btn" onclick="showScreen('quests',this)">📜<br><small>Quests</small></button>
-      <button class="nav-btn" onclick="showScreen('char',this)">🧙<br><small>Charakter</small></button>
+      <button class="nav-btn" onclick="showScreen('char',this)">🧙<br><small>Character</small></button>
       <button class="nav-btn" onclick="showScreen('shop',this)">🏪<br><small>Shop</small></button>
     </nav>
 
   </div>
+  <script src="lang.js"></script>
   <script src="sprites.js"></script>
   <script src="data.js"></script>
   <script src="ui.js"></script>

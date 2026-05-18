@@ -286,6 +286,7 @@ const G = {
   dailyChallenge: null,
   storyChains: {},
   invSort: 'none',
+  lang: 'en',
 };
 
 // ── STATS ────────────────────────────────────────────────────
@@ -972,7 +973,7 @@ function showHardcoreGameOver() {
   wrap.innerHTML=`<div id="overlay-box" style="text-align:center;border-color:#ff0000">
     💀 GAME OVER 💀<br><br>
     <span style="font-size:7px;color:var(--dim)">Hardcore-Held gefallen<br>
-    LV ${G.p.level} · ${G.p.kills} Kills · ${G.steps} Steps</span><br><br>
+    LV ${G.p.level} · ${G.p.kills} Kills · ${G.steps} ${t('step_counter')}</span><br><br>
     <button onclick="hardcoreReset()" style="display:block;width:100%;background:#2a0000;color:#ff4444;border:2px solid #ff0000;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer">🔄 Neu starten</button>
   </div>`;
   document.body.appendChild(wrap);
@@ -1285,7 +1286,7 @@ function showWorldMap() {
 function travelToArea(areaId) {
   const a = AREAS.find(a=>a.id===areaId); if(!a) return;
   if(a.secret && (G.p.prestige||0)<5){showOverlay('🔒 Dimensionsriss: Prestige 5 erforderlich!');return;}
-  if(G.p.level < a.min){showOverlay('❌ Level zu niedrig!');return;}
+  if(G.p.level < a.min){showOverlay(t('err_level'));return;}
   if(G.combat){showOverlay('❌ Beende zuerst den Kampf!');return;}
   G.area = a;
   document.getElementById('area-name').textContent = a.name;
@@ -1573,7 +1574,7 @@ function updateCharScreen(){
     const upg=invSlot&&invSlot._upgrade?` +${invSlot._upgrade}`:'';
     const rune=invSlot&&invSlot._rune?` ${ITEMS[invSlot._rune]?.icon||''}`:'' ;
     const enc=invSlot&&invSlot._enchant?' ✨':'';
-    el.innerHTML=`${icons[sl]} <span>${eq?eq.name+upg+rune+enc:'Empty'}</span>`;
+    el.innerHTML=`${icons[sl]} <span>${eq?eq.name+upg+rune+enc:t('equip_empty')}</span>`;
   }
   const clEl=document.getElementById('s-class');
   if(clEl){
@@ -1588,9 +1589,73 @@ function updateCharScreen(){
   updateInvScreen();
 }
 
+function applyLang(){
+  // Nav buttons
+  const navKeys=['nav_explore','nav_quests','nav_char','nav_shop'];
+  document.querySelectorAll('#bottom-nav .nav-btn small').forEach((el,i)=>{
+    if(navKeys[i]) el.textContent=t(navKeys[i]);
+  });
+  // Explore button
+  const eb=document.getElementById('explore-btn');
+  if(eb&&!eb.disabled) eb.textContent=t('btn_explore');
+  // Boss button
+  const bb=document.getElementById('boss-btn');
+  if(bb) bb.textContent=t('btn_boss');
+  // Step counter label
+  const sc=document.getElementById('step-counter');
+  if(sc&&sc.childNodes[0]) sc.childNodes[0].textContent=t('step_counter')+': ';
+  // Combat buttons
+  const ba=document.getElementById('btn-attack');
+  if(ba) ba.textContent=t('btn_attack');
+  const bfl=document.querySelector('#combat-btns .cbtn:nth-child(4)');
+  if(bfl) bfl.textContent=t('btn_flee');
+  // Auto battle button
+  const abBtn=document.getElementById('auto-battle-btn');
+  if(abBtn) abBtn.textContent=G.autoBattle?t('btn_auto_on'):t('btn_auto_off');
+  // Inventory tip
+  const it=document.getElementById('inv-tip');
+  if(it) it.textContent=t('inv_tip');
+  // Quest hint
+  const qh=document.getElementById('quest-hint');
+  if(qh) qh.textContent=t('quest_hint');
+  // Quest daily header
+  const qdh=document.querySelector('#daily-header h2');
+  if(qdh) qdh.textContent=t('quest_daily');
+  // Daily bonus button
+  const dbb=document.getElementById('daily-bonus-btn');
+  if(dbb) dbb.textContent=t('quest_claim');
+  // Character screen headings
+  document.querySelectorAll('#screen-char h2').forEach(h=>{if(/Charakter|Character/.test(h.textContent)) h.textContent=t('char_title');});
+  document.querySelectorAll('#screen-char h3').forEach(h=>{
+    if(/Ausrüstung|Equipment/.test(h.textContent)) h.textContent=t('char_equip');
+    else if(/Inventar|Inventory/.test(h.textContent)&&h.childNodes[0]) h.childNodes[0].textContent=t('char_inv')+' ';
+  });
+  // Stat row labels in character screen
+  const keyMap={'Level':'char_lv','XP':'char_xp','HP':'char_hp','MP':'char_mp','ATK':'char_atk','DEF':'char_def','MaxHP':'char_maxhp','MaxMP':'char_maxmp','Kills':'char_kills','Klasse':'char_class','Class':'char_class','Modus':'char_mode','Mode':'char_mode'};
+  document.querySelectorAll('#screen-char .stat-row').forEach(row=>{
+    const spans=row.querySelectorAll('span');
+    if(spans.length>=1){const txt=spans[0].textContent.trim();const key=keyMap[txt];if(key) spans[0].textContent=t(key);}
+  });
+  // Equipment empty slots
+  document.querySelectorAll('.equip-row span').forEach(span=>{
+    if(span.textContent==='Leer'||span.textContent==='Empty') span.textContent=t('equip_empty');
+  });
+  // Shop tabs
+  const stabs=document.querySelectorAll('.stab');
+  if(stabs[0]) stabs[0].textContent=t('shop_buy');
+  if(stabs[1]) stabs[1].textContent=t('shop_sell');
+  // Stat points banner
+  const spb=document.getElementById('stat-points-banner');
+  if(spb){const sc2=document.getElementById('sp-count');const cnt=sc2?sc2.textContent:'';spb.innerHTML=`⭐ <span id="sp-count">${cnt}</span> ${t('stat_points')}`;}
+  // Mode / Hardcore label in char screen
+  const hcEl=document.getElementById('s-hardcore');
+  if(hcEl) hcEl.textContent=G.hardcore?t('char_hardcore'):t('char_normal');
+}
+
 function refresh(){
   updateHUD(); updateCharScreen(); updateQuestScreen();
   if(G.combat) updateCombatUI();
+  applyLang();
 }
 
 // ── LOG ──────────────────────────────────────────────────────
@@ -1622,7 +1687,7 @@ function showOverlay(msg){
 function toggleAutoBattle(){
   G.autoBattle=!G.autoBattle;
   const btn=document.getElementById('auto-battle-btn');
-  if(btn) btn.textContent=G.autoBattle?'⚡ Auto: ON':'⚡ Auto: OFF';
+  if(btn) btn.textContent=G.autoBattle?t('btn_auto_on'):t('btn_auto_off');
   if(G.autoBattle && G.combat){
     window._autoBattleInterval=setInterval(()=>{
       if(!G.combat||!G.autoBattle){clearInterval(window._autoBattleInterval);return;}
@@ -1991,7 +2056,7 @@ function save(){
     difficulty:G.difficulty, tutorialStep:G.tutorialStep, tutorialDone:G.tutorialDone,
     prestigeCoins:G.prestigeCoins, prestigeUpgrades:G.prestigeUpgrades,
     battleHistory:G.battleHistory, dailyChallenge:G.dailyChallenge, storyChains:G.storyChains,
-    invSort:G.invSort,
+    invSort:G.invSort, lang:G.lang,
   }));}catch(_){}
 }
 
@@ -2011,7 +2076,7 @@ function load(){
     G.difficulty=d.difficulty||'normal'; G.tutorialStep=d.tutorialStep||99; G.tutorialDone=d.tutorialDone||false;
     G.prestigeCoins=d.prestigeCoins||0; G.prestigeUpgrades=d.prestigeUpgrades||{};
     G.battleHistory=d.battleHistory||[]; G.dailyChallenge=d.dailyChallenge||null; G.storyChains=d.storyChains||{};
-    G.invSort=d.invSort||'none';
+    G.invSort=d.invSort||'none'; G.lang=d.lang||'en';
     if(!G.p.eq.pet) G.p.eq.pet=null;
     if(!G.p.subclass) G.p.subclass=null;
     if(!G.p.eq.helm) G.p.eq.helm=null;
@@ -2206,7 +2271,7 @@ function init(){
   drawPlayer(document.getElementById('player-canvas'));
   if(!G.p.inv.length){addInv('potion',true);addInv('wood_sword',true);}
   if(!hasSave) promptName(()=>save());
-  else if(G.p.kills===0){const log=document.getElementById('log');if(!log||!log.children.length)addLog('⚔ Willkommen! Drücke ERKUNDEN um dein Abenteuer zu starten!');}
+  else if(G.p.kills===0){const log=document.getElementById('log');if(!log||!log.children.length)addLog(t('log_start'));}
   if(!G.dailyChallenge||G.dailyChallenge.date!==new Date().toDateString()) generateDailyChallenge();
   updateDailyTimer();
   updateDayNight();
@@ -2214,8 +2279,7 @@ function init(){
   const srEl=document.getElementById('speedrun-timer');
   if(srEl) srEl.style.display=G.speedrun.active?'block':'none';
   if(G.speedrun.active) window._speedrunInterval=setInterval(updateSpeedrunTimer,1000);
-  const abBtn=document.getElementById('auto-battle-btn');
-  if(abBtn) abBtn.textContent=G.autoBattle?'⚡ Auto: AN':'⚡ Auto: AUS';
+  applyLang();
   initSwipeGestures();
   initInstallBanner();
   MUSIC.play(G.area.id);

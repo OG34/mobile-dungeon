@@ -25,7 +25,7 @@ function showMerchant() {
   document.body.appendChild(wrap);
 }
 function merchantBuy(id,price){
-  if(G.p.gold<price){showOverlay('❌ Kein Gold!');return;}
+  if(G.p.gold<price){showOverlay(t('err_gold'));return;}
   G.p.gold-=price; addInv(id); addLog(`🧙 ${ITEMS[id].icon} ${ITEMS[id].name} für ${price}🪙 gekauft!`);
   document.getElementById('overlay')?.remove(); refresh();
 }
@@ -45,7 +45,7 @@ function showInn() {
   document.body.appendChild(wrap);
 }
 function doRest(cost) {
-  if(G.p.gold<cost){showOverlay('❌ Kein Gold!');return;}
+  if(G.p.gold<cost){showOverlay(t('err_gold'));return;}
   G.p.gold-=cost; const s=stats();
   G.p.hp=s.maxHp; G.p.mp=s.maxMp;
   SFX.heal();
@@ -123,7 +123,7 @@ function showVictory() {
       🏆 VICTORY! 🏆<br><br>
       <span style="font-size:7px;color:var(--dim)">Du hast den Shadow King besiegt!<br><br>
       Level: ${p.level} &nbsp;|&nbsp; Kills: ${p.kills}<br>
-      Steps: ${G.steps} &nbsp;|&nbsp; Gold: ${p.gold}<br>
+      ${t('step_counter')}: ${G.steps} &nbsp;|&nbsp; Gold: ${p.gold}<br>
       ${p.prestige>0?`Prestige: ⭐`.repeat(p.prestige)+'<br>':''}
       </span><br>
       <button onclick="doPrestige()" style="display:block;width:100%;background:#2a1a00;color:var(--accent);border:2px solid var(--accent);border-bottom:3px solid #a08830;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin-bottom:8px">⭐ PRESTIGE — Neustart mit Bonus</button>
@@ -222,7 +222,7 @@ function upgradeItem(idx) {
   if (upg>=3) { showOverlay('❌ Bereits max. Upgrade!'); return; }
   const costs=[0,80,250,600];
   const cost=costs[upg+1];
-  if (G.p.gold<cost) { showOverlay(`❌ Kein Gold!\nBenötigt: ${cost}🪙`); return; }
+  if (G.p.gold<cost) { showOverlay(`${t('err_gold')}\n${cost}🪙`); return; }
   G.p.gold-=cost; slot._upgrade=(upg+1);
   addLog(`✨ ${item.name} auf +${slot._upgrade} aufgewertet!`);
   refresh();
@@ -581,7 +581,7 @@ function shopTab(mode,btn){
 function buyItem(id){
   const item=ITEMS[id]; if(!item) return;
   const price=Math.ceil(item.value*1.5);
-  if(G.p.gold<price){showOverlay('❌ Kein Gold!');return;}
+  if(G.p.gold<price){showOverlay(t('err_gold'));return;}
   G.p.gold-=price; addInv(id); addLog(`🛒 ${item.name} gekauft!`); refresh(); updateShopScreen();
 }
 
@@ -936,19 +936,13 @@ function confirmName(){
 }
 
 function showWelcomeOverlay(){
-  const classNames={warrior:'Krieger',mage:'Magier',rogue:'Schurke'};
-  const cn=classNames[G.p.class]||G.p.class;
   const wrap=document.createElement('div'); wrap.id='welcome-overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.95);z-index:110';
+  const bodyLines=t('welcome_body').replace(/\n/g,'<br>');
   wrap.innerHTML=`<div style="min-width:270px;max-width:90vw;text-align:center;padding:18px">
-    <div style="font-size:11px;color:var(--accent);margin-bottom:12px">⚔ WILLKOMMEN, ${G.p.name}!</div>
-    <div style="font-size:7px;color:var(--dim);margin-bottom:14px">Als ${cn} beginnst du im Verzauberten Wald.</div>
-    <div style="font-size:7px;color:var(--text);text-align:left;line-height:2;margin-bottom:16px">
-      → Tippe ERKUNDEN um dein erstes Monster zu finden<br>
-      → Kämpfe, sammle Items, steige auf<br>
-      → Besiege den Shadow King um die Legende zu werden
-    </div>
-    <button onclick="dismissWelcome()" style="width:100%;background:var(--accent);color:var(--bg);border:none;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer">▶ Los geht's!</button>
+    <div style="font-size:11px;color:var(--accent);margin-bottom:12px">⚔ ${t('welcome_title')}, ${G.p.name}!</div>
+    <div style="font-size:7px;color:var(--text);text-align:left;line-height:2;margin-bottom:16px">${bodyLines}</div>
+    <button onclick="dismissWelcome()" style="width:100%;background:var(--accent);color:var(--bg);border:none;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer">${t('welcome_btn')}</button>
   </div>`;
   document.body.appendChild(wrap);
 }
@@ -1038,6 +1032,11 @@ function showSettings() {
   const d = G.difficulty||'normal';
   wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;text-align:center">
     ⚙ EINSTELLUNGEN<br><br>
+    <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px">
+      <span style="font-size:7px;color:var(--dim)">${t('lang_label')}:</span>
+      <button onclick="G.lang='en';save();refresh();document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);padding:4px 10px;font-family:inherit;font-size:7px;cursor:pointer;color:${G.lang==='en'?'var(--accent)':'var(--dim)'}">EN</button>
+      <button onclick="G.lang='de';save();refresh();document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);padding:4px 10px;font-family:inherit;font-size:7px;cursor:pointer;color:${G.lang==='de'?'var(--accent)':'var(--dim)'}">DE</button>
+    </div>
     <div style="font-size:7px;color:var(--text);margin-bottom:6px">Schwierigkeit:</div>
     <div style="display:flex;gap:4px;margin-bottom:14px">
       <button class="diff-btn${d==='easy'?' active':''}"   id="s-diff-easy"   onclick="settingsDiff('easy')">😊 Leicht</button>
@@ -1233,24 +1232,24 @@ function showMoreMenu() {
       <span style="color:var(--accent);font-size:9px">☰ MEHR</span>
       <button onclick="closeOverlay()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:4px 8px;font-family:inherit;font-size:7px;cursor:pointer">✖</button>
     </div>
-    <div class="more-cat">⚔ KAMPF</div>
+    <div class="more-cat">${t('more_combat')}</div>
     <button class="more-btn" onclick="closeOverlay();startBossRush()">⚡ Boss Rush</button>
     <button class="more-btn" onclick="closeOverlay();startArena()">🏟 Arena</button>
     <button class="more-btn" onclick="closeOverlay();showDailyChallenge()">🎯 Daily Challenge</button>
-    <div class="more-cat">🏰 DUNGEONS</div>
+    <div class="more-cat">${t('more_dungeons')}</div>
     <button class="more-btn" onclick="closeOverlay();showDailyDungeon()">🏰 Daily Dungeon</button>
     <button class="more-btn" onclick="closeOverlay();showSeasonalDungeon()">🌸 Saisonaler Dungeon</button>
-    <div class="more-cat">👤 CHARAKTER</div>
+    <div class="more-cat">${t('more_char')}</div>
     <button class="more-btn" onclick="closeOverlay();showCompanions()">🧑‍🤝‍🧑 Begleiter</button>
     <button class="more-btn" onclick="closeOverlay();showGuild()">🏛 Gilde</button>
     <button class="more-btn" onclick="closeOverlay();showPrestigeShop()">⭐ Prestige-Shop</button>
     <button class="more-btn" onclick="closeOverlay();showSpriteSelect()">🎨 Sprite</button>
-    <div class="more-cat">📊 INFO</div>
+    <div class="more-cat">${t('more_info')}</div>
     <button class="more-btn" onclick="closeOverlay();showStats()">📊 Stats</button>
     <button class="more-btn" onclick="closeOverlay();showHighscore()">🏆 Highscore</button>
     <button class="more-btn" onclick="closeOverlay();showBattleHistory()">📜 Kampfhistorie</button>
     <button class="more-btn" onclick="closeOverlay();showBestiary()">📗 Bestiary</button>
-    <div class="more-cat">⚙ SYSTEM</div>
+    <div class="more-cat">${t('more_system')}</div>
     <button class="more-btn" onclick="closeOverlay();showSettings()">⚙ Einstellungen</button>
     <button class="more-btn" onclick="closeOverlay();showBank()">🏦 Bank</button>
     <button class="more-btn" onclick="closeOverlay();showLootFilter()">🗑 Loot-Filter</button>
