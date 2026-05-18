@@ -46,6 +46,7 @@
           <canvas id="weather-canvas" width="240" height="120"></canvas>
         </div>
         <div id="step-counter">Steps: <span id="step-val">0</span></div>
+        <div id="speedrun-timer" style="display:none;font-size:8px;color:#ff8800;font-family:'Press Start 2P',monospace">⏱ 00:00</div>
         <div id="explore-quick-btns">
           <button class="qbtn" onclick="showWorldMap()">🗺</button>
           <button class="qbtn" onclick="showCrafting()">⚗</button>
@@ -53,6 +54,14 @@
           <button class="qbtn" onclick="showStats()">📊</button>
           <button class="qbtn" onclick="showHighscore()">🏆</button>
           <button class="qbtn" onclick="showLootFilter()">🗑</button>
+        </div>
+        <div id="explore-quick-btns2">
+          <button class="qbtn" onclick="showBank()">🏦</button>
+          <button class="qbtn" onclick="showTalentTree()">🌟</button>
+          <button class="qbtn" onclick="showCompanions()">🧑‍🤝‍🧑</button>
+          <button class="qbtn" onclick="showPvP()">⚔</button>
+          <button class="qbtn" onclick="startBossRush()">⚡</button>
+          <button class="qbtn" onclick="showDailyDungeon()">🏰</button>
         </div>
         <button id="boss-btn" onclick="startFinalBoss()" style="display:none">💀 SHADOW KING — FINAL BOSS</button>
         <button id="explore-btn" onclick="doStep()">⚔ EXPLORE</button>
@@ -88,6 +97,7 @@
           <button class="cbtn" id="btn-skills" onclick="toggleSkillPicker()">✨ Skills</button>
           <button class="cbtn" id="btn-items" onclick="toggleCombatItems()">🎒 Items</button>
           <button class="cbtn" onclick="combatAction('flee')">🏃 Flee</button>
+          <button class="cbtn" id="auto-battle-btn" onclick="toggleAutoBattle()" style="grid-column:1/-1">⚡ Auto: OFF</button>
         </div>
       </div>
 
@@ -114,6 +124,9 @@
         <div class="panel">
           <div class="equip-row" id="eq-weapon">🗡 <span>Empty</span></div>
           <div class="equip-row" id="eq-armor">🛡 <span>Empty</span></div>
+          <div class="equip-row" id="eq-helm">🪖 <span>Empty</span></div>
+          <div class="equip-row" id="eq-gloves">🧤 <span>Empty</span></div>
+          <div class="equip-row" id="eq-boots">👢 <span>Empty</span></div>
           <div class="equip-row" id="eq-acc">💍 <span>Empty</span></div>
           <div class="equip-row" id="eq-pet">🐾 <span>Empty</span></div>
         </div>

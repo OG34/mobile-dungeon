@@ -622,3 +622,33 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 /* ── CLASS / PET RARITY ── */
 .inv-item.pet{border-color:#52c07a}
 #s-class{color:var(--accent)}
+
+/* ── SECOND QUICK BUTTONS ROW ── */
+#explore-quick-btns2{
+  display:flex;
+  gap:6px;
+  width:100%;
+  justify-content:center;
+}
+
+/* ── SPEEDRUN TIMER ── */
+#speedrun-timer{
+  font-size:8px;
+  color:#ff8800;
+  text-shadow:0 0 8px #ff4400;
+  animation:pulse2 1s infinite;
+  text-align:center;
+}
+
+/* ── TALENT TREE ── */
+.talent-node{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  cursor:pointer;
+}
+.talent-node.learned{border-color:var(--accent)}
+.talent-node:active{background:var(--border)}

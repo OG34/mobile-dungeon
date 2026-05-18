@@ -415,6 +415,195 @@ const SPRITES = {
       ['.','.','.','.','.','.',0,1,'.','.','.',1,0,'.','.','.'],
     ]
   },
+  sea_serpent: {
+    p:['#006677','#00aacc','#aaddff','#ff4488','#004455'],
+    d:[
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.',0,0,0,'.','.','.','.','.','.','.'],
+      ['.','.','.','.','.',0,1,1,2,0,'.','.','.','.','.','.'],
+      ['.','.','.','.','.',0,2,3,1,0,'.','.','.','.','.','.'],
+      ['.','.','.','.','.',0,1,1,1,0,'.','.','.','.','.','.'],
+      ['.','.','.','.','.','.',0,0,0,0,0,'.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.',0,0,'.','.','.' ],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.',0,'.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.',3,3,'.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+    ]
+  },
+  coral_crab: {
+    p:['#cc3300','#ff6622','#ffaa66','#111111','#ff9944'],
+    d:[
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.', 0, 0,'.','.','.','.','.','.','.','.','.','.','.', 0, 0],
+      ['.', 0, 1, 0,'.','.','.','.','.','.','.','.','.',0, 1, 0],
+      ['.','.','.',0,1,1,1,1,1,1,1,1,0,'.','.','.'],
+      ['.','.','.','.', 1, 4, 2, 2, 2, 2, 4, 1,'.','.','.','.'],
+      ['.','.','.','.', 1, 2, 3, 3, 3, 3, 2, 1,'.','.','.','.'],
+      ['.','.','.','.', 1, 2, 3, 2, 2, 3, 2, 1,'.','.','.','.'],
+      ['.','.','.','.', 1, 4, 2, 2, 2, 2, 4, 1,'.','.','.','.'],
+      ['.','.','.','.','.', 0, 1, 1, 1, 1, 0,'.','.','.','.','.'],
+      ['.','.','.',0,0,'.','.','.','.','.','.','.',0,0,'.','.'],
+      ['.','.','.',0,0,'.','.','.','.','.','.','.',0,0,'.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+    ]
+  },
+  deep_kraken: {
+    p:['#330044','#6600aa','#aa00ee','#111122','#ff00cc'],
+    d:[
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.', 0, 0, 0, 0, 0, 0,'.','.','.','.','.' ],
+      ['.','.','.','.', 0, 1, 2, 2, 2, 2, 1, 0,'.','.','.','.'],
+      ['.','.','.','.', 0, 2, 4, 3, 3, 4, 2, 0,'.','.','.','.'],
+      ['.','.','.','.', 0, 2, 3, 3, 3, 3, 2, 0,'.','.','.','.'],
+      ['.','.','.','.', 0, 1, 2, 2, 2, 2, 1, 0,'.','.','.','.'],
+      ['.','.','.','.','.','.', 0, 0, 0, 0,'.','.','.','.','.','.'],
+      ['.', 0, 0,'.','.','.',0, 1,'.', 1, 0,'.','.', 0, 0,'.'],
+      ['.', 0, 1, 0,'.','.', 0, 2,'.', 2, 0,'.','.', 0, 1, 0],
+      ['.', 0, 2, 0,'.','.','.',0,'.', 0,'.','.','.',0, 2, 0],
+      ['.', 0, 2, 0,'.','.','.','.','.','.','.','.','.',0, 2, 0],
+      ['.', 0, 1,'.','.','.','.','.','.','.','.','.','.','.',1, 0],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+    ]
+  },
+  storm_hawk: {
+    p:['#555566','#888899','#ccccdd','#222233','#ffcc00'],
+    d:[
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.',0,0,'.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.', 0, 1, 1, 0,'.','.','.','.','.','.'],
+      ['.','.','.','.','.',0, 1, 4, 4, 1, 0,'.','.','.','.','.'],
+      ['.','.','.',4, 0, 1, 2, 3, 3, 2, 1, 0, 4,'.','.','.'],
+      ['.','.', 0, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1, 0,'.','.'],
+      ['.', 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0,'.'],
+      [0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0],
+      ['.', 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0,'.'],
+      ['.','.','.',0, 1, 1, 2, 2, 2, 2, 1, 1, 0,'.','.','.' ],
+      ['.','.','.','.','.',0, 1, 4, 4, 1, 0,'.','.','.','.','.'],
+      ['.','.','.','.','.','.', 0, 4, 4, 0,'.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.', 4, 4,'.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+    ]
+  },
+  wind_giant: {
+    p:['#3355aa','#6688cc','#99bbee','#ffffff','#aaccff'],
+    d:[
+      ['.','.','.','.','.','.', 0, 0, 0, 0,'.','.','.','.','.','.'],
+      ['.','.','.','.','.',0, 1, 1, 1, 1, 0,'.','.','.','.','.'],
+      ['.','.','.','.','.',0, 1, 3, 3, 1, 0,'.','.','.','.','.'],
+      ['.','.','.','.','.',0, 2, 4, 4, 2, 0,'.','.','.','.','.'],
+      ['.','.','.','.', 0, 1, 2, 1, 1, 2, 1, 0,'.','.','.','.'],
+      ['.','.','.',0, 1, 2, 2, 2, 2, 2, 2, 1, 0,'.','.','.' ],
+      ['.','.',0, 1, 2, 3, 3, 3, 3, 3, 3, 2, 1, 0,'.','.'],
+      ['.', 0, 1, 2, 3, 3, 4, 4, 4, 4, 3, 3, 2, 1, 0,'.'],
+      ['.','.',0, 1, 2, 3, 3, 3, 3, 3, 3, 2, 1, 0,'.','.'],
+      ['.','.','.',0, 1, 2, 2, 3, 3, 2, 2, 1, 0,'.','.','.' ],
+      ['.','.','.','.', 0, 1, 2, 1, 1, 2, 1, 0,'.','.','.','.'],
+      ['.','.','.','.','.',0, 1, 1, 1, 1, 0,'.','.','.','.','.'],
+      ['.','.','.',0, 1, 0,'.','.','.','.', 0, 1, 0,'.','.','.' ],
+      ['.','.','.',0, 1, 0,'.','.','.','.', 0, 1, 0,'.','.','.' ],
+      ['.','.','.',0, 2, 0,'.','.','.','.', 0, 2, 0,'.','.','.' ],
+      ['.','.','.','.', 0,'.','.','.','.','.','.', 0,'.','.','.','.'],
+    ]
+  },
+  thunder_wyrm: {
+    p:['#440066','#8800cc','#cc44ff','#ffcc00','#111111'],
+    d:[
+      ['.', 0, 0,'.','.','.','.','.','.','.','.','.','.','.',0, 0],
+      [0, 1, 1, 0,'.','.','.','.','.','.','.','.','.',0, 1, 1],
+      ['.', 0, 1, 0,'.','.', 0, 0, 0, 0,'.','.', 0, 1, 0,'.'],
+      ['.','.', 0, 1, 1, 1, 3, 2, 2, 3, 1, 1, 1, 0,'.','.'],
+      ['.','.','.',0, 1, 1, 3, 3, 3, 3, 1, 1, 0,'.','.','.' ],
+      ['.','.','.','.', 0, 1, 2, 3, 3, 2, 1, 0,'.','.','.','.'],
+      ['.','.','.','.','.',0, 1, 1, 1, 1, 0,'.','.','.','.','.'],
+      ['.','.','.','.','.','.', 2, 4, 4, 2,'.','.','.','.','.','.'],
+      ['.','.','.','.','.',0, 1, 3, 3, 1, 0,'.','.','.','.','.'],
+      ['.','.','.',0, 1, 2, 2, 1, 1, 2, 2, 1, 0,'.','.','.' ],
+      ['.','.','.','.', 0, 1, 2, 2, 2, 2, 1, 0,'.','.','.','.'],
+      ['.','.','.','.','.',0, 2, 1, 1, 2, 0,'.','.','.','.','.'],
+      ['.','.','.','.','.','.', 2, 1, 1, 2,'.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.',1, 1,'.','.','.','.','.','.','.' ],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+    ]
+  },
+  ice_golem: {
+    p:['#224466','#4488aa','#88ccee','#ffffff','#aaddff'],
+    d:[
+      ['.','.','.','.','.', 0, 0, 0, 0, 0, 0,'.','.','.','.','.' ],
+      ['.','.','.','.', 0, 1, 1, 1, 1, 1, 1, 0,'.','.','.','.'],
+      ['.','.','.','.', 0, 1, 3, 2, 2, 3, 1, 0,'.','.','.','.'],
+      ['.','.','.','.', 0, 2, 0, 0, 0, 0, 2, 0,'.','.','.','.'],
+      ['.','.','.','.', 0, 1, 3, 2, 2, 3, 1, 0,'.','.','.','.'],
+      ['.','.','.','.', 0, 0, 1, 1, 1, 1, 0, 0,'.','.','.','.'],
+      ['.','.', 0, 0, 1, 1, 2, 2, 2, 2, 1, 1, 0, 0,'.','.'],
+      ['.', 0, 1, 1, 2, 2, 4, 4, 4, 4, 2, 2, 1, 1, 0,'.'],
+      ['.', 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0,'.'],
+      ['.','.', 0, 1, 1, 2, 2, 4, 4, 2, 2, 1, 1, 0,'.','.'],
+      ['.','.','.',0, 0, 1, 1, 2, 2, 1, 1, 0, 0,'.','.','.' ],
+      ['.','.','.','.', 0, 1, 2, 2, 2, 2, 1, 0,'.','.','.','.'],
+      ['.','.','.','.', 0, 1, 2, 0, 0, 2, 1, 0,'.','.','.','.'],
+      ['.','.','.','.', 0, 0, 2, 0, 0, 2, 0, 0,'.','.','.','.'],
+      ['.','.','.','.','.',0, 0,'.','.', 0, 0,'.','.','.','.','.' ],
+      ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'],
+    ]
+  },
+  frost_troll: {
+    p:['#336688','#5599bb','#88ccee','#aaddff','#224466','#111122'],
+    d:[
+      ['.','.','.','.','.', 0, 0, 0, 0, 0, 0,'.','.','.','.','.' ],
+      ['.','.','.','.','.', 0, 1, 1, 1, 1, 0,'.','.','.','.','.' ],
+      ['.','.','.','.','.',1, 1, 1, 1, 1, 1,'.','.','.','.','.'],
+      ['.','.','.','.','.',1, 2, 1, 1, 2, 1,'.','.','.','.','.'],
+      ['.','.','.',0, 1, 1, 5, 1, 1, 5, 1, 1, 0,'.','.','.' ],
+      ['.','.','.','.','.',1, 1, 3, 3, 1, 1,'.','.','.','.','.'],
+      ['.','.','.','.','.','.','.',1, 1,'.','.','.','.','.','.','.'],
+      ['.',0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,'.','.'],
+      [4, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 4,'.'],
+      [4, 0, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 0, 4,'.','.'],
+      [4, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 4,'.','.'],
+      ['.', 5, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 5,'.','.','.' ],
+      ['.','.','.','.','.',1, 1,'.','.','.',1, 1,'.','.','.','.'],
+      ['.','.','.','.','.',0, 1,'.','.','.',1, 0,'.','.','.','.'],
+      ['.','.','.','.','.',1, 1,'.','.','.',1, 1,'.','.','.','.'],
+      ['.','.','.','.','.',0, 0,'.','.','.',0, 0,'.','.','.','.'],
+    ]
+  },
+  blizzard_dragon: {
+    p:['#224477','#4488bb','#88ccff','#ffffff','#aaddff','#112244'],
+    d:[
+      [0,'.','.','.','.','.','.','.','.','.','.','.','.','.','.', 0],
+      [0, 0,'.','.','.','.','.','.','.','.','.','.','.','.', 0, 0],
+      [0, 0, 0,'.','.','.',1, 1, 1,'.','.','.',0, 0,'.','.'],
+      ['.','.','.',1, 1, 2, 0, 0, 0, 2, 1, 1,'.','.','.','.'],
+      ['.','.','.',1, 1, 3, 5, 0, 5, 3, 1, 1,'.','.','.','.'],
+      ['.','.','.','.','.',1, 0, 2, 0, 1,'.','.','.','.','.','.'],
+      ['.','.','.','.','.','.','.',1, 1,'.','.','.','.','.','.','.'],
+      ['.', 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,'.','.'],
+      [0, 0, 0, 3, 1, 1, 1, 1, 1, 1, 3, 0, 0, 0,'.','.'],
+      ['.', 0, 3, 2, 1, 1, 1, 1, 1, 1, 2, 3, 0,'.','.','.' ],
+      ['.','.','.',1, 3, 1, 1, 1, 1, 3, 1,'.','.','.','.','.'],
+      ['.','.','.',1, 1, 3, 1, 1, 3, 1, 1,'.','.','.','.','.'],
+      ['.','.','.','.','.','.',1, 1,'.','.','.',1, 1,'.','.','.' ],
+      ['.','.','.','.','.',4, 1, 0,'.','.','.',0, 1, 4,'.','.'],
+      ['.','.','.','.','.','.',1, 1,'.','.','.',1, 1,'.','.','.' ],
+      ['.','.','.','.','.','.',5, 0,'.','.','.',5, 0,'.','.','.' ],
+    ]
+  },
 };
 
 function drawSprite(canvas, key, scale=4, paletteOverride=null) {
@@ -583,6 +772,41 @@ function drawBackground(areaId, targetCanvas) {
     [[5,5],[15,20],[35,8],[55,25],[95,10],[115,30],[145,6],[165,22],[185,14],[205,28],[225,5]].forEach(([x,y])=>ctx.fillRect(x,y,2,2));
     ctx.fillStyle='#ffffff';
     [[25,15],[75,28],[155,18],[195,8]].forEach(([x,y])=>ctx.fillRect(x,y,1,1));
+  } else if (areaId === 'underwater') {
+    r('#001833',0,0,W,H); r('#002255',0,H*0.65,W,H*0.35);
+    ctx.globalAlpha=0.3; r('#0044aa',0,0,W,H*0.5); ctx.globalAlpha=1;
+    [[20,70,'#3399ff'],[50,60,'#2288ee'],[90,75,'#44aaff'],[130,62,'#3399ff'],[170,72,'#2288ee'],[210,65,'#44aaff']].forEach(([x,y,c])=>{
+      ctx.globalAlpha=0.6; r(c,x,y,4,4); ctx.globalAlpha=0.2; r(c,x-2,y-2,8,8); ctx.globalAlpha=1;
+    });
+    r('#ff4488',10,H*0.65,5,H*0.35); r('#ff8800',40,H*0.7,4,H*0.3);
+    r('#ff4488',80,H*0.62,6,H*0.38); r('#00cc88',110,H*0.68,3,H*0.32);
+    r('#ff4488',160,H*0.65,5,H*0.35); r('#ff8800',200,H*0.72,4,H*0.28);
+    ctx.fillStyle='#aaeeff';
+    [[30,H*0.4],[70,H*0.3],[120,H*0.45],[180,H*0.35],[220,H*0.4]].forEach(([x,y])=>{
+      ctx.globalAlpha=0.4; ctx.fillRect(x,y,2,Math.abs(H*0.65-y)); ctx.globalAlpha=1;
+    });
+    r('#001122',0,H*0.82,W,H*0.18);
+  } else if (areaId === 'sky') {
+    r('#87ceeb',0,0,W,H);
+    ctx.globalAlpha=0.9; r('#ffffff',5,12,50,14); r('#ffffff',0,12,55,12); ctx.globalAlpha=1;
+    r('#ffffff',5,12,55,14); r('#ffffff',0,10,60,10);
+    r('#ffffff',4,14,54,14); r('#ffffff',140,20,45,12); r('#ffffff',138,24,50,10);
+    r('#aaaacc',75,H*0.35,90,H*0.65); r('#8888aa',70,H*0.3,15,H*0.1); r('#8888aa',155,H*0.3,15,H*0.1);
+    for(let x=70;x<165;x+=10) r('#ccccdd',x,H*0.28,8,6);
+    r('#ccccdd',70,H*0.36,95,4);
+    ctx.globalAlpha=0.5; r('#ffffff',0,0,W,H*0.15); ctx.globalAlpha=1;
+    r('#99aabb',0,H*0.85,W,H*0.15);
+  } else if (areaId === 'ice') {
+    r('#cce8ff',0,0,W,H); r('#99ccee',0,H*0.55,W,H*0.45);
+    [[18,H*0.35,4,H*0.65],[40,H*0.28,3,H*0.72],[70,H*0.38,5,H*0.62],[100,H*0.32,4,H*0.68],[140,H*0.40,3,H*0.6],[165,H*0.30,5,H*0.70],[200,H*0.36,4,H*0.64]].forEach(([x,y,w,h])=>{
+      r('#aaddff',x,y,w,h); r('#cceeff',x+1,y,w-2,4);
+    });
+    r('#88aacc',90,H*0.25,80,H*0.75); r('#aabbdd',90,H*0.25,80,8);
+    r('#99bbcc',170,H*0.3,60,H*0.7);
+    r('#ffffff',88,H*0.23,84,6); r('#ffffff',168,H*0.28,64,6);
+    ctx.fillStyle='#ddeeff';
+    [[10,H*0.5],[30,H*0.45],[55,H*0.52],[80,H*0.47],[120,H*0.5],[145,H*0.44],[190,H*0.51],[220,H*0.47]].forEach(([x,y])=>ctx.fillRect(x,y,6,4));
+    r('#ddeeff',0,H*0.82,W,H*0.18);
   }
 }
 
@@ -616,8 +840,11 @@ const AREAS = [
   { id:'dungeon',   name:'Dark Dungeon',     icon:'⛏',  min:6,  max:11, foes:['skeleton','goblin','wolf','bat'] },
   { id:'graveyard', name:'Cursed Graveyard', icon:'💀', min:9,  max:15, foes:['skeleton','zombie','ghost'] },
   { id:'castle',    name:'Shadow Castle',    icon:'🏰', min:13, max:20, foes:['ghost','demon','dragon'] },
-  { id:'volcanic',  name:'Volcanic Ruins',   icon:'🌋', min:21, max:28, foes:['fire_elemental','lava_golem','phoenix'] },
-  { id:'void',      name:'Void Realm',       icon:'🌀', min:29, max:50, foes:['void_shade','shadow_spider','chaos_dragon'] },
+  { id:'volcanic',  name:'Volcanic Ruins',    icon:'🌋', min:21, max:28, foes:['fire_elemental','lava_golem','phoenix'] },
+  { id:'void',      name:'Void Realm',        icon:'🌀', min:29, max:50, foes:['void_shade','shadow_spider','chaos_dragon'] },
+  { id:'underwater',name:'Abyssal Kingdom',   icon:'🌊', min:51, max:65, foes:['sea_serpent','coral_crab','deep_kraken'] },
+  { id:'sky',       name:'Sky Fortress',      icon:'⛅', min:66, max:80, foes:['storm_hawk','wind_giant','thunder_wyrm'] },
+  { id:'ice',       name:'Ice Tundra',        icon:'❄',  min:81, max:99, foes:['ice_golem','frost_troll','blizzard_dragon'] },
 ];
 
 const FOES = {
@@ -638,6 +865,15 @@ const FOES = {
   void_shade:     { name:'Void Shade',     sprite:'void_shade',     hp:165, atk:42, def:12, xp:290, gold:[42,105], status:{type:'stun',chance:.30,turns:1,value:0},   element:'void', weakTo:'light' },
   shadow_spider:  { name:'Shadow Spider',  sprite:'shadow_spider',  hp:195, atk:48, def:14, xp:340, gold:[55,130], status:{type:'poison',chance:.50,turns:4,value:18}, element:'void', weakTo:'light' },
   chaos_dragon:   { name:'Chaos Dragon',   sprite:'chaos_dragon',   hp:260, atk:58, def:18, xp:480, gold:[85,210], status:{type:'burn',chance:.50,turns:3,value:22},  element:'void', weakTo:'light' },
+  sea_serpent:    { name:'Sea Serpent',    sprite:'sea_serpent',    hp:320, atk:68, def:22, xp:600, gold:[100,260],status:{type:'poison',chance:.40,turns:3,value:25}, element:'water',weakTo:'lightning' },
+  coral_crab:     { name:'Coral Crab',     sprite:'coral_crab',     hp:380, atk:72, def:28, xp:680, gold:[115,290],status:{type:'stun',chance:.25,turns:1,value:0},   element:'water',weakTo:'lightning' },
+  deep_kraken:    { name:'Deep Kraken',    sprite:'deep_kraken',    hp:460, atk:82, def:24, xp:820, gold:[145,380],status:{type:'stun',chance:.35,turns:2,value:0},   element:'water',weakTo:'lightning' },
+  storm_hawk:     { name:'Storm Hawk',     sprite:'storm_hawk',     hp:440, atk:90, def:20, xp:850, gold:[140,360],status:{type:'stun',chance:.30,turns:1,value:0},   element:'air',  weakTo:'earth' },
+  wind_giant:     { name:'Wind Giant',     sprite:'wind_giant',     hp:540, atk:98, def:30, xp:1000,gold:[180,460],status:null,                                        element:'air',  weakTo:'earth' },
+  thunder_wyrm:   { name:'Thunder Wyrm',   sprite:'thunder_wyrm',   hp:620, atk:110,def:26, xp:1200,gold:[220,580],status:{type:'burn',chance:.45,turns:3,value:30},  element:'lightning',weakTo:'earth' },
+  ice_golem:      { name:'Ice Golem',      sprite:'ice_golem',      hp:700, atk:120,def:40, xp:1400,gold:[280,720],status:{type:'stun',chance:.30,turns:1,value:0},   element:'ice',  weakTo:'fire' },
+  frost_troll:    { name:'Frost Troll',    sprite:'frost_troll',    hp:820, atk:130,def:35, xp:1600,gold:[320,850],status:{type:'poison',chance:.35,turns:3,value:40}, element:'ice',  weakTo:'fire' },
+  blizzard_dragon:{ name:'Blizzard Dragon',sprite:'blizzard_dragon',hp:1000,atk:150,def:45, xp:2000,gold:[450,1200],status:{type:'burn',chance:.50,turns:4,value:45},  element:'ice',  weakTo:'fire' },
 };
 
 const DROPS = {
@@ -659,6 +895,15 @@ const DROPS = {
   void_shade:     [{id:'elixir',p:.40},{id:'void_robe',  p:.10},{id:'chaos_crystal',p:.08},{id:'void_rune',p:.05}],
   shadow_spider:  [{id:'elixir',p:.45},{id:'void_robe',  p:.12},{id:'chaos_crystal',p:.10},{id:'void_rune',p:.08}],
   chaos_dragon:   [{id:'chaos_blade',p:.40},{id:'void_robe',p:.35},{id:'chaos_crystal',p:.30},{id:'elixir',p:.80},{id:'void_rune',p:.20}],
+  sea_serpent:    [{id:'elixir',p:.50},{id:'id_scroll',p:.30},{id:'swift_boots',p:.12},{id:'leather_helm',p:.10}],
+  coral_crab:     [{id:'elixir',p:.55},{id:'id_scroll',p:.25},{id:'iron_helm',p:.10},{id:'iron_gloves',p:.12}],
+  deep_kraken:    [{id:'elixir',p:.70},{id:'id_scroll',p:.40},{id:'void_gloves',p:.08},{id:'chaos_crystal',p:.15}],
+  storm_hawk:     [{id:'elixir',p:.55},{id:'id_scroll',p:.30},{id:'swift_boots',p:.15},{id:'hunter_bow',p:.08}],
+  wind_giant:     [{id:'elixir',p:.65},{id:'id_scroll',p:.35},{id:'void_boots',p:.08},{id:'wind_rune',p:.10}],
+  thunder_wyrm:   [{id:'elixir',p:.75},{id:'id_scroll',p:.40},{id:'chaos_blade',p:.10},{id:'void_gloves',p:.12}],
+  ice_golem:      [{id:'elixir',p:.75},{id:'id_scroll',p:.45},{id:'iron_gloves',p:.15},{id:'resist_ring',p:.12}],
+  frost_troll:    [{id:'elixir',p:.80},{id:'id_scroll',p:.50},{id:'void_boots',p:.12},{id:'shadow_helm',p:.08}],
+  blizzard_dragon:[{id:'chaos_blade',p:.50},{id:'void_robe',p:.45},{id:'chaos_crystal',p:.40},{id:'elixir',p:.90},{id:'id_scroll',p:.60},{id:'resist_ring',p:.25}],
 };
 
 const ITEMS = {
@@ -687,6 +932,31 @@ const ITEMS = {
   crit_rune:    { name:'Krit-Rune',   icon:'🟡', slot:'rune',   critBonus:0.08,                       value:130, buyable:true,  rarity:'rare'      },
   mp_rune:      { name:'MP-Rune',     icon:'🟣', slot:'rune',   maxMp:18,                             value:90,  buyable:true,  rarity:'uncommon'  },
   void_rune:    { name:'Void-Rune',   icon:'⚫', slot:'rune',   atk:12, critBonus:0.05,               value:200, buyable:false, rarity:'epic'      },
+  wind_rune:    { name:'Wind-Rune',   icon:'🌀', slot:'rune',   atk:6,  def:6,                        value:180, buyable:false, rarity:'epic'      },
+  // Helm
+  leather_helm: { name:'Leder-Helm',      icon:'🪖', slot:'helm',   def:4,           value:50,  buyable:true,  rarity:'common'    },
+  iron_helm:    { name:'Eisen-Helm',       icon:'⛑',  slot:'helm',   def:8,  atk:2,   value:140, buyable:true,  rarity:'uncommon'  },
+  shadow_helm:  { name:'Schatten-Helm',    icon:'🎭', slot:'helm',   def:12, atk:5,   value:420, buyable:false, rarity:'rare'      },
+  // Gloves
+  iron_gloves:  { name:'Eisen-Handschuhe',icon:'🧤', slot:'gloves', atk:5,           value:60,  buyable:true,  rarity:'common'    },
+  magic_gloves: { name:'Magie-Handschuhe',icon:'✋',  slot:'gloves', atk:7,  maxMp:12,value:160, buyable:true,  rarity:'uncommon'  },
+  void_gloves:  { name:'Void-Handschuhe', icon:'🖐',  slot:'gloves', atk:14, critBonus:0.10, value:900, buyable:false, rarity:'legendary' },
+  // Boots
+  leather_boots:{ name:'Leder-Stiefel',   icon:'👢', slot:'boots',  def:3,           value:55,  buyable:true,  rarity:'common'    },
+  swift_boots:  { name:'Schnelle Stiefel', icon:'👟', slot:'boots',  def:5,  maxMp:8, value:150, buyable:true,  rarity:'uncommon'  },
+  void_boots:   { name:'Void-Stiefel',     icon:'🥾', slot:'boots',  def:10, atk:6,   value:750, buyable:false, rarity:'epic'      },
+  // New weapons
+  iron_axe:     { name:'Eisen-Axt',        icon:'🪓', slot:'weapon', wType:'axe',   atk:14, def:2,         value:180, buyable:true,  rarity:'uncommon'  },
+  hunter_bow:   { name:'Jäger-Bogen',       icon:'🏹', slot:'weapon', wType:'bow',   atk:12,                value:200, buyable:true,  rarity:'uncommon'  },
+  mystic_staff: { name:'Mystischer Stab',   icon:'🪄', slot:'weapon', wType:'staff', atk:10, maxMp:25, mpRegen:5, value:320, buyable:true, rarity:'rare' },
+  // Resistance & utility
+  resist_ring:  { name:'Widerstandsring',   icon:'💠', slot:'acc',    def:4, resist:0.30,            value:380, buyable:true,  rarity:'rare'      },
+  // Resources (consumable-like, tracked in G.resources)
+  wood:         { name:'Holz',              icon:'🪵', slot:null, qty:0,                             value:5,   buyable:false, rarity:'common'    },
+  ore:          { name:'Erz',               icon:'🪨', slot:null, qty:0,                             value:8,   buyable:false, rarity:'common'    },
+  herbs:        { name:'Kräuter',           icon:'🌿', slot:null, qty:0,                             value:6,   buyable:false, rarity:'common'    },
+  // Scroll
+  id_scroll:    { name:'Identifizierungs-Schriftrolle', icon:'📜', slot:null, hp:0,                  value:50,  buyable:true,  rarity:'uncommon'  },
 };
 
 const SKILLS = [
@@ -769,6 +1039,45 @@ const PRESTIGE_PALETTES = {
   3: ['#c8a882','#4a2e00','#ff4400','#aa00ff','#ffcc00','#00ccff','#cc4444','#ffffff','#ff0088'],
 };
 
+// ── TALENT NODES ─────────────────────────────────────────────
+const TALENT_NODES = [
+  { id:'crit',      name:'Präzision',   icon:'🎯', desc:'+5% Krit pro Stufe',      cost:1, maxLv:5 },
+  { id:'atk_pct',   name:'Stärke+',     icon:'💪', desc:'+10% ATK pro Stufe',      cost:1, maxLv:5 },
+  { id:'def_pct',   name:'Panzer+',     icon:'🛡', desc:'+10% DEF pro Stufe',      cost:1, maxLv:5 },
+  { id:'hp_pct',    name:'Ausdauer+',   icon:'❤',  desc:'+8% MaxHP pro Stufe',     cost:1, maxLv:5 },
+  { id:'lifesteal', name:'Lebensdraub', icon:'🩸', desc:'5% Lifesteal pro Stufe',  cost:2, maxLv:3 },
+  { id:'evasion',   name:'Ausweichen',  icon:'💨', desc:'8% Ausweich pro Stufe',   cost:2, maxLv:3 },
+  { id:'mp_regen',  name:'MP-Fluss',    icon:'🔮', desc:'+2 MP/Runde pro Stufe',   cost:2, maxLv:3 },
+  { id:'gold_find', name:'Goldnase',    icon:'🪙', desc:'+20% Gold pro Stufe',     cost:1, maxLv:5 },
+  { id:'xp_boost',  name:'Lernend',     icon:'⭐', desc:'+15% XP pro Stufe',       cost:1, maxLv:5 },
+  { id:'crit_dmg',  name:'Tödlich',     icon:'💥', desc:'+15% Krit-Schaden/Stufe', cost:2, maxLv:3 },
+];
+
+// ── COMPANIONS ───────────────────────────────────────────────
+const COMPANIONS = {
+  squire:   { name:'Knappe',       icon:'⚔', hp:80,  maxHp:80,  atk:10, goldCost:150 },
+  archer:   { name:'Bogenschütze', icon:'🏹', hp:60,  maxHp:60,  atk:16, goldCost:280 },
+  healer:   { name:'Heiler',       icon:'💚', hp:100, maxHp:100, atk:5,  goldCost:350, heals:true },
+  berserkerC:{ name:'Berserker',   icon:'🪓', hp:120, maxHp:120, atk:22, goldCost:600 },
+};
+
+// ── BOSS RUSH ────────────────────────────────────────────────
+const BOSS_RUSH_SEQ = ['dragon','demon','ghost','troll','skeleton','chaos_dragon'];
+
+// ── AREA STORIES ─────────────────────────────────────────────
+const AREA_STORIES = {
+  forest:     '🌲 Das Verzauberte Waldgebiet\nUralte Geister flüstern\nzwischen den Bäumen...',
+  cave:       '🦇 Die Goblin-Höhlen\nHungrige Augen glühen\nim Dunkel vor dir...',
+  dungeon:    '⛏ Das dunkle Verlies\nFäulnis und Moder\nerfüllen die Gänge...',
+  graveyard:  '💀 Der verfluchte Friedhof\nDie Toten ruhen nicht.\nLauf, wenn du kannst...',
+  castle:     '🏰 Das Schattenschloss\nEine dunkle Festung\nerwartet dich...',
+  volcanic:   '🌋 Die Vulkanruinen\nDie Erde bebt.\nDrachen kreisen oben...',
+  void:       '🌀 Das Void-Reich\nDie Realität bricht hier.\nNur Starke überleben...',
+  underwater: '🌊 Das Abyssale Königreich\nDruck steigt. Seltsame\nLichter führen dich...',
+  sky:        '⛅ Die Himmelsfestung\nWolken unter dir.\nDonneriesen bewachen...',
+  ice:        '❄ Die Eistundra\nFrost beißt. Blizzards toben.\nLegenden enden hier...',
+};
+
 // ── CRAFTING ─────────────────────────────────────────────────
 const CRAFTING = [
   { id:'c_elixir',  label:'Elixier brauen',   requires:[{id:'potion',qty:3}],                                  result:'elixir',       resultQty:1 },
@@ -776,6 +1085,9 @@ const CRAFTING = [
   { id:'c_crystal', label:'Chaos-Kristall',    requires:[{id:'magic_ring',qty:1},{id:'health_ring',qty:1}],     result:'chaos_crystal',resultQty:1 },
   { id:'c_chaos',   label:'Chaos-Klinge',      requires:[{id:'dragon_blade',qty:1},{id:'shadow_blade',qty:1}],  result:'chaos_blade',  resultQty:1 },
   { id:'c_void',    label:'Void-Robe',         requires:[{id:'demon_armor',qty:1},{id:'thorn_shield',qty:1}],   result:'void_robe',    resultQty:1 },
+  { id:'c_herb_pot',label:'Heiltrank ×2 (Kräuter)', requires:[{id:'herbs',qty:3,res:true}],                    result:'potion',       resultQty:2, resReq:true },
+  { id:'c_ore_shld',label:'Erz-Schild (Erz)',  requires:[{id:'ore',qty:5,res:true}],                           result:'iron_shield',  resultQty:1, resReq:true },
+  { id:'c_wood_bow',label:'Holzbogen (Holz)',   requires:[{id:'wood',qty:6,res:true}],                          result:'hunter_bow',   resultQty:1, resReq:true },
 ];
 
 // ── QUESTS ──────────────────────────────────────────────────
@@ -818,8 +1130,9 @@ const G = {
     baseAtk:8, baseDef:3, gold:0, kills:0,
     totalGoldEarned:0, statPoints:0, prestige:0,
     class:null, subclass:null,
-    eq:{weapon:null,armor:null,acc:null,pet:null},
+    eq:{weapon:null,armor:null,acc:null,pet:null,helm:null,gloves:null,boots:null},
     inv:[], buffs:[],
+    talents:{}, talentPoints:0,
   },
   area: AREAS[0],
   combat: null,
@@ -834,28 +1147,36 @@ const G = {
   dungeon: null,
   dungeonClears: 0,
   arena: null,
+  bossRush: null,
   weather: { particles: [], tick: 0 },
   battleStats: { dmgDealt:0, dmgTaken:0, highCrit:0, won:0, fled:0 },
   lootFilter: 'common',
   hardcore: false,
+  bank: [],
+  resources: { wood:0, ore:0, herbs:0 },
+  companion: null,
+  speedrun: { active:false, startTime:0, bestTime:null },
+  storyShown: [],
+  autoBattle: false,
 };
 
 // ── STATS ────────────────────────────────────────────────────
 function stats() {
   const p = G.p;
-  let atk=p.baseAtk, def=p.baseDef, maxHp=p.maxHp, maxMp=p.maxMp, critBonus=0;
+  let atk=p.baseAtk, def=p.baseDef, maxHp=p.maxHp, maxMp=p.maxMp, critBonus=0, resist=0, mpRegen=0;
   const equippedIds = [];
-  for (const slot of ['weapon','armor','acc','pet']) {
+  for (const slot of ['weapon','armor','acc','pet','helm','gloves','boots']) {
     const eq = p.eq[slot];
     if (eq) {
       atk+=eq.atk||0; def+=eq.def||0;
       maxHp+=eq.maxHp||0; maxMp+=eq.maxMp||0;
-      critBonus+=eq.critBonus||0;
+      critBonus+=eq.critBonus||0; resist+=eq.resist||0;
+      mpRegen+=eq.mpRegen||0;
       if (slot!=='pet') {
         const invSlot = p.inv.find(i=>i.id===eq.id&&i.equipped);
         if (invSlot) {
           const upg = invSlot._upgrade||0;
-          if (slot==='weapon') atk+=upg*3; else if (slot==='armor') def+=upg*3; else { atk+=upg; def+=upg; }
+          if (slot==='weapon') atk+=upg*3; else if (slot==='armor'||slot==='helm') def+=upg*3; else { atk+=upg; def+=upg; }
           const runeId = invSlot._rune;
           if (runeId && ITEMS[runeId]) {
             const r=ITEMS[runeId];
@@ -892,7 +1213,20 @@ function stats() {
       atk+=s.bonus.atk||0; def+=s.bonus.def||0;
     }
   }
-  return { atk, def, maxHp, maxMp, critBonus };
+  // Talent bonuses
+  const t = p.talents||{};
+  critBonus += (t.crit||0)*0.05;
+  if (t.atk_pct) atk  = Math.floor(atk  * (1 + (t.atk_pct||0)*0.10));
+  if (t.def_pct) def  = Math.floor(def  * (1 + (t.def_pct||0)*0.10));
+  if (t.hp_pct)  maxHp= Math.floor(maxHp* (1 + (t.hp_pct ||0)*0.08));
+  mpRegen += (t.mp_regen||0)*2;
+  return { atk, def, maxHp, maxMp, critBonus, resist, mpRegen,
+    lifesteal: (t.lifesteal||0)*0.05,
+    evasion:   (t.evasion  ||0)*0.08,
+    goldFind:  (t.gold_find||0)*0.20,
+    xpBoost:   (t.xp_boost ||0)*0.15,
+    critDmg:   (t.crit_dmg ||0)*0.15,
+  };
 }
 
 // ── STAT ALLOCATION ──────────────────────────────────────────
@@ -914,6 +1248,8 @@ function gainXP(amount) {
   const p = G.p;
   const pet = p.eq.pet;
   if (pet && pet.xpBonus) amount = Math.floor(amount * (1 + pet.xpBonus));
+  const s = stats();
+  if (s.xpBoost > 0) amount = Math.floor(amount * (1 + s.xpBoost));
   p.xp += amount;
   while (p.xp >= p.xpNext) {
     p.xp -= p.xpNext;
@@ -922,13 +1258,15 @@ function gainXP(amount) {
     p.baseAtk+=1; p.baseDef+=1; p.maxHp+=10; p.maxMp+=3;
     p.hp=Math.min(p.hp+10, stats().maxHp); p.mp=Math.min(p.mp+3, stats().maxMp);
     p.statPoints+=2;
+    p.talentPoints = (p.talentPoints||0) + 1;
     const ns = SKILLS.find(s=>s.unlockLv===p.level);
     const extra = ns ? `\n${ns.icon} ${ns.name}\nfreigeschaltet!` : '';
     SFX.levelUp();
-    showOverlay(`⭐ LEVEL UP!\nLV ${p.level}\n+2 Stat-Punkte${extra}`);
+    showOverlay(`⭐ LEVEL UP!\nLV ${p.level}\n+2 Stat +1 Talent${extra}`);
     updateArea();
     if (p.level===5  && !p.class)    setTimeout(showClassSelect, 800);
     if (p.level===15 && !p.subclass) setTimeout(showSubclassSelect, 800);
+    checkSpeedrunComplete();
   }
   checkAchievements();
   refresh();
@@ -947,6 +1285,7 @@ function checkAchievements() {
 // ── AREA ─────────────────────────────────────────────────────
 function updateArea() {
   const lvl = G.p.level;
+  const prevArea = G.area?.id;
   G.area = AREAS.find(a=>lvl>=a.min&&lvl<=a.max) || AREAS[AREAS.length-1];
   document.getElementById('area-name').textContent = G.area.name;
   document.getElementById('area-icon').textContent = G.area.icon;
@@ -954,16 +1293,21 @@ function updateArea() {
   const bb = document.getElementById('boss-btn');
   if (bb) bb.style.display = (lvl >= 20 && !G.kingDefeated) ? 'block' : 'none';
   initWeather(G.area.id);
+  if(G.area.id !== prevArea && !G.storyShown.includes(G.area.id) && AREA_STORIES[G.area.id]){
+    G.storyShown.push(G.area.id);
+    setTimeout(()=>showOverlay(AREA_STORIES[G.area.id]), 600);
+  }
 }
 
 // ── EXPLORE ──────────────────────────────────────────────────
 const EVENTS = [
-  {t:'combat',   w:38},{t:'gold',    w:12},{t:'heal',    w:8},
+  {t:'combat',   w:35},{t:'gold',    w:12},{t:'heal',    w:8},
   {t:'chest',    w:6}, {t:'shrine',  w:5}, {t:'boss',    w:3},
   {t:'merchant', w:4}, {t:'stranger',w:3}, {t:'trap',    w:3},
   {t:'dungeon',  w:3}, {t:'arena',   w:2}, {t:'smith',   w:3},
   {t:'oracle',   w:2}, {t:'thief',   w:2}, {t:'meteor',  w:2},
-  {t:'divine',   w:2}, {t:'nothing', w:2},
+  {t:'divine',   w:2}, {t:'gather',  w:5}, {t:'pvp',     w:1},
+  {t:'nothing',  w:2},
 ];
 const CHEST_LOOT = ['potion','potion','elixir','iron_sword','leather','iron_shield','health_ring','magic_ring','battle_brew','atk_rune','def_rune','crit_rune','mp_rune'];
 
@@ -1034,6 +1378,16 @@ function doStep() {
     const heal=stats().maxHp-p.hp; const mp=stats().maxMp-p.mp;
     p.hp=stats().maxHp; p.mp=stats().maxMp;
     SFX.heal(); addLog(`✨ Göttliche Gnade! Vollständig geheilt! (+${heal} HP, +${mp} MP)`); refresh();
+  } else if (ev.t==='gather') {
+    const types=['wood','ore','herbs']; const res=types[Math.floor(Math.random()*types.length)];
+    const amt=Math.floor(Math.random()*3)+1;
+    G.resources[res]=(G.resources[res]||0)+amt;
+    const icons={wood:'🪵',ore:'🪨',herbs:'🌿'};
+    const names={wood:'Holz',ore:'Erz',herbs:'Kräuter'};
+    addLog(`${icons[res]} +${amt} ${names[res]} gesammelt! (Gesamt: ${G.resources[res]})`);
+    SFX.itemGet(); refresh();
+  } else if (ev.t==='pvp') {
+    addLog('⚔ Eine Aufforderung zum Duell!'); showPvPEvent();
   } else {
     const msgs=['🌲 Nichts passiert.','🌫️ Seltsamer Nebel...','🍄 Bunte Pilze.','🐦 Vögel zwitschern.','💨 Der Wind flüstert.','🕸️ Überall Spinnweben.','🌙 Der Mond steht tief.'];
     addLog(msgs[Math.floor(Math.random()*msgs.length)]);
@@ -1043,6 +1397,8 @@ function doStep() {
 function earnGold(g) {
   const pet = G.p.eq.pet;
   if (pet && pet.goldBonus) g = Math.floor(g * (1 + pet.goldBonus));
+  const s = stats();
+  if (s.goldFind > 0) g = Math.floor(g * (1 + s.goldFind));
   G.p.gold+=g; G.p.totalGoldEarned+=g; tickQuestGold(g); tickDailyGold(g);
   checkAchievements();
 }
@@ -1161,21 +1517,27 @@ function combatAction(act) {
   const comboMult=1+Math.min(e.combo*0.12,0.72);
   const crit=Math.random()<(0.15+(s.critBonus||0));
   const sc=p.subclass?SUBCLASSES[p.subclass]:null;
-  const hits=(sc&&sc.autoMulti&&Math.random()<0.35)?2:1;
+  const wType=ITEMS[p.eq.weapon?.id]?.wType||null;
+  const hits=(sc&&sc.autoMulti&&Math.random()<0.35)?2:(wType==='axe'&&Math.random()<0.25)?2:1;
   let totalDmg=0;
   const ec=document.getElementById('enemy-canvas');
+  const critMult = 2 + (s.critDmg||0);
   for(let h=0;h<hits;h++){
-    let dmg=Math.max(1,Math.floor((s.atk-e.def+rand(-2,3))*(crit?2:1)*comboMult));
+    let dmg=Math.max(1,Math.floor((s.atk-e.def+rand(-2,3))*(crit?critMult:1)*comboMult));
     if(sc&&sc.berserker&&crit) dmg=Math.floor(dmg*2);
     totalDmg+=dmg; e.hp-=dmg;
     floatDmg(ec,(crit?'💥':'')+dmg,crit?'#ffd700':'#e05252');
     shake(ec); flashHit(ec);
   }
+  // Bow: 25% stun on hit
+  if(wType==='bow'&&Math.random()<0.25) { applyStatus('enemy','stun',1,0); }
+  // Lifesteal
+  if(s.lifesteal>0){ const ls=Math.floor(totalDmg*s.lifesteal); p.hp=Math.min(s.maxHp,p.hp+ls); if(ls>0)floatDmg(document.getElementById('player-combat-canvas'),'+'+ls,'#88ff88'); }
   G.battleStats.dmgDealt+=totalDmg;
   if(crit&&totalDmg>G.battleStats.highCrit) G.battleStats.highCrit=totalDmg;
   if(e.combo>=3) combatLog(`🔥 COMBO ×${e.combo}!`);
   if(crit){ combatLog(`💥 KRITISCH! ${totalDmg} Schaden!`); SFX.crit(); }
-  else if(hits>1){ combatLog(`🏹 Ranger-Doppelschlag! ${totalDmg} Schaden!`); SFX.hit(); }
+  else if(hits>1){ combatLog(`${wType==='axe'?'🪓 Axt-Cleave':'🏹 Doppelschlag'}! ${totalDmg} Schaden!`); SFX.hit(); }
   else    { combatLog(`⚔ Du schlägst für ${totalDmg} Schaden!`); SFX.hit(); }
   updateCombatUI(); updateHUD();
   if(e.hp<=0){setTimeout(combatWin,700);return;}
@@ -1287,19 +1649,38 @@ function hideCombatItems(){document.getElementById('combat-item-picker').classLi
 function enemyTurn() {
   if(!G.combat) return;
   const p=G.p; const e=G.combat; const s=stats();
+  // Staff MP regen
+  if(s.mpRegen>0){ p.mp=Math.min(s.maxMp,p.mp+s.mpRegen); updateHUD(); }
+  // Companion attack
+  if(G.companion&&G.companion.hp>0&&e.hp>0){
+    const cd=Math.max(1,G.companion.atk-Math.floor(e.def*0.5)+rand(-2,2));
+    e.hp-=cd;
+    combatLog(`${G.companion.icon} ${G.companion.name}: ${cd} Schaden!`);
+    // Healer companion
+    if(G.companion.heals&&Math.random()<0.35){ const h=Math.floor(s.maxHp*0.05); p.hp=Math.min(s.maxHp,p.hp+h); combatLog(`💚 ${G.companion.name} heilt +${h} HP`); }
+    updateCombatUI();
+    if(e.hp<=0){setTimeout(combatWin,400);return;}
+  }
   const stunned=processStatuses('enemy'); updateCombatUI();
   if(e.hp<=0){setTimeout(combatWin,400);return;}
   if(!stunned){
-    e.combo=0; // break player combo on hit
-    const crit=Math.random()<0.10;
-    const dmg=Math.max(1,Math.floor((e.atk-s.def+rand(-2,2))*(crit?1.8:1)));
-    p.hp-=dmg; G.battleStats.dmgTaken+=dmg;
-    combatLog(`💢 ${e.name}: ${dmg}${crit?' Krit!':''}`);
-    SFX.dmgTake();
-    const pc=document.getElementById('player-combat-canvas');
-    floatDmg(pc,'-'+dmg,'#e05252');
-    shake(pc); flashHit(pc);
-    if(e.statusDef&&Math.random()<e.statusDef.chance) applyStatus('player',e.statusDef.type,e.statusDef.turns,e.statusDef.value);
+    e.combo=0;
+    // Evasion check
+    if(s.evasion>0&&Math.random()<s.evasion){ combatLog('💨 Ausgewichen!'); }
+    else {
+      const crit=Math.random()<0.10;
+      const dmg=Math.max(1,Math.floor((e.atk-s.def+rand(-2,2))*(crit?1.8:1)));
+      // Status resist
+      const resisted=s.resist>0&&Math.random()<s.resist;
+      p.hp-=dmg; G.battleStats.dmgTaken+=dmg;
+      combatLog(`💢 ${e.name}: ${dmg}${crit?' Krit!':''}`);
+      SFX.dmgTake();
+      const pc=document.getElementById('player-combat-canvas');
+      floatDmg(pc,'-'+dmg,'#e05252');
+      shake(pc); flashHit(pc);
+      if(!resisted&&e.statusDef&&Math.random()<e.statusDef.chance) applyStatus('player',e.statusDef.type,e.statusDef.turns,e.statusDef.value);
+      else if(resisted&&e.statusDef) combatLog('💠 Status widerstanden!');
+    }
   }
   updateCombatUI(); updateHUD();
   if(p.hp<=0){p.hp=0;defeatPlayer();return;}
@@ -1350,21 +1731,24 @@ function combatWin() {
   for(const drop of e.drops){ if(Math.random()<drop.p){ addInv(drop.id); const it=ITEMS[drop.id]; combatLog(`📦 ${it.rarity==='legendary'?'🌟':it.rarity==='epic'?'💜':''} ${it.name}!`); } }
   G.battleStats.won++;
   const xp=e.xp; const isKing=e.isKing;
-  const isDungeon=!!G.dungeon; const isArena=!!G.arena;
+  const isDungeon=!!G.dungeon; const isArena=!!G.arena; const isBossRush=!!G.bossRush;
   const sc=G.p.subclass?SUBCLASSES[G.p.subclass]:null;
   if(sc&&sc.healOnKill){ const h=Math.floor(stats().maxHp*0.08); G.p.hp=Math.min(stats().maxHp,G.p.hp+h); combatLog(`🛡 Paladin: +${h} HP`); }
+  if(isBossRush) G.bossRush.score=(G.bossRush.score||0)+xp*2;
   setTimeout(()=>{
     endCombat();
     gainXP(xp);
     addLog(`✅ ${e.name} besiegt!`);
-    if(isKing) showVictory();
+    if(isKing){ showVictory(); checkSpeedrunComplete(); }
     if(isDungeon) dungeonNextRoom();
     if(isArena) arenaNextRound();
+    if(isBossRush) bossRushNext();
   },1100);
 }
 
 function endCombat() {
   G.combat=null; hideSkillPicker(); hideCombatItems();
+  if(G.autoBattle){ G.autoBattle=false; clearInterval(window._autoBattleInterval); window._autoBattleInterval=null; }
   G.p.buffs=(G.p.buffs||[]).filter(b=>{
     b.left--;
     if(b.left<=0){addLog(`⌛ ${b.type==='atk'?'ATK':'DEF'}-Buff abgelaufen.`);return false;}
@@ -1467,7 +1851,7 @@ function doPrestige() {
   p.baseAtk=8+bonusAtk; p.baseDef=3+bonusDef;
   p.maxHp=100; p.maxMp=30; p.hp=100; p.mp=30;
   p.gold=keptGold; p.kills=0; p.statPoints=0;
-  p.eq={weapon:null,armor:null,acc:null}; p.inv=[];
+  p.eq={weapon:null,armor:null,acc:null,pet:null,helm:null,gloves:null,boots:null}; p.inv=[];
   if(keptItem){ addInv(Object.keys(ITEMS).find(k=>ITEMS[k].name===keptItem.name)||'potion', true); }
   addInv('potion', true);
   G.steps=0; G.quests=[]; G.kingDefeated=false;
@@ -1822,14 +2206,16 @@ function showCrafting() {
   const wrap=document.createElement('div'); wrap.id='overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
   const btnStyle='display:block;width:100%;background:var(--panel);border:1px solid var(--border);border-bottom:2px solid var(--accent2);color:var(--text);padding:8px 10px;margin-bottom:6px;font-family:\'Press Start 2P\',monospace;font-size:6px;cursor:pointer;text-align:left';
+  const resLine=`🪵 Holz:${G.resources.wood||0} 🪨 Erz:${G.resources.ore||0} 🌿 Kräuter:${G.resources.herbs||0}`;
   const rows=CRAFTING.map(r=>{
-    const req=r.requires.map(x=>`${x.qty}× ${ITEMS[x.id]?.name||x.id}`).join(', ');
+    const req=r.requires.map(x=>`${x.qty}× ${x.res?{wood:'Holz',ore:'Erz',herbs:'Kräuter'}[x.id]:ITEMS[x.id]?.name||x.id}`).join(', ');
     const res=ITEMS[r.result];
-    const canCraft=r.requires.every(x=>{ const s=G.p.inv.find(i=>i.id===x.id); return s&&(s.qty||1)>=x.qty; });
+    const canCraft=r.requires.every(x=>{ if(x.res) return (G.resources[x.id]||0)>=x.qty; const s=G.p.inv.find(i=>i.id===x.id); return s&&(s.qty||1)>=x.qty; });
     return `<button style="${btnStyle};${canCraft?'':'color:var(--dim)'}" ${canCraft?`onclick="doCraft('${r.id}')"`:'disabled'}>${res?.icon||''} ${r.label}<br><span style="color:var(--dim);font-size:5px">${req} → ${res?.name}</span></button>`;
   }).join('');
+  const resBadge=`<div style="font-size:6px;color:var(--accent);margin-bottom:8px;padding:4px;background:var(--panel);border:1px solid var(--border)">${resLine}</div>`;
   wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:90vw">
-    ⚗ CRAFTING<br><br>${rows}
+    ⚗ CRAFTING<br><br>${resBadge}${rows}
     <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ Schließen</button>
   </div>`;
   document.body.appendChild(wrap);
@@ -1838,9 +2224,19 @@ function showCrafting() {
 function doCraft(recipeId) {
   const r=CRAFTING.find(x=>x.id===recipeId); if(!r) return;
   for(const req of r.requires) {
-    const s=G.p.inv.find(i=>i.id===req.id);
-    if(!s||(s.qty||1)<req.qty) { showOverlay('❌ Materialien fehlen!'); return; }
-    s.qty=(s.qty||1)-req.qty; if(s.qty<=0) G.p.inv.splice(G.p.inv.indexOf(s),1);
+    if(req.res) {
+      if((G.resources[req.id]||0)<req.qty){showOverlay('❌ Ressourcen fehlen!');return;}
+    } else {
+      const s=G.p.inv.find(i=>i.id===req.id);
+      if(!s||(s.qty||1)<req.qty){showOverlay('❌ Materialien fehlen!');return;}
+    }
+  }
+  for(const req of r.requires) {
+    if(req.res) G.resources[req.id]-=req.qty;
+    else {
+      const s=G.p.inv.find(i=>i.id===req.id);
+      s.qty=(s.qty||1)-req.qty; if(s.qty<=0) G.p.inv.splice(G.p.inv.indexOf(s),1);
+    }
   }
   for(let i=0;i<(r.resultQty||1);i++) addInv(r.result);
   const res=ITEMS[r.result];
@@ -1916,16 +2312,32 @@ function floatDmg(el,text,color='#e05252'){
 
 // ── INVENTORY ────────────────────────────────────────────────
 const RARITY_ORDER = ['common','uncommon','rare','epic','legendary'];
-function addInv(id, silent=false){
+const UNIDENTIFIED_RARITIES = ['epic','legendary'];
+function addInv(id, silent=false, forceUnidentified=false){
   const item=ITEMS[id]; if(!item) return;
   if (!silent && G.lootFilter && G.lootFilter!=='common' && item.slot && item.slot!=='pet' && item.slot!=='rune') {
     const minIdx=RARITY_ORDER.indexOf(G.lootFilter);
     const itemIdx=RARITY_ORDER.indexOf(item.rarity||'common');
     if(itemIdx<minIdx) { addLog(`🗑 [Filter] ${item.icon} ${item.name} ignoriert.`); return; }
   }
-  if(!item.slot){ const ex=G.p.inv.find(i=>i.id===id); if(ex) ex.qty=(ex.qty||1)+1; else G.p.inv.push({id,qty:1}); }
-  else G.p.inv.push({id,equipped:false});
+  if(!item.slot){ const ex=G.p.inv.find(i=>i.id===id&&!i._unidentified); if(ex) ex.qty=(ex.qty||1)+1; else G.p.inv.push({id,qty:1}); }
+  else {
+    const unid = forceUnidentified || (!silent && UNIDENTIFIED_RARITIES.includes(item.rarity) && Math.random()<0.4);
+    G.p.inv.push({id,equipped:false, _unidentified:unid||undefined});
+    if(unid) addLog(`📜 ??? Unbekanntes ${item.slot==='weapon'?'Waffe':item.slot==='armor'?'Rüstung':'Item'} gefunden! (Schriftrolle zum Identifizieren)`);
+  }
   if(!silent) SFX.itemGet();
+}
+
+function identifyItem(idx) {
+  const slot=G.p.inv[idx]; if(!slot||!slot._unidentified) return;
+  const scrollIdx=G.p.inv.findIndex(i=>i.id==='id_scroll');
+  if(scrollIdx===-1){ showOverlay('❌ Keine Schriftrolle!\nKaufe eine im Shop.'); return; }
+  const sc=G.p.inv[scrollIdx]; sc.qty=(sc.qty||1)-1; if(sc.qty<=0) G.p.inv.splice(scrollIdx>idx?scrollIdx:scrollIdx,1);
+  delete slot._unidentified;
+  const item=ITEMS[slot.id];
+  addLog(`🔍 Enthüllt: ${item.icon} ${item.name}! (${item.rarity})`);
+  SFX.chest(); refresh();
 }
 
 function useItem(idx){
@@ -1963,10 +2375,16 @@ function updateInvScreen(){
     const item=ITEMS[slot.id]; if(!item) return;
     const upg=slot._upgrade||0;
     const div=document.createElement('div');
-    div.className=`inv-item${slot.equipped?' equipped':''} ${item.rarity||''}`;
+    const isUnid = slot._unidentified;
+    div.className=`inv-item${slot.equipped?' equipped':''} ${isUnid?'epic':item.rarity||''}`;
     const upgLabel=upg>0?`<small style="color:var(--accent)">+${upg}</small>`:'';
-    div.innerHTML=`${item.icon}${upgLabel}<small>${item.name.slice(0,9)}</small>${slot.qty>1?`<small>x${slot.qty}</small>`:''}`;
-    div.onclick=()=>{ if(slot.equipped&&item.slot&&item.slot!=='pet'){ showUpgradeMenu(idx); } else { useItem(idx); } };
+    if(isUnid){
+      div.innerHTML=`❓<small>??? ${item.slot}</small>`;
+      div.onclick=()=>{ showOverlay(`📜 Unidentifiziertes Item\n\n[${item.slot}]\n\nSchriftrolle benutzen?`); setTimeout(()=>{ if(confirm('Schriftrolle benutzen?')) identifyItem(idx); },300); };
+    } else {
+      div.innerHTML=`${item.icon}${upgLabel}<small>${item.name.slice(0,9)}</small>${slot.qty>1?`<small>x${slot.qty}</small>`:''}`;
+      div.onclick=()=>{ if(slot.equipped&&item.slot&&item.slot!=='pet'){ showUpgradeMenu(idx); } else { useItem(idx); } };
+    }
     let t;
     div.addEventListener('touchstart',()=>{t=setTimeout(()=>{ if(!slot.equipped)sellItem(idx); },600);},{passive:true});
     div.addEventListener('touchend',()=>clearTimeout(t),{passive:true});
@@ -2216,8 +2634,8 @@ function updateCharScreen(){
   document.getElementById('stat-points-banner').style.display=hasPts?'block':'none';
   document.getElementById('sp-count').textContent=p.statPoints;
   document.querySelectorAll('.salloc').forEach(b=>b.disabled=!hasPts);
-  const icons={weapon:'🗡',armor:'🛡',acc:'💍',pet:'🐾'};
-  for(const sl of ['weapon','armor','acc','pet']){
+  const icons={weapon:'🗡',armor:'🛡',acc:'💍',pet:'🐾',helm:'🪖',gloves:'🧤',boots:'👢'};
+  for(const sl of ['weapon','armor','acc','pet','helm','gloves','boots']){
     const el=document.getElementById(`eq-${sl}`); if(!el) continue;
     const eq=p.eq[sl];
     const invSlot=eq?p.inv.find(i=>i.id===eq.id&&i.equipped):null;
@@ -2296,12 +2714,304 @@ function confirmName(){
   if(window._onNameDone) window._onNameDone();
 }
 
+// ── AUTO-BATTLE ───────────────────────────────────────────────
+function toggleAutoBattle(){
+  G.autoBattle=!G.autoBattle;
+  const btn=document.getElementById('auto-battle-btn');
+  if(btn) btn.textContent=G.autoBattle?'⚡ Auto: ON':'⚡ Auto: OFF';
+  if(G.autoBattle && G.combat){
+    window._autoBattleInterval=setInterval(()=>{
+      if(!G.combat||!G.autoBattle){clearInterval(window._autoBattleInterval);return;}
+      combatAction('attack');
+    },900);
+  } else {
+    clearInterval(window._autoBattleInterval);
+  }
+}
+
+// ── BANK / STASH ─────────────────────────────────────────────
+function showBank(){
+  const p=G.p;
+  const invRows=p.inv.map((it,i)=>{
+    const item=ITEMS[it.id]; if(!item||it.equipped) return '';
+    return `<div class="shop-row" style="font-size:7px">
+      <span class="shop-icon">${item.icon}</span>
+      <span class="shop-info"><div class="shop-name">${item.name}</div></span>
+      <button class="shop-btn" onclick="bankDeposit(${i})">Einlagern</button>
+    </div>`;
+  }).join('');
+  const bankRows=G.bank.map((it,i)=>{
+    const item=ITEMS[it.id]; if(!item) return '';
+    return `<div class="shop-row" style="font-size:7px">
+      <span class="shop-icon">${item.icon}</span>
+      <span class="shop-info"><div class="shop-name">${item.name}</div></span>
+      <button class="shop-btn" onclick="bankWithdraw(${i})">Abheben</button>
+    </div>`;
+  }).join('');
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:290px;max-width:90vw;max-height:85vh;overflow-y:auto;text-align:left">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:10px">🏦 TRESOR (${G.bank.length}/30)</div>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:6px">Inventar → Tresor</div>
+    ${invRows||'<div style="font-size:6px;color:var(--dim);padding:8px">Kein Inventar</div>'}
+    <div style="font-size:7px;color:var(--dim);margin:10px 0 6px">Tresor → Inventar</div>
+    ${bankRows||'<div style="font-size:6px;color:var(--dim);padding:8px">Tresor leer</div>'}
+    <br><button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function bankDeposit(idx){
+  if(G.bank.length>=30){showOverlay('❌ Tresor voll!');return;}
+  const it=G.p.inv.splice(idx,1)[0];
+  G.bank.push(it);
+  document.getElementById('overlay')?.remove();
+  showBank(); refresh();
+}
+function bankWithdraw(idx){
+  if(G.p.inv.length>=30){showOverlay('❌ Inventar voll!');return;}
+  const it=G.bank.splice(idx,1)[0];
+  G.p.inv.push(it);
+  document.getElementById('overlay')?.remove();
+  showBank(); refresh();
+}
+
+// ── TALENT TREE ───────────────────────────────────────────────
+function showTalentTree(){
+  const p=G.p;
+  const rows=TALENT_NODES.map(n=>{
+    const lv=p.talents[n.id]||0;
+    const canLearn=p.talentPoints>=n.cost&&lv<n.maxLv;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px">${n.icon}</span>
+      <div style="flex:1">
+        <div style="font-size:7px;color:var(--text)">${n.name} ${lv>0?'['+lv+'/'+n.maxLv+']':''}</div>
+        <div style="font-size:6px;color:var(--dim)">${n.desc}</div>
+      </div>
+      <button onclick="learnTalent('${n.id}')" ${canLearn?'':'disabled'} style="background:${canLearn?'var(--accent)':'var(--border)'};color:${canLearn?'var(--bg)':'var(--dim)'};border:none;padding:4px 8px;font-family:inherit;font-size:6px;cursor:${canLearn?'pointer':'default'}">${n.cost}⭐</button>
+    </div>`;
+  }).join('');
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:290px;max-width:90vw;max-height:85vh;overflow-y:auto;text-align:left">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:8px">🌟 TALENTBAUM — ${p.talentPoints} Punkte</div>
+    ${rows}
+    <br><button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function learnTalent(id){
+  const node=TALENT_NODES.find(n=>n.id===id); if(!node) return;
+  const lv=G.p.talents[id]||0;
+  if(G.p.talentPoints<node.cost||lv>=node.maxLv) return;
+  G.p.talentPoints-=node.cost;
+  G.p.talents[id]=(lv+1);
+  SFX.levelUp();
+  document.getElementById('overlay')?.remove();
+  showTalentTree(); refresh();
+}
+
+// ── BOSS RUSH ─────────────────────────────────────────────────
+function startBossRush(){
+  if(G.combat){showOverlay('❌ Beende zuerst den Kampf!');return;}
+  G.bossRush={round:0,score:0};
+  addLog('⚡ Boss Rush gestartet!');
+  showScreen('combat'); bossRushNext();
+}
+function bossRushNext(){
+  const seq=BOSS_RUSH_SEQ;
+  const round=G.bossRush.round;
+  if(round>=seq.length){bossRushComplete();return;}
+  const foeId=seq[round];
+  const foe=FOES[foeId]; if(!foe) return;
+  G.bossRush.round++;
+  const hp=Math.floor(foe.hp*1.5); // harder versions
+  G.combat={
+    foe:{...foe,id:foeId,hp,maxHp:hp,statusEffects:[]},
+    playerStatus:[],turn:1,combo:0,fled:false,
+  };
+  showScreen('combat');
+  updateCombatUI();
+  addLog(`⚡ Boss Rush Runde ${round+1}: ${foe.name}!`);
+  drawSprite(document.getElementById('enemy-canvas'),foe.sprite||foeId);
+  drawBackground(G.area.id,true);
+}
+function bossRushComplete(){
+  const score=G.bossRush.score||0;
+  G.bossRush=null;
+  SFX.levelUp(); SFX.levelUp();
+  showOverlay(`⚡ BOSS RUSH ABGESCHLOSSEN!\n🏆 Score: ${score}\n\n+500 Gold!`);
+  earnGold(500); addLog(`⚡ Boss Rush abgeschlossen! Score: ${score}`); refresh();
+}
+
+// ── PVP ────────────────────────────────────────────────────────
+function savePvPSnapshot(){
+  const s=stats();
+  const snap={name:G.p.name,level:G.p.level,atk:s.atk,def:s.def,maxHp:G.p.maxHp,class:G.p.class};
+  try{localStorage.setItem('pq_pvp_snap',JSON.stringify(snap));}catch(_){}
+  showOverlay('💾 PvP-Snapshot gespeichert!');
+}
+function simulatePvP(opp){
+  const s=stats();
+  let myHp=G.p.maxHp, oppHp=opp.maxHp;
+  for(let i=0;i<30;i++){
+    const myDmg=Math.max(1,s.atk-Math.floor(opp.def*0.6)+rand(-3,3));
+    oppHp-=myDmg;
+    if(oppHp<=0) return true;
+    const oppDmg=Math.max(1,opp.atk-Math.floor(s.def*0.6)+rand(-3,3));
+    myHp-=oppDmg;
+    if(myHp<=0) return false;
+  }
+  return myHp>oppHp;
+}
+function showPvP(){
+  let snapHtml='<div style="font-size:6px;color:var(--dim);padding:8px">Kein gespeicherter Gegner</div>';
+  try{
+    const raw=localStorage.getItem('pq_pvp_snap');
+    if(raw){
+      const opp=JSON.parse(raw);
+      const win=simulatePvP(opp);
+      snapHtml=`<div style="padding:8px;border:1px solid var(--border);font-size:7px">
+        <div style="color:var(--accent)">${opp.name} LV${opp.level}</div>
+        <div style="color:var(--dim)">ATK:${opp.atk} DEF:${opp.def} HP:${opp.maxHp}</div>
+        <div style="margin-top:6px;color:${win?'var(--green)':'var(--red)'}">${win?'🏆 DU GEWINNST':'💀 DU VERLIERST'}</div>
+      </div>`;
+    }
+  }catch(_){}
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:90vw;text-align:left">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:10px">⚔ PVP SIMULATION</div>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:6px">Dein aktueller Snapshot:</div>
+    <button onclick="savePvPSnapshot();document.getElementById('overlay').remove();showPvP()" style="width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:8px">💾 Snapshot speichern</button>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:6px">Gespeicherter Gegner:</div>
+    ${snapHtml}
+    <br><button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function showPvPEvent(){
+  let opp=null;
+  try{const raw=localStorage.getItem('pq_pvp_snap');if(raw) opp=JSON.parse(raw);}catch(_){}
+  if(!opp){
+    const s=stats();
+    opp={name:'Wanderer',level:Math.max(1,G.p.level-1+rand(-2,2)),atk:Math.max(5,s.atk-rand(2,8)),def:Math.max(2,s.def-rand(1,4)),maxHp:Math.max(50,G.p.maxHp-rand(10,30))};
+  }
+  const win=simulatePvP(opp);
+  const goldWon=win?rand(50,150):0;
+  if(win){earnGold(goldWon);gainXP(Math.floor(G.p.level*30));}
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;text-align:center">
+    ⚔ DUELL vs. ${opp.name}!<br><br>
+    <span style="color:${win?'var(--green)':'var(--red)'};font-size:10px">${win?'🏆 SIEG!':'💀 NIEDERLAGE!'}</span><br><br>
+    ${win?`+🪙${goldWon} Gold erhalten!`:''}<br>
+    <button onclick="document.getElementById('overlay').remove();refresh()" style="margin-top:12px;width:100%;background:var(--accent);color:var(--bg);border:none;padding:8px;font-family:inherit;font-size:7px;cursor:pointer">OK</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+// ── SPEEDRUN ──────────────────────────────────────────────────
+function startSpeedrun(){
+  if(G.p.level>1){showOverlay('❌ Speedrun nur auf LV1 startbar! Prestige zuerst.');return;}
+  G.speedrun={active:true,startTime:Date.now(),bestTime:G.speedrun.bestTime||null};
+  G.p.level=1;G.p.xp=0;G.p.xpNext=100;G.p.kills=0;G.kingDefeated=false;
+  addLog('⏱ Speedrun gestartet! Ziel: LV20 + König besiegen!');
+  const el=document.getElementById('speedrun-timer');
+  if(el) el.style.display='block';
+  window._speedrunInterval=setInterval(updateSpeedrunTimer,1000);
+  refresh();
+}
+function updateSpeedrunTimer(){
+  if(!G.speedrun.active){clearInterval(window._speedrunInterval);return;}
+  const el=document.getElementById('speedrun-timer');
+  if(!el) return;
+  const elapsed=Math.floor((Date.now()-G.speedrun.startTime)/1000);
+  const m=Math.floor(elapsed/60).toString().padStart(2,'0');
+  const s=(elapsed%60).toString().padStart(2,'0');
+  el.textContent=`⏱ ${m}:${s}`;
+}
+function checkSpeedrunComplete(){
+  if(!G.speedrun.active) return;
+  if(G.p.level>=20&&G.kingDefeated){
+    clearInterval(window._speedrunInterval);
+    const elapsed=Math.floor((Date.now()-G.speedrun.startTime)/1000);
+    const m=Math.floor(elapsed/60).toString().padStart(2,'0');
+    const s=(elapsed%60).toString().padStart(2,'0');
+    const isNewBest=!G.speedrun.bestTime||elapsed<G.speedrun.bestTime;
+    if(isNewBest) G.speedrun.bestTime=elapsed;
+    G.speedrun.active=false;
+    const el=document.getElementById('speedrun-timer');if(el) el.style.display='none';
+    SFX.levelUp();SFX.levelUp();
+    showOverlay(`⏱ SPEEDRUN ABGESCHLOSSEN!\n🕐 Zeit: ${m}:${s}${isNewBest?'\n🏆 NEUER REKORD!':'\n(Best: '+Math.floor(G.speedrun.bestTime/60)+'m'+(G.speedrun.bestTime%60)+'s)'}`);
+  }
+}
+
+// ── COMPANIONS ────────────────────────────────────────────────
+function showCompanions(){
+  const comp=G.companion;
+  const hireRows=Object.entries(COMPANIONS).map(([id,c])=>{
+    const active=comp&&comp.id===id;
+    return `<div class="shop-row">
+      <span class="shop-icon">${c.icon}</span>
+      <div class="shop-info">
+        <div class="shop-name">${c.name}${active?' (aktiv)':''}</div>
+        <div class="shop-stat">HP:${c.maxHp} ATK:${c.atk}${c.heals?' Heilt':''}${active?' HP:'+comp.hp:''}  </div>
+      </div>
+      ${active?`<button class="shop-btn" onclick="hireCompanion(null)">Entlassen</button>`:`<button class="shop-btn" onclick="hireCompanion('${id}')" ${G.p.gold<c.goldCost?'disabled':''}>🪙${c.goldCost}</button>`}
+    </div>`;
+  }).join('');
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:290px;max-width:90vw;max-height:85vh;overflow-y:auto;text-align:left">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:10px">🧑‍🤝‍🧑 GEFÄHRTEN</div>
+    ${hireRows}
+    <br><button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function hireCompanion(id){
+  if(!id){G.companion=null;document.getElementById('overlay')?.remove();showCompanions();addLog('👋 Gefährte entlassen.');refresh();return;}
+  const c=COMPANIONS[id]; if(!c) return;
+  if(G.p.gold<c.goldCost){showOverlay('❌ Zu wenig Gold!');return;}
+  G.p.gold-=c.goldCost;
+  G.companion={...c,id,hp:c.maxHp};
+  document.getElementById('overlay')?.remove();
+  addLog(`${c.icon} ${c.name} angeheuert!`);
+  showCompanions(); refresh();
+}
+
+// ── DAILY DUNGEON ─────────────────────────────────────────────
+function showDailyDungeon(){
+  const today=new Date().toDateString();
+  const cleared=G.daily&&G.daily.dungeonDate===today&&G.daily.dungeonCleared;
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;text-align:center">
+    🏰 TAGESDUNGEON<br><br>
+    <span style="font-size:7px;color:var(--dim)">Täglicher 5-Kampf-Dungeon mit Bonusbelohnung!</span><br><br>
+    ${cleared
+      ?'<span style="color:var(--green);font-size:8px">✅ Heute abgeschlossen!</span>'
+      :`<button onclick="startDailyDungeon()" style="width:100%;background:var(--accent);color:var(--bg);border:none;padding:10px;font-family:inherit;font-size:8px;cursor:pointer">⚔ STARTEN</button>`
+    }<br><br>
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function startDailyDungeon(){
+  document.getElementById('overlay')?.remove();
+  G.dungeon={floors:5,current:1,bonus:true};
+  addLog('🏰 Tagesdungeon betreten!');
+  showScreen('explore'); doStep();
+}
+
 // ── SAVE / LOAD ──────────────────────────────────────────────
 function save(){
   try{localStorage.setItem('pq_save',JSON.stringify({
     p:G.p, steps:G.steps, quests:G.quests, kingDefeated:G.kingDefeated,
     achievements:G.achievements, bestiary:G.bestiary, dungeonClears:G.dungeonClears,
     battleStats:G.battleStats, lootFilter:G.lootFilter, hardcore:G.hardcore,
+    bank:G.bank, resources:G.resources, companion:G.companion,
+    speedrun:G.speedrun, storyShown:G.storyShown,
   }));}catch(_){}
 }
 
@@ -2313,8 +3023,16 @@ function load(){
     G.achievements=d.achievements||[]; G.bestiary=d.bestiary||{}; G.dungeonClears=d.dungeonClears||0;
     G.battleStats=d.battleStats||{dmgDealt:0,dmgTaken:0,highCrit:0,won:0,fled:0};
     G.lootFilter=d.lootFilter||'common'; G.hardcore=d.hardcore||false;
+    G.bank=d.bank||[]; G.resources=d.resources||{wood:0,ore:0,herbs:0};
+    G.companion=d.companion||null; G.speedrun=d.speedrun||{active:false,startTime:0,bestTime:null};
+    G.storyShown=d.storyShown||[];
     if(!G.p.eq.pet) G.p.eq.pet=null;
     if(!G.p.subclass) G.p.subclass=null;
+    if(!G.p.eq.helm) G.p.eq.helm=null;
+    if(!G.p.eq.gloves) G.p.eq.gloves=null;
+    if(!G.p.eq.boots) G.p.eq.boots=null;
+    if(!G.p.talents) G.p.talents={};
+    if(G.p.talentPoints===undefined) G.p.talentPoints=0;
     document.getElementById('step-val').textContent=G.steps; return true;
   }catch(_){return false;}
 }
@@ -2345,6 +3063,11 @@ function init(){
   if(!hasSave) promptName(()=>save());
   updateDailyTimer();
   setInterval(weatherTick, 80);
+  const srEl=document.getElementById('speedrun-timer');
+  if(srEl) srEl.style.display=G.speedrun.active?'block':'none';
+  if(G.speedrun.active) window._speedrunInterval=setInterval(updateSpeedrunTimer,1000);
+  const abBtn=document.getElementById('auto-battle-btn');
+  if(abBtn) abBtn.textContent=G.autoBattle?'⚡ Auto: ON':'⚡ Auto: OFF';
 }
 
 init();
