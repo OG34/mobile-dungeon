@@ -662,3 +662,63 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 }
 .talent-node.learned{border-color:var(--accent)}
 .talent-node:active{background:var(--border)}
+
+/* ── RARE ITEM POPUP ── */
+.rare-popup{
+  position:fixed;top:38%;left:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(0,0,0,.93);
+  border:2px solid var(--accent);
+  padding:14px 22px;
+  font-family:'Press Start 2P',monospace;
+  font-size:9px;text-align:center;
+  z-index:500;pointer-events:none;
+  animation:rarePop 2.2s ease-out forwards;
+}
+.rare-popup.epic{border-color:#9952e0;color:#9952e0;box-shadow:0 0 22px #9952e060}
+.rare-popup.legendary{border-color:#ffcc00;color:#ffcc00;box-shadow:0 0 28px #ffcc0080}
+@keyframes rarePop{
+  0%  {opacity:0;transform:translate(-50%,-50%) scale(.4)}
+  18% {opacity:1;transform:translate(-50%,-50%) scale(1.1)}
+  35% {transform:translate(-50%,-50%) scale(1)}
+  72% {opacity:1}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.85)}
+}
+
+/* ── INTRO SCREEN ── */
+.intro-class-btn{
+  background:var(--panel);border:2px solid var(--border);
+  color:var(--text);padding:10px 4px;
+  font-family:'Press Start 2P',monospace;font-size:6px;
+  cursor:pointer;flex:1;text-align:center;line-height:2;
+}
+.intro-class-btn.selected,.intro-class-btn:active{
+  border-color:var(--accent);background:#1a1600;color:var(--accent);
+}
+
+/* ── DIFFICULTY BUTTONS ── */
+.diff-btn{
+  background:var(--panel);border:1px solid var(--border);
+  color:var(--dim);padding:6px 2px;
+  font-family:'Press Start 2P',monospace;font-size:6px;
+  cursor:pointer;flex:1;text-align:center;
+}
+.diff-btn.active{border-color:var(--accent);color:var(--accent);background:#1a1600}
+
+/* ── TUTORIAL HINT ── */
+.tutorial-hint{
+  position:fixed;bottom:72px;left:50%;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,.92);
+  border:1px solid var(--accent);color:var(--accent);
+  font-family:'Press Start 2P',monospace;font-size:7px;
+  padding:9px 14px;max-width:82vw;text-align:center;
+  z-index:300;pointer-events:none;
+  animation:tutFade 4.5s ease-out forwards;
+}
+@keyframes tutFade{
+  0%  {opacity:0;transform:translateX(-50%) translateY(8px)}
+  12% {opacity:1;transform:translateX(-50%) translateY(0)}
+  72% {opacity:1}
+  100%{opacity:0}
+}

@@ -230,7 +230,7 @@ function bgBat(ctx, x, y) {
 }
 
 // ── HELPERS ──────────────────────────────────────────────────
-function unlockedSkills() { return SKILLS.filter(s => G.p.level >= s.unlockLv); }
+function unlockedSkills() { return SKILLS.filter(s => G.p.level >= s.unlockLv && (!s.reqClass || s.reqClass === G.p.class)); }
 
 
 // ── STATE ────────────────────────────────────────────────────
@@ -274,6 +274,8 @@ const G = {
   heroSprite: 'warrior',
   worldBossSteps: 0,
   guild: null,
+  difficulty: 'normal',
+  tutorialStep: 0,
 };
 
 // ── STATS ────────────────────────────────────────────────────
@@ -314,6 +316,7 @@ function stats() {
     if (b.type==='atk') atk+=b.val;
     if (b.type==='def') def+=b.val;
   }
+  if (G.combat) { atk+=G.combat.atkBonus||0; def+=G.combat.defBonus||0; }
   if (p.class && CLASSES[p.class]) {
     const cl = CLASSES[p.class];
     atk+=cl.bonusAtk||0; def+=cl.bonusDef||0;
@@ -383,6 +386,7 @@ function gainXP(amount) {
     const extra = ns ? `\n${ns.icon} ${ns.name}\nfreigeschaltet!` : '';
     SFX.levelUp();
     showOverlay(`⭐ LEVEL UP!\nLV ${p.level}\n+2 Stat +1 Talent${extra}`);
+    if(G.tutorialStep===2){G.tutorialStep=3;setTimeout(()=>showTutorialHint(2),1200);}
     updateArea();
     if (p.level===5  && !p.class)    setTimeout(showClassSelect, 800);
     if (p.level===15 && !p.subclass) setTimeout(showSubclassSelect, 800);
@@ -421,13 +425,14 @@ function updateArea() {
 
 // ── EXPLORE ──────────────────────────────────────────────────
 const EVENTS = [
-  {t:'combat',   w:35},{t:'gold',    w:12},{t:'heal',    w:8},
-  {t:'chest',    w:6}, {t:'shrine',  w:5}, {t:'boss',    w:3},
-  {t:'merchant', w:4}, {t:'stranger',w:3}, {t:'trap',    w:3},
-  {t:'dungeon',  w:3}, {t:'arena',   w:2}, {t:'smith',   w:3},
-  {t:'oracle',   w:2}, {t:'thief',   w:2}, {t:'meteor',  w:2},
-  {t:'divine',   w:2}, {t:'gather',  w:5}, {t:'pvp',     w:1},
-  {t:'fish',     w:4}, {t:'inn',     w:3}, {t:'nothing', w:2},
+  {t:'combat',    w:35},{t:'gold',    w:12},{t:'heal',    w:8},
+  {t:'chest',     w:6}, {t:'shrine',  w:5}, {t:'boss',    w:3},
+  {t:'merchant',  w:4}, {t:'stranger',w:3}, {t:'trap',    w:3},
+  {t:'dungeon',   w:3}, {t:'arena',   w:2}, {t:'smith',   w:3},
+  {t:'oracle',    w:2}, {t:'thief',   w:2}, {t:'meteor',  w:2},
+  {t:'divine',    w:2}, {t:'gather',  w:5}, {t:'pvp',     w:1},
+  {t:'fish',      w:4}, {t:'inn',     w:3}, {t:'nothing', w:2},
+  {t:'area_boss', w:2},
 ];
 const CHEST_LOOT = ['potion','potion','elixir','iron_sword','leather','iron_shield','health_ring','magic_ring','battle_brew','atk_rune','def_rune','crit_rune','mp_rune','chain_mail','mage_robe','runed_sword','mp_potion','bone_dagger','battle_gauntlets','storm_boots'];
 
@@ -523,9 +528,12 @@ function doStep() {
     addLog('⚔ Eine Aufforderung zum Duell!'); showPvPEvent();
   } else if (ev.t==='inn') {
     addLog('🏠 Du entdeckst ein Wirtshaus. Ausruhen?'); showInn();
+  } else if (ev.t==='area_boss') {
+    startAreaBoss(G.area.id);
   } else {
     addLog(NPC_FLAVOR_LINES[Math.floor(Math.random()*NPC_FLAVOR_LINES.length)]);
   }
+  if (G.tutorialStep===0&&!G.combat) { G.tutorialStep=1; showTutorialHint(0); }
 }
 
 function earnGold(g) {
@@ -603,7 +611,8 @@ function startCombat(foeId, isBoss) {
   const base=FOES[foeId];
   const isElite = !isBoss && Math.random() < 0.05;
   const em = isElite ? 2.2 : 1;
-  const m=(1+(G.p.level-1)*0.15)*(isBoss?2:1)*em;
+  const diffMult = G.difficulty==='easy'?0.75 : G.difficulty==='hard'?1.35 : 1;
+  const m=(1+(G.p.level-1)*0.15)*(isBoss?2:1)*em*diffMult;
   const goldMult = isBoss?3 : isElite?3 : 1;
   const drops=(DROPS[foeId]||[]).map(d=>(isBoss||isElite)?{...d,p:Math.min(1,d.p*(isElite?2.5:3))}:d);
   G.combat={
@@ -614,6 +623,7 @@ function startCombat(foeId, isBoss) {
     gold:[base.gold[0]*goldMult, base.gold[1]*goldMult],
     drops, playerTurn:true, playerStatus:[], enemyStatus:[], combo:0,
     statusDef:base.status, isKing:false,
+    atkBonus:0, atkBonusTurns:0, defBonus:0, defBonusTurns:0,
   };
   // bestiary
   if (!G.bestiary[foeId]) G.bestiary[foeId]={seen:0,killed:0};
@@ -628,6 +638,27 @@ function startFinalBoss() {
   G.combat = { ...SHADOW_KING, hp:SHADOW_KING.hp, maxHp:SHADOW_KING.maxHp, playerStatus:[], enemyStatus:[], combo:0, isBoss:true };
   addLog('👑 DER SHADOW KING ERWACHT!');
   enterCombatScreen('shadow_king', false, true);
+}
+
+function startAreaBoss(areaId) {
+  const boss = AREA_BOSSES[areaId]; if (!boss) { startCombat(G.area.foes[0], true); return; }
+  const base = FOES[boss.foeId]||FOES[G.area.foes[0]]; if (!base) return;
+  const diffMult = G.difficulty==='easy'?0.75 : G.difficulty==='hard'?1.35 : 1;
+  const m = (1+(G.p.level-1)*0.15) * boss.hpMult * diffMult;
+  G.combat = {
+    id:boss.foeId, isBoss:true, isElite:false,
+    name:boss.name, sprite:base.sprite,
+    hp:Math.floor(base.hp*m), maxHp:Math.floor(base.hp*m),
+    atk:Math.floor(base.atk*boss.atkMult*(1+(G.p.level-1)*0.15)*diffMult),
+    def:Math.floor(base.def*1.5*(1+(G.p.level-1)*0.1)),
+    xp:Math.floor(base.xp*boss.xpMult*(1+(G.p.level-1)*0.15)),
+    gold:[Math.floor(base.gold[0]*boss.goldMult), Math.floor(base.gold[1]*boss.goldMult)],
+    drops:boss.drops||[], playerTurn:true, playerStatus:[], enemyStatus:[], combo:0,
+    statusDef:base.status||null, isKing:false,
+    atkBonus:0, atkBonusTurns:0, defBonus:0, defBonusTurns:0,
+  };
+  addLog(`👑 ${boss.name} tritt auf! GEBIET-BOSS!`); SFX.boss();
+  enterCombatScreen(base.sprite, true, false, base.palette||null);
 }
 
 function enterCombatScreen(sprite, isBoss, isKing, palette=null) {
@@ -715,6 +746,31 @@ function useSkill(skillId) {
   if(e.hp<=0){setTimeout(combatWin,400);return;}
   if(stunned){combatLog('💫 Betäubt!'); p.mp+=skill.mp; setTimeout(enemyTurn,700);return;}
 
+  if(skill.atkBuff){
+    e.atkBonus=(e.atkBonus||0)+skill.atkBuff; e.atkBonusTurns=skill.buffTurns||3;
+    combatLog(`${skill.icon} ${skill.name}! +${skill.atkBuff} ATK für ${skill.buffTurns} Runden!`);
+    SFX.status(); floatDmg(document.getElementById('player-combat-canvas'),'+ATK','#ffcc00');
+    updateCombatUI(); updateHUD(); e.playerTurn=true; setCombatBtns(true); return;
+  }
+  if(skill.defBuff){
+    e.defBonus=(e.defBonus||0)+skill.defBuff; e.defBonusTurns=skill.buffTurns||3;
+    combatLog(`${skill.icon} ${skill.name}! +${skill.defBuff} DEF für ${skill.buffTurns} Runden!`);
+    SFX.status(); floatDmg(document.getElementById('player-combat-canvas'),'+DEF','#44aaff');
+    updateCombatUI(); updateHUD(); e.playerTurn=true; setCombatBtns(true); return;
+  }
+  if(skill.fleeSkill){
+    combatLog(`${skill.icon} ${skill.name}! Flucht gelungen!`); SFX.step();
+    G.combat=null; G.battleStats.fled++;
+    setTimeout(()=>showScreen('explore',null),600); return;
+  }
+  if(skill.healAmt&&skill.stun){
+    const healed=Math.min(s.maxHp-p.hp,skill.healAmt);
+    p.hp=Math.min(s.maxHp,p.hp+skill.healAmt);
+    applyStatus('enemy','stun',2,0);
+    combatLog(`${skill.icon} ${skill.name}! +${healed} HP & Feind betäubt!`);
+    SFX.heal(); floatDmg(document.getElementById('player-combat-canvas'),'+'+healed,'#52c07a');
+    updateCombatUI(); updateHUD(); e.playerTurn=true; setCombatBtns(true); return;
+  }
   if(skill.healAmt){
     const healed=Math.min(s.maxHp-p.hp,skill.healAmt);
     p.hp=Math.min(s.maxHp,p.hp+skill.healAmt);
@@ -742,7 +798,8 @@ function useSkill(skillId) {
   const scSub=p.subclass?SUBCLASSES[p.subclass]:null;
   const elemBonus=(skill.element&&FOES[e.id]&&FOES[e.id].weakTo===skill.element)?1.5:1;
   const skillMult=skill.dmgMult*(scSub&&scSub.skillBonus?(1+scSub.skillBonus):1)*elemBonus;
-  let dmg=Math.max(1,Math.floor(s.atk*skillMult-e.def+rand(-1,2))*(crit?2:1));
+  const critMultiplier=skill.critMult||(2+(s.critDmg||0));
+  let dmg=Math.max(1,Math.floor(s.atk*skillMult-e.def+rand(-1,2))*(crit?critMultiplier:1));
   if(elemBonus>1) combatLog(`🎯 SCHWÄCHE! ${skill.element.toUpperCase()}`);
   combatLog(`${skill.icon} ${skill.name}! ${dmg}${crit?' KRIT!':''}`);
   if(crit) SFX.crit(); else SFX.hit();
@@ -752,6 +809,7 @@ function useSkill(skillId) {
   shake(ec2); flashHit(ec2);
   if(skill.stun) applyStatus('enemy','stun',1,0);
   if(skill.burn) applyStatus('enemy','burn',skill.id==='meteor'?3:2,skill.id==='meteor'?14:8);
+  if(skill.poisonSkill) applyStatus('enemy','poison',4,8+Math.floor(s.atk*0.15));
   const doDrain=skill.drain||(scSub&&scSub.alwaysDrain);
   if(doDrain){ const d=Math.floor(dmg*0.4); p.hp=Math.min(s.maxHp,p.hp+d); combatLog(`🩸 +${d} HP`); floatDmg(document.getElementById('player-combat-canvas'),'+'+d,'#cc44aa'); }
   updateCombatUI(); updateHUD();
@@ -822,7 +880,11 @@ function enemyTurn() {
     combatLog(`💥 ${G.combat.name} Phase 2! ATK ×1.5!`);
     SFX.boss();
   }
-  const p=G.p; const e=G.combat; const s=stats();
+  const p=G.p; const e=G.combat;
+  // Decrement combat skill buffs
+  if(e.atkBonusTurns>0){e.atkBonusTurns--;if(e.atkBonusTurns===0)e.atkBonus=0;}
+  if(e.defBonusTurns>0){e.defBonusTurns--;if(e.defBonusTurns===0)e.defBonus=0;}
+  const s=stats();
   // Staff MP regen
   if(s.mpRegen>0){ p.mp=Math.min(s.maxMp,p.mp+s.mpRegen); updateHUD(); }
   // Companion attack
@@ -919,6 +981,7 @@ function combatWin() {
   tickQuestKill(e.id); tickDailyKill(e.id);
   for(const drop of (e.drops||[])){ if(Math.random()<drop.p){ addInv(drop.id); const it=ITEMS[drop.id]; if(it) combatLog(`📦 ${it.rarity==='legendary'?'🌟':it.rarity==='epic'?'💜':''} ${it.name}!`); } }
   G.battleStats.won++;
+  if(G.tutorialStep===1){G.tutorialStep=2;setTimeout(()=>showTutorialHint(1),600);}
   const xp=e.xp; const isKing=e.isKing;
   const isDungeon=!!G.dungeon; const isArena=!!G.arena; const isBossRush=!!G.bossRush;
   const sc=G.p.subclass?SUBCLASSES[G.p.subclass]:null;
@@ -1597,7 +1660,10 @@ function addInv(id, silent=false, forceUnidentified=false){
     G.p.inv.push({id,equipped:false, _unidentified:unid||undefined});
     if(unid) addLog(`📜 ??? Unbekanntes ${item.slot==='weapon'?'Waffe':item.slot==='armor'?'Rüstung':'Item'} gefunden! (Schriftrolle zum Identifizieren)`);
   }
-  if(!silent) SFX.itemGet();
+  if(!silent) {
+    SFX.itemGet();
+    if(item.rarity==='epic'||item.rarity==='legendary') showRarePopup(item);
+  }
 }
 
 function identifyItem(idx) {
@@ -2003,30 +2069,85 @@ function showOverlay(msg){
   setTimeout(()=>wrap.remove(),2800);
 }
 
-// ── NAME PROMPT ──────────────────────────────────────────────
+// ── RARE POPUP ───────────────────────────────────────────────
+function showRarePopup(item) {
+  const el = document.createElement('div');
+  el.className = 'rare-popup ' + (item.rarity||'');
+  el.innerHTML = `${item.icon||'📦'} ${item.rarity==='legendary'?'LEGENDÄR':'EPISCH'}!<br><span style="font-size:7px;color:inherit">${item.name}</span>`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 2400);
+}
+
+// ── INTRO SCREEN ─────────────────────────────────────────────
 function promptName(onDone){
+  window._onNameDone=onDone;
   const wrap=document.createElement('div'); wrap.id='name-overlay';
-  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:100';
-  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:88vw">⚔ PIXEL QUEST RPG<br><br>
-    <span style="font-size:7px;color:var(--dim)">Dein Heldenname:</span><br>
-    <input id="name-inp" type="text" maxlength="10" value="Hero" autocomplete="off">
-    <div style="margin:8px 0;display:flex;align-items:center;gap:8px;justify-content:center">
+  wrap.style.cssText='position:fixed;inset:0;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.93);z-index:100;padding:12px 0';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;max-width:90vw;text-align:center">
+    <div style="font-size:11px;color:var(--accent);margin-bottom:10px">⚔ PIXEL QUEST RPG</div>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:14px">Ein Pixel-Abenteuer wartet!</div>
+
+    <div style="font-size:7px;color:var(--dim);margin-bottom:4px">Dein Heldenname:</div>
+    <input id="name-inp" type="text" maxlength="10" value="Hero" autocomplete="off" style="margin-bottom:14px">
+
+    <div style="font-size:7px;color:var(--text);margin-bottom:6px">Klasse wählen:</div>
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <button class="intro-class-btn selected" id="cls-warrior" onclick="introSelectClass('warrior')">⚔<br>Krieger<br><span style="font-size:5px;color:var(--dim)">+ATK +HP</span></button>
+      <button class="intro-class-btn" id="cls-mage"    onclick="introSelectClass('mage')">🔮<br>Magier<br><span style="font-size:5px;color:var(--dim)">+MP Schaden</span></button>
+      <button class="intro-class-btn" id="cls-rogue"   onclick="introSelectClass('rogue')">🗡<br>Schurke<br><span style="font-size:5px;color:var(--dim)">+Krit Ausweichen</span></button>
+    </div>
+
+    <div style="font-size:7px;color:var(--text);margin-bottom:6px">Schwierigkeit:</div>
+    <div style="display:flex;gap:4px;margin-bottom:14px">
+      <button class="diff-btn" id="diff-easy"   onclick="introSetDiff('easy')">😊<br>Leicht</button>
+      <button class="diff-btn active" id="diff-normal" onclick="introSetDiff('normal')">⚔<br>Normal</button>
+      <button class="diff-btn" id="diff-hard"   onclick="introSetDiff('hard')">💀<br>Schwer</button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px">
       <input type="checkbox" id="hc-check" onchange="G.hardcore=this.checked">
       <label for="hc-check" style="font-size:6px;color:#ff4444;cursor:pointer">☠ HARDCORE (Permadeath)</label>
     </div>
-    <button id="name-start-btn" onclick="confirmName()">▶ START</button>
+    <button id="name-start-btn" onclick="confirmName()">▶ ABENTEUER BEGINNEN</button>
   </div>`;
   document.body.appendChild(wrap);
-  document.getElementById('name-inp').focus(); document.getElementById('name-inp').select();
-  document.getElementById('name-inp').addEventListener('keydown',e=>{if(e.key==='Enter')confirmName();});
-  window._onNameDone=onDone;
+  const inp=document.getElementById('name-inp');
+  inp.focus(); inp.select();
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')confirmName();});
+  window._introClass='warrior';
+  window._introDiff='normal';
+}
+
+function introSelectClass(cls){
+  window._introClass=cls;
+  ['warrior','mage','rogue'].forEach(c=>{
+    const b=document.getElementById('cls-'+c);
+    if(b) b.classList.toggle('selected',c===cls);
+  });
+}
+function introSetDiff(d){
+  window._introDiff=d; G.difficulty=d;
+  ['easy','normal','hard'].forEach(x=>{
+    const b=document.getElementById('diff-'+x);
+    if(b) b.classList.toggle('active',x===d);
+  });
 }
 
 function confirmName(){
   const inp=document.getElementById('name-inp');
   G.p.name=(inp?.value.trim()||'Hero').slice(0,10)||'Hero';
+  G.p.class=window._introClass||'warrior';
+  G.difficulty=window._introDiff||'normal';
+  if(G.p.class&&CLASSES[G.p.class]){
+    const cl=CLASSES[G.p.class];
+    G.p.baseAtk+=(cl.bonusAtk||0); G.p.baseDef+=(cl.bonusDef||0);
+    G.p.maxHp+=(cl.bonusHp||0); G.p.hp=G.p.maxHp;
+    G.p.maxMp+=(cl.bonusMp||0); G.p.mp=G.p.maxMp;
+  }
   document.getElementById('name-overlay')?.remove();
   document.getElementById('pcombat-name').textContent=G.p.name;
+  refresh();
+  setTimeout(()=>showTutorialHint(0),800);
   if(window._onNameDone) window._onNameDone();
 }
 
@@ -2452,7 +2573,7 @@ function doRuneCombine(runeId) {
   showRuneCombine(); refresh();
 }
 
-// ── EXPORT CODE ───────────────────────────────────────────────
+// ── EXPORT / IMPORT CODE ─────────────────────────────────────
 function exportCode() {
   const data = { name:G.p.name, level:G.p.level, kills:G.p.kills, gold:G.p.totalGoldEarned, steps:G.steps, prestige:G.p.prestige||0 };
   const code = btoa(JSON.stringify(data));
@@ -2460,12 +2581,110 @@ function exportCode() {
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
   wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;text-align:center">
     🏅 RANGLISTEN-CODE<br><br>
-    <div style="font-size:6px;color:var(--dim);word-break:break-all;border:1px solid var(--border);padding:8px;margin:8px 0">${code}</div>
+    <div style="font-size:6px;color:var(--dim);word-break:break-all;border:1px solid var(--border);padding:8px;margin:8px 0;user-select:all">${code}</div>
     <div style="font-size:7px;color:var(--dim)">${G.p.name} · LV${G.p.level} · ${G.p.kills} Kills</div><br>
-    <button onclick="navigator.clipboard?.writeText('${code}').then(()=>addLog('📋 Code kopiert!'))" style="width:100%;background:var(--accent);color:var(--bg);border:none;padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:6px">📋 Kopieren</button>
+    <button onclick="navigator.clipboard?.writeText('${code}').then(()=>addLog('📋 Code kopiert!'))" style="width:100%;background:var(--accent);color:var(--bg);border:none;padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:4px">📋 Exportieren / Kopieren</button>
+    <button onclick="showImportCode()" style="width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:6px">📥 Code Importieren</button>
     <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
   </div>`;
   document.body.appendChild(wrap);
+}
+
+function showImportCode() {
+  document.getElementById('overlay')?.remove();
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;text-align:center">
+    📥 CODE IMPORTIEREN<br><br>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:8px">Ranglisten-Code einfügen:</div>
+    <textarea id="import-inp" style="width:100%;height:60px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:monospace;font-size:7px;padding:6px;resize:none;box-sizing:border-box" placeholder="Code hier einfügen..."></textarea><br><br>
+    <button onclick="doImportCode()" style="width:100%;background:var(--accent);color:var(--bg);border:none;padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:6px">✅ Importieren</button>
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Abbrechen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function doImportCode() {
+  const raw = document.getElementById('import-inp')?.value.trim();
+  if (!raw) { showOverlay('❌ Kein Code eingegeben!'); return; }
+  try {
+    const d = JSON.parse(atob(raw));
+    if (!d.name||!d.level) throw new Error('invalid');
+    document.getElementById('overlay')?.remove();
+    showOverlay(`🏅 RANGLISTE\n\n👤 ${d.name}\n⚔ LV ${d.level}\n💀 Kills: ${d.kills||0}\n🪙 Gold: ${d.gold||0}\n👣 Schritte: ${d.steps||0}${d.prestige?'\n🌟 Prestige '+d.prestige:''}`);
+  } catch(_) {
+    showOverlay('❌ Ungültiger Code!');
+  }
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────
+function showSettings() {
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
+  const d = G.difficulty||'normal';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;text-align:center">
+    ⚙ EINSTELLUNGEN<br><br>
+    <div style="font-size:7px;color:var(--text);margin-bottom:6px">Schwierigkeit:</div>
+    <div style="display:flex;gap:4px;margin-bottom:14px">
+      <button class="diff-btn${d==='easy'?' active':''}"   id="s-diff-easy"   onclick="settingsDiff('easy')">😊 Leicht</button>
+      <button class="diff-btn${d==='normal'?' active':''}" id="s-diff-normal" onclick="settingsDiff('normal')">⚔ Normal</button>
+      <button class="diff-btn${d==='hard'?' active':''}"   id="s-diff-hard"   onclick="settingsDiff('hard')">💀 Schwer</button>
+    </div>
+    <div style="font-size:6px;color:var(--dim);margin-bottom:14px">Schwierigkeit wirkt sich auf Gegner-HP/ATK aus.</div>
+    <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px">
+      <input type="checkbox" id="s-mute" ${SFX.muted?'checked':''} onchange="if(this.checked!==SFX.muted)toggleMute()">
+      <label for="s-mute" style="font-size:7px;cursor:pointer">🔇 Stumm</label>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:14px">
+      <input type="checkbox" id="s-hc" ${G.hardcore?'checked':''} onchange="G.hardcore=this.checked;save()">
+      <label for="s-hc" style="font-size:6px;color:#ff4444;cursor:pointer">☠ Hardcore (Permadeath)</label>
+    </div>
+    <button onclick="confirmReset()" style="width:100%;background:#3a1010;border:1px solid #ff4444;color:#ff4444;padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:6px">🗑 Spielstand LÖSCHEN</button>
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function settingsDiff(d) {
+  G.difficulty=d; save();
+  ['easy','normal','hard'].forEach(x=>{
+    const b=document.getElementById('s-diff-'+x);
+    if(b) b.classList.toggle('active',x===d);
+  });
+}
+
+function confirmReset() {
+  const wrap2=document.createElement('div'); wrap2.id='overlay2';
+  wrap2.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);z-index:200';
+  wrap2.innerHTML=`<div id="overlay-box" style="text-align:center;min-width:240px">
+    ⚠ WIRKLICH LÖSCHEN?<br><br>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:12px">Alle Daten gehen verloren!</div>
+    <button onclick="doReset()" style="width:100%;background:#ff4444;border:none;color:#000;padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:6px">💥 JA, LÖSCHEN</button>
+    <button onclick="document.getElementById('overlay2').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Abbrechen</button>
+  </div>`;
+  document.body.appendChild(wrap2);
+}
+
+function doReset() {
+  localStorage.removeItem('pq_save'); location.reload();
+}
+
+// ── TUTORIAL ──────────────────────────────────────────────────
+const TUTORIAL_HINTS = [
+  '💡 Drücke EXPLORE um dein Abenteuer zu starten!',
+  '💡 Benutze Skills im Kampf für mehr Schaden!',
+  '💡 Levle auf um neue Fähigkeiten freizuschalten!',
+  '💡 Öffne Schatzkisten für seltene Ausrüstung!',
+  '💡 Rüste Items aus im Inventar für Boni!',
+];
+
+function showTutorialHint(step) {
+  if (step >= TUTORIAL_HINTS.length) return;
+  const el = document.createElement('div');
+  el.className = 'tutorial-hint';
+  el.textContent = TUTORIAL_HINTS[step];
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 4800);
 }
 
 // ── GUILD ─────────────────────────────────────────────────────
@@ -2576,6 +2795,7 @@ function save(){
     bank:G.bank, resources:G.resources, companion:G.companion,
     speedrun:G.speedrun, storyShown:G.storyShown,
     guild:G.guild, dayNight:G.dayNight, heroSprite:G.heroSprite, worldBossSteps:G.worldBossSteps,
+    difficulty:G.difficulty, tutorialStep:G.tutorialStep,
   }));}catch(_){}
 }
 
@@ -2592,6 +2812,7 @@ function load(){
     G.storyShown=d.storyShown||[];
     G.guild=d.guild||null; G.dayNight=d.dayNight||6; G.heroSprite=d.heroSprite||'warrior';
     G.worldBossSteps=d.worldBossSteps||0;
+    G.difficulty=d.difficulty||'normal'; G.tutorialStep=d.tutorialStep||99;
     if(!G.p.eq.pet) G.p.eq.pet=null;
     if(!G.p.subclass) G.p.subclass=null;
     if(!G.p.eq.helm) G.p.eq.helm=null;

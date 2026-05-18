@@ -200,7 +200,33 @@ const SKILLS = [
   { id:'void_blast', name:'Void Blast',    icon:'🌀', mp:55, unlockLv:25, dmgMult:4.0,             element:'void',  desc:'4.0× Void-Schaden' },
   { id:'lava_strike',name:'Lava Strike',   icon:'🌋', mp:60, unlockLv:30, dmgMult:3.5, multiHit:2, element:'fire',  desc:'2× 3.5× Lava' },
   { id:'holy_nova',  name:'Holy Nova',     icon:'✨', mp:65, unlockLv:35, dmgMult:5.5,             element:'light', desc:'5.5× Licht-Nova' },
+  // ── Krieger-Skills ─────────────────────────────────────────
+  { id:'war_cry',    name:'Kriegsschrei',  icon:'📢', mp:15, unlockLv:5,  reqClass:'warrior', atkBuff:18, buffTurns:3, desc:'+18 ATK für 3 Runden' },
+  { id:'shield_wall',name:'Schildwall',    icon:'🛡', mp:18, unlockLv:8,  reqClass:'warrior', defBuff:25, buffTurns:3, desc:'+25 DEF für 3 Runden' },
+  { id:'whirlwind',  name:'Wirbelwind',    icon:'🌪', mp:35, unlockLv:14, reqClass:'warrior', dmgMult:1.6, multiHit:3, desc:'3× 1.6× Wirbelwind' },
+  // ── Magier-Skills ──────────────────────────────────────────
+  { id:'arcane',     name:'Arkaner Blitz', icon:'🌟', mp:20, unlockLv:4,  reqClass:'mage',    dmgMult:3.0, element:'arcane', desc:'3.0× Arkaner Schaden' },
+  { id:'mana_surge', name:'Mana-Schwall',  icon:'💫', mp:35, unlockLv:9,  reqClass:'mage',    dmgMult:2.2, multiHit:3, element:'arcane', desc:'3× 2.2× Arkaner Burst' },
+  { id:'time_stop',  name:'Zeitstillstand',icon:'⏳', mp:45, unlockLv:16, reqClass:'mage',    dmgMult:0,  stun:true, healAmt:30, desc:'Stun + 30 HP Erholung' },
+  // ── Schurken-Skills ────────────────────────────────────────
+  { id:'backstab',   name:'Hinterhalt',    icon:'🗡', mp:12, unlockLv:4,  reqClass:'rogue',   dmgMult:1.5, critMult:3.0, desc:'1.5× + 3× Krit-Schaden' },
+  { id:'smoke_bomb', name:'Rauchbombe',    icon:'💨', mp:20, unlockLv:7,  reqClass:'rogue',   fleeSkill:true, desc:'Garantierte Flucht' },
+  { id:'poison_strike',name:'Giftstoß',   icon:'🐍', mp:25, unlockLv:12, reqClass:'rogue',   dmgMult:1.2, poisonSkill:true, desc:'1.2× + starkes Gift' },
 ];
+
+// ── AREA BOSSES ──────────────────────────────────────────────
+const AREA_BOSSES = {
+  forest:    { name:'👑 Goblin-König',       foeId:'goblin',      hpMult:5,   atkMult:2.5, xpMult:4,  goldMult:4,  drops:[{id:'runed_sword',p:.6},{id:'elixir',p:1}] },
+  cave:      { name:'💀 Uralt-Troll',         foeId:'troll',       hpMult:4.5, atkMult:2.2, xpMult:4,  goldMult:4,  drops:[{id:'chain_mail',p:.7},{id:'elixir',p:1}] },
+  dungeon:   { name:'🔮 Dungeon-Herr',        foeId:'dark_mage',   hpMult:4,   atkMult:2.3, xpMult:4.5,goldMult:4.5,drops:[{id:'shadow_helm',p:.5},{id:'elixir',p:1}] },
+  graveyard: { name:'💀 Lich-Lord',           foeId:'wraith',      hpMult:5,   atkMult:2.5, xpMult:5,  goldMult:5,  drops:[{id:'magic_ring',p:.7},{id:'mana_crystal',p:.4},{id:'elixir',p:1}] },
+  castle:    { name:'😈 Schattenfürst',       foeId:'dark_sorcerer',hpMult:4,  atkMult:2.3, xpMult:5,  goldMult:5,  drops:[{id:'demon_armor',p:.5},{id:'cursed_blade',p:.3},{id:'elixir',p:1}] },
+  volcanic:  { name:'🌋 Magma-Overlord',      foeId:'magma_titan', hpMult:3.5, atkMult:2.0, xpMult:5,  goldMult:5,  drops:[{id:'berserker_axe',p:.5},{id:'berserker_plate',p:.3},{id:'elixir',p:1}] },
+  void:      { name:'🌀 Void-Kaiser',         foeId:'void_lich',   hpMult:4,   atkMult:2.5, xpMult:6,  goldMult:6,  drops:[{id:'void_robe',p:.5},{id:'void_gloves',p:.4},{id:'elixir',p:1}] },
+  underwater:{ name:'🦑 Kraken-König',        foeId:'deep_kraken', hpMult:3.5, atkMult:2.0, xpMult:6,  goldMult:6,  drops:[{id:'chaos_crystal',p:.4},{id:'celestial_bow',p:.2},{id:'elixir',p:1}] },
+  sky:       { name:'⚡ Donner-Imperator',    foeId:'thunder_wyrm',hpMult:3.5, atkMult:2.0, xpMult:6,  goldMult:6,  drops:[{id:'crystal_crown',p:.3},{id:'chaos_blade',p:.2},{id:'elixir',p:1}] },
+  ice:       { name:'❄ Gletscher-Titan',      foeId:'blizzard_dragon',hpMult:3.5,atkMult:2.0,xpMult:6, goldMult:6,  drops:[{id:'dragon_scale',p:.3},{id:'crystal_crown',p:.3},{id:'elixir',p:1}] },
+};
 
 // ── SHADOW KING ──────────────────────────────────────────────
 const SHADOW_KING = {
