@@ -1,3 +1,10 @@
+// ── OVERLAY HELPERS ──────────────────────────────────────────
+function closeOverlay(){
+  const el=document.getElementById('overlay'); if(!el) return;
+  el.classList.add('overlay-closing');
+  setTimeout(()=>el.remove(),150);
+}
+
 // ── NPC EVENTS ───────────────────────────────────────────────
 function showMerchant() {
   const pool=Object.entries(ITEMS).filter(([,it])=>it.buyable);
@@ -401,6 +408,24 @@ function sellItem(idx){
   earnGold(price); addLog(`💱 ${item.name} für ${price} Gold verkauft.`); refresh();
 }
 
+function confirmSell(idx){
+  const slot=G.p.inv[idx]; if(!slot||slot.equipped) return;
+  const item=ITEMS[slot.id]; if(!item) return;
+  const price=Math.floor(item.value*0.5);
+  document.getElementById('overlay')?.remove();
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:220px;max-width:90vw;text-align:center">
+    <div style="font-size:14px;margin-bottom:8px">${item.icon}</div>
+    <div style="color:var(--accent);font-size:8px;margin-bottom:10px">💱 ${item.name} für ${price}🪙 verkaufen?</div>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button onclick="sellItem(${idx});document.getElementById('overlay').remove();refresh()" style="background:var(--green);color:var(--bg);border:none;padding:8px 16px;font-family:inherit;font-size:7px;cursor:pointer">✔ Ja</button>
+      <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:8px 16px;font-family:inherit;font-size:7px;cursor:pointer">✖ Nein</button>
+    </div>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
 function recycleItem(invIdx) {
   const slot=G.p.inv[invIdx]; if(!slot||slot.equipped) return;
   const item=ITEMS[slot.id]; if(!item) return;
@@ -417,8 +442,43 @@ function recycleItem(invIdx) {
 
 function updateInvScreen(){
   document.getElementById('inv-gold-lbl').textContent=`🪙 ${G.p.gold}`;
-  const grid=document.getElementById('inv-grid'); grid.innerHTML='';
-  G.p.inv.forEach((slot,idx)=>{
+  // Sort button
+  const sortLabels={'none':'Standard','rarity':'Seltenheit','type':'Typ'};
+  const sortModes=['none','rarity','type'];
+  let sortBtn=document.getElementById('inv-sort-btn');
+  const grid=document.getElementById('inv-grid');
+  if(!sortBtn){
+    sortBtn=document.createElement('button');
+    sortBtn.id='inv-sort-btn';
+    sortBtn.style.cssText='font-size:6px;color:var(--dim);background:none;border:1px solid var(--border);padding:4px 8px;cursor:pointer;font-family:inherit;display:block;margin-bottom:6px';
+    grid.parentNode.insertBefore(sortBtn,grid);
+  }
+  if(!G.invSort) G.invSort='none';
+  sortBtn.textContent=`Sortierung: ${sortLabels[G.invSort]}`;
+  sortBtn.onclick=()=>{
+    const next=sortModes[(sortModes.indexOf(G.invSort)+1)%sortModes.length];
+    G.invSort=next; updateInvScreen();
+  };
+  grid.innerHTML='';
+  // Build a sorted index array so original inv indices stay valid
+  const SLOT_ORDER=['weapon','armor','helm','gloves','boots','acc','pet','rune'];
+  const indices=G.p.inv.map((_,i)=>i);
+  if(G.invSort==='rarity'){
+    indices.sort((a,b)=>{
+      const ra=RARITY_ORDER.indexOf(ITEMS[G.p.inv[a].id]?.rarity||'common');
+      const rb=RARITY_ORDER.indexOf(ITEMS[G.p.inv[b].id]?.rarity||'common');
+      return rb-ra;
+    });
+  } else if(G.invSort==='type'){
+    indices.sort((a,b)=>{
+      const sa=ITEMS[G.p.inv[a].id]?.slot; const sb=ITEMS[G.p.inv[b].id]?.slot;
+      const ia=sa?SLOT_ORDER.indexOf(sa):(sa===null?SLOT_ORDER.length:SLOT_ORDER.length+1);
+      const ib=sb?SLOT_ORDER.indexOf(sb):(sb===null?SLOT_ORDER.length:SLOT_ORDER.length+1);
+      return (ia<0?SLOT_ORDER.length:ia)-(ib<0?SLOT_ORDER.length:ib);
+    });
+  }
+  indices.forEach(idx=>{
+    const slot=G.p.inv[idx];
     const item=ITEMS[slot.id]; if(!item) return;
     const upg=slot._upgrade||0;
     const div=document.createElement('div');
@@ -433,7 +493,7 @@ function updateInvScreen(){
       div.onclick=()=>{ if(slot.equipped&&item.slot&&item.slot!=='pet'){ showUpgradeMenu(idx); } else if(!item.slot){ showConsumableMenu(idx); } else if(item.slot&&!slot.equipped){ showItemCompare(idx); } else { useItem(idx); } };
     }
     let t;
-    div.addEventListener('touchstart',()=>{t=setTimeout(()=>{ if(!slot.equipped)sellItem(idx); },600);},{passive:true});
+    div.addEventListener('touchstart',()=>{t=setTimeout(()=>{ if(!slot.equipped)confirmSell(idx); },600);},{passive:true});
     div.addEventListener('touchend',()=>clearTimeout(t),{passive:true});
     div.addEventListener('touchmove',()=>clearTimeout(t),{passive:true});
     grid.appendChild(div);
@@ -1133,32 +1193,32 @@ function showMoreMenu() {
   wrap.innerHTML = `<div id="overlay-box" style="width:100%;max-width:400px;max-height:80dvh;overflow-y:auto;padding:12px 12px 20px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <span style="color:var(--accent);font-size:9px">☰ MEHR</span>
-      <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:4px 8px;font-family:inherit;font-size:7px;cursor:pointer">✖</button>
+      <button onclick="closeOverlay()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:4px 8px;font-family:inherit;font-size:7px;cursor:pointer">✖</button>
     </div>
     <div class="more-cat">⚔ KAMPF</div>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showPvP()">⚔ PvP</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();startBossRush()">⚡ Boss Rush</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showOverlay('Bald verfügbar')">🏟 Arena</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showDailyChallenge()">🎯 Daily Challenge</button>
+    <button class="more-btn" onclick="closeOverlay();showPvP()">⚔ PvP</button>
+    <button class="more-btn" onclick="closeOverlay();startBossRush()">⚡ Boss Rush</button>
+    <button class="more-btn" onclick="closeOverlay();startArena()">🏟 Arena</button>
+    <button class="more-btn" onclick="closeOverlay();showDailyChallenge()">🎯 Daily Challenge</button>
     <div class="more-cat">🏰 DUNGEONS</div>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showDailyDungeon()">🏰 Daily Dungeon</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showSeasonalDungeon()">🌸 Saisonaler Dungeon</button>
+    <button class="more-btn" onclick="closeOverlay();showDailyDungeon()">🏰 Daily Dungeon</button>
+    <button class="more-btn" onclick="closeOverlay();showSeasonalDungeon()">🌸 Saisonaler Dungeon</button>
     <div class="more-cat">👤 CHARAKTER</div>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showCompanions()">🧑‍🤝‍🧑 Begleiter</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showGuild()">🏛 Gilde</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showPrestigeShop()">⭐ Prestige-Shop</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showSpriteSelect()">🎨 Sprite</button>
+    <button class="more-btn" onclick="closeOverlay();showCompanions()">🧑‍🤝‍🧑 Begleiter</button>
+    <button class="more-btn" onclick="closeOverlay();showGuild()">🏛 Gilde</button>
+    <button class="more-btn" onclick="closeOverlay();showPrestigeShop()">⭐ Prestige-Shop</button>
+    <button class="more-btn" onclick="closeOverlay();showSpriteSelect()">🎨 Sprite</button>
     <div class="more-cat">📊 INFO</div>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showStats()">📊 Stats</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showHighscore()">🏆 Highscore</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showBattleHistory()">📜 Kampfhistorie</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showBestiary()">📗 Bestiary</button>
+    <button class="more-btn" onclick="closeOverlay();showStats()">📊 Stats</button>
+    <button class="more-btn" onclick="closeOverlay();showHighscore()">🏆 Highscore</button>
+    <button class="more-btn" onclick="closeOverlay();showBattleHistory()">📜 Kampfhistorie</button>
+    <button class="more-btn" onclick="closeOverlay();showBestiary()">📗 Bestiary</button>
     <div class="more-cat">⚙ SYSTEM</div>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showSettings()">⚙ Einstellungen</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showBank()">🏦 Bank</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showLootFilter()">🗑 Loot-Filter</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();showRuneCombine()">💫 Runen</button>
-    <button class="more-btn" onclick="document.getElementById('overlay').remove();exportCode()">📋 Export</button>
+    <button class="more-btn" onclick="closeOverlay();showSettings()">⚙ Einstellungen</button>
+    <button class="more-btn" onclick="closeOverlay();showBank()">🏦 Bank</button>
+    <button class="more-btn" onclick="closeOverlay();showLootFilter()">🗑 Loot-Filter</button>
+    <button class="more-btn" onclick="closeOverlay();showRuneCombine()">💫 Runen</button>
+    <button class="more-btn" onclick="closeOverlay();exportCode()">📋 Export</button>
   </div>`;
   document.body.appendChild(wrap);
 }

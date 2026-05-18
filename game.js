@@ -279,6 +279,7 @@ const G = {
   battleHistory: [],
   dailyChallenge: null,
   storyChains: {},
+  invSort: 'none',
 };
 
 // ── STATS ────────────────────────────────────────────────────
@@ -1308,7 +1309,7 @@ function showCrafting() {
   wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:92vw;max-height:82vh;display:flex;flex-direction:column;overflow:hidden">
     <div style="flex-shrink:0;padding-bottom:6px">⚗ CRAFTING<br><br>${resBadge}</div>
     <div style="overflow-y:auto;flex:1;padding-right:2px">${rows}</div>
-    <div style="flex-shrink:0;padding-top:6px"><button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:8px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ Schließen</button></div>
+    <div style="flex-shrink:0;padding-top:6px"><button onclick="closeOverlay()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:8px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ Schließen</button></div>
   </div>`;
   document.body.appendChild(wrap);
 }
@@ -1959,6 +1960,7 @@ function save(){
     difficulty:G.difficulty, tutorialStep:G.tutorialStep,
     prestigeCoins:G.prestigeCoins, prestigeUpgrades:G.prestigeUpgrades,
     battleHistory:G.battleHistory, dailyChallenge:G.dailyChallenge, storyChains:G.storyChains,
+    invSort:G.invSort,
   }));}catch(_){}
 }
 
@@ -1978,6 +1980,7 @@ function load(){
     G.difficulty=d.difficulty||'normal'; G.tutorialStep=d.tutorialStep||99;
     G.prestigeCoins=d.prestigeCoins||0; G.prestigeUpgrades=d.prestigeUpgrades||{};
     G.battleHistory=d.battleHistory||[]; G.dailyChallenge=d.dailyChallenge||null; G.storyChains=d.storyChains||{};
+    G.invSort=d.invSort||'none';
     if(!G.p.eq.pet) G.p.eq.pet=null;
     if(!G.p.subclass) G.p.subclass=null;
     if(!G.p.eq.helm) G.p.eq.helm=null;
