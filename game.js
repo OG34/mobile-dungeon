@@ -276,6 +276,9 @@ const G = {
   guild: null,
   difficulty: 'normal',
   tutorialStep: 0,
+  battleHistory: [],
+  dailyChallenge: null,
+  storyChains: {},
 };
 
 // ── STATS ────────────────────────────────────────────────────
@@ -628,6 +631,21 @@ function startCombat(foeId, isBoss) {
   // bestiary
   if (!G.bestiary[foeId]) G.bestiary[foeId]={seen:0,killed:0};
   G.bestiary[foeId].seen++;
+  // Monster affixes
+  const affixes = [];
+  if (isElite && typeof MONSTER_AFFIXES !== 'undefined') {
+    const pool = [...MONSTER_AFFIXES];
+    const numAffixes = Math.min(2, 1 + Math.floor(Math.random()*2));
+    for (let i=0;i<numAffixes;i++) {
+      const pick = pool.splice(Math.floor(Math.random()*pool.length),1)[0];
+      if (pick) { pick.apply(G.combat); affixes.push(pick); }
+    }
+    if (affixes.length) combatLog(`⚡ Affixe: ${affixes.map(a=>a.icon+a.name).join(' ')}`);
+  } else if (!isBoss && G.p.level >= 10 && Math.random() < 0.12 && typeof MONSTER_AFFIXES !== 'undefined') {
+    const pick = MONSTER_AFFIXES[Math.floor(Math.random()*MONSTER_AFFIXES.length)];
+    if (pick) { pick.apply(G.combat); affixes.push(pick); combatLog(`🌀 ${pick.icon} ${G.combat.name} (${pick.name})!`); }
+  }
+  if (affixes.length) G.combat.name = affixes.map(a=>a.icon).join('')+' '+G.combat.name;
   if (isElite) { addLog(`⚡ Ein ELITE ${base.name} erscheint! (3× Beute)`); SFX.boss(); }
   else addLog(isBoss?`🌟 Mächtiger ${base.name}! BOSS!`:`⚔ Ein ${base.name} erscheint!`);
   enterCombatScreen(base.sprite, isBoss||isElite, false, base.palette||null);
@@ -903,16 +921,18 @@ function enemyTurn() {
   if(e.hp<=0){setTimeout(combatWin,400);return;}
   if(!stunned){
     e.combo=0;
-    // Evasion check
-    if(s.evasion>0&&Math.random()<s.evasion){ combatLog('💨 Ausgewichen!'); }
-    else {
+    const attackTimes = e._multiAtk||1;
+    for (let ai=0; ai<attackTimes; ai++) {
+      // Evasion check
+      if(s.evasion>0&&Math.random()<s.evasion){ combatLog('💨 Ausgewichen!'); continue; }
+      if(e._evasion&&Math.random()<e._evasion){ combatLog(`💨 ${e.name} weicht aus!`); continue; }
       const crit=Math.random()<0.10;
       const nightMult = (G.dayNight >= 21 || G.dayNight < 5) ? 1.1 : 1;
       const dmg=Math.max(1,Math.floor((e.atk-s.def+rand(-2,2))*(crit?1.8:1)*nightMult));
       // Status resist
       const resisted=s.resist>0&&Math.random()<s.resist;
       p.hp-=dmg; G.battleStats.dmgTaken+=dmg;
-      combatLog(`💢 ${e.name}: ${dmg}${crit?' Krit!':''}`);
+      combatLog(`💢 ${e.name}${attackTimes>1?' (×'+attackTimes+')':''}: ${dmg}${crit?' Krit!':''}`);
       SFX.dmgTake();
       const ec3=document.getElementById('enemy-canvas');
       if(ec3){ec3.classList.remove('enemy-lunge');void ec3.offsetWidth;ec3.classList.add('enemy-lunge');setTimeout(()=>ec3.classList.remove('enemy-lunge'),400);}
@@ -921,6 +941,9 @@ function enemyTurn() {
       shake(pc); flashHit(pc);
       if(!resisted&&e.statusDef&&Math.random()<e.statusDef.chance) applyStatus('player',e.statusDef.type,e.statusDef.turns,e.statusDef.value);
       else if(resisted&&e.statusDef) combatLog('💠 Status widerstanden!');
+      // Vampiric affix: enemy heals on hit
+      if(e._lifesteal){ const heal=Math.floor(dmg*e._lifesteal); e.hp=Math.min(e.maxHp,e.hp+heal); combatLog(`🩸 ${e.name} saugt ${heal} HP!`); }
+      if(p.hp<=0) break;
     }
   }
   updateCombatUI(); updateHUD();
@@ -930,6 +953,7 @@ function enemyTurn() {
 
 function defeatPlayer(){
   combatLog('💀 Du wurdest besiegt...'); setCombatBtns(false);
+  if(G.combat) recordBattleHistory(G.combat,'loss');
   G.battleStats.fled++;
   setTimeout(()=>{
     if(G.hardcore){
@@ -982,7 +1006,9 @@ function combatWin() {
     }
   }
   combatLog(`🎉 Sieg! +${e.xp} XP  +${g} Gold`);
+  recordBattleHistory(e, 'win');
   tickQuestKill(e.id); tickDailyKill(e.id);
+  tickStoryChain(e.id, e.isBoss);
   for(const drop of (e.drops||[])){ if(Math.random()<drop.p){ addInv(drop.id); const it=ITEMS[drop.id]; if(it) combatLog(`📦 ${it.rarity==='legendary'?'🌟':it.rarity==='epic'?'💜':''} ${it.name}!`); } }
   G.battleStats.won++;
   if(G.tutorialStep===1){G.tutorialStep=2;setTimeout(()=>showTutorialHint(1),600);}
@@ -992,10 +1018,19 @@ function combatWin() {
   if(sc&&sc.healOnKill){ const h=Math.floor(stats().maxHp*0.08); G.p.hp=Math.min(stats().maxHp,G.p.hp+h); combatLog(`🛡 Paladin: +${h} HP`); }
   if(isBossRush) G.bossRush.score=(G.bossRush.score||0)+xp*2;
   const seasonalReward=e._seasonalReward;
+  const isDailyChallenge=e._dailyChallenge;
   setTimeout(()=>{
     endCombat();
     gainXP(xp);
     if(seasonalReward){ for(let i=0;i<(seasonalReward.qty||1);i++) addInv(seasonalReward.id); addLog(`🎁 Event-Belohnung: ${ITEMS[seasonalReward.id]?.icon} ×${seasonalReward.qty}!`); }
+    if(isDailyChallenge && G.dailyChallenge && !G.dailyChallenge.done){
+      G.dailyChallenge.done=true;
+      const dc=G.dailyChallenge;
+      for(let i=0;i<dc.rewardQty;i++) addInv(dc.reward);
+      gainXP(dc.xp); earnGold(dc.gold);
+      SFX.victory(); addLog(`${dc.icon} Tages-Herausforderung abgeschlossen! +${dc.xp}XP +${dc.gold}G`);
+      save();
+    }
     addLog(`✅ ${e.name} besiegt!`);
     if(isKing){ showVictory(); checkSpeedrunComplete(); }
     if(isDungeon) dungeonNextRoom();
@@ -1246,17 +1281,43 @@ function startDungeon() {
   setTimeout(()=>startCombat(foes[Math.floor(Math.random()*foes.length)], false), 300);
 }
 
+const PROC_ROOM_TYPES = [
+  {t:'combat',   w:38},{t:'chest',   w:14},{t:'heal',     w:10},
+  {t:'trap',     w:8}, {t:'merchant',w:7}, {t:'boss_room',w:10},{t:'shrine',  w:7},{t:'secret',  w:6},
+];
+
 function dungeonNextRoom() {
   if (!G.dungeon) return;
   G.dungeon.room++;
-  if (G.dungeon.room >= G.dungeon.maxRooms) {
-    dungeonComplete();
-  } else {
-    addLog(`⛏ Raum ${G.dungeon.room+1}/${G.dungeon.maxRooms}...`);
-    const foes = G.area.foes;
-    setTimeout(()=>startCombat(foes[Math.floor(Math.random()*foes.length)], false), 1200);
-  }
+  if (G.dungeon.room >= G.dungeon.maxRooms) { dungeonComplete(); return; }
+  const room = pick(PROC_ROOM_TYPES);
+  const foes = G.area.foes; const p = G.p;
+  addLog(`⛏ Raum ${G.dungeon.room+1}/${G.dungeon.maxRooms} — ${roomIcon(room.t)}`);
+  setTimeout(() => {
+    if (room.t==='combat') { startCombat(foes[Math.floor(Math.random()*foes.length)], false); }
+    else if (room.t==='boss_room') { startCombat(foes[Math.floor(Math.random()*foes.length)], true); }
+    else if (room.t==='chest') {
+      const id=CHEST_LOOT[Math.floor(Math.random()*CHEST_LOOT.length)]; addInv(id);
+      SFX.chest(); addLog(`📦 Schatzkammer! ${ITEMS[id].icon} ${ITEMS[id].name}!`); dungeonNextRoom();
+    } else if (room.t==='heal') {
+      const h=Math.floor(stats().maxHp*0.35); p.hp=Math.min(stats().maxHp,p.hp+h);
+      SFX.heal(); addLog(`💚 Heilquelle! +${h} HP`); refresh(); dungeonNextRoom();
+    } else if (room.t==='trap') {
+      const dmg=Math.max(5,Math.floor(p.hp*0.2)); p.hp=Math.max(1,p.hp-dmg);
+      SFX.dmgTake(); addLog(`🪤 Falle! -${dmg} HP`); refresh(); dungeonNextRoom();
+    } else if (room.t==='merchant') {
+      addLog('🧙 Dungeon-Händler!'); showMerchant(); G.dungeon._pausedForMerchant=true;
+    } else if (room.t==='shrine') {
+      p.hp=stats().maxHp; p.mp=stats().maxMp; SFX.heal();
+      addLog('⛩️ Dungeon-Schrein! Vollständig geheilt!'); refresh(); dungeonNextRoom();
+    } else if (room.t==='secret') {
+      const rewards=['elixir','chaos_crystal','mana_crystal','battle_brew'];
+      const r=rewards[Math.floor(Math.random()*rewards.length)]; addInv(r); addInv(r);
+      SFX.chest(); addLog(`🌟 Geheimraum! ×2 ${ITEMS[r].icon} ${ITEMS[r].name}!`); dungeonNextRoom();
+    } else { startCombat(foes[Math.floor(Math.random()*foes.length)], false); }
+  }, 900);
 }
+function roomIcon(t){return {combat:'⚔',chest:'📦',heal:'💚',trap:'🪤',merchant:'🧙',boss_room:'💀',shrine:'⛩️',secret:'🌟'}[t]||'?';}
 
 function dungeonComplete() {
   G.dungeonClears = (G.dungeonClears||0)+1;
@@ -1506,6 +1567,41 @@ function showLootFilter() {
 }
 
 // ── WORLD MAP ────────────────────────────────────────────────
+function drawMiniMap() {
+  const c=document.getElementById('minimap-canvas'); if(!c) return;
+  const ctx=c.getContext('2d'); const W=c.width, H=c.height;
+  ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,W,H);
+  // Layout: 2 rows of 5, then secret area at bottom right
+  const layout=[
+    [0,0],[1,0],[2,0],[3,0],[4,0],
+    [0,1],[1,1],[2,1],[3,1],[4,1],
+    [4,2], // secret area
+  ];
+  const cellW=46, cellH=22, offX=8, offY=6;
+  AREAS.forEach((a,i)=>{
+    if(i>=layout.length) return;
+    const [gx,gy]=layout[i]; const x=offX+gx*cellW, y=offY+gy*cellH;
+    const active=G.area.id===a.id;
+    const isSecret=a.secret;
+    const secretUnlocked=isSecret&&(G.p.prestige||0)>=5;
+    const locked=(!secretUnlocked&&isSecret)||(G.p.level<a.min);
+    // draw line to next
+    if(i<AREAS.length-1&&layout[i+1]){
+      const [nx,ny]=layout[i+1];
+      ctx.strokeStyle='#334'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x+18,y+9); ctx.lineTo(offX+nx*cellW+18,offY+ny*cellH+9); ctx.stroke();
+    }
+    ctx.fillStyle=active?'#2244aa':locked?'#1a1a1a':isSecret?'#3a0a5a':'#1a2a1a';
+    ctx.strokeStyle=active?'#6688ff':locked?'#333':isSecret?'#9952e0':'#445544';
+    ctx.lineWidth=active?2:1;
+    ctx.fillRect(x,y,36,18); ctx.strokeRect(x,y,36,18);
+    ctx.font='11px serif'; ctx.textAlign='center';
+    ctx.fillStyle=locked?'#333':'#fff';
+    ctx.fillText(locked?'🔒':a.icon,x+18,y+13);
+    if(active){ ctx.fillStyle='#88aaff'; ctx.font='4px monospace'; ctx.fillText('▲',x+18,y+20); }
+  });
+}
+
 function showWorldMap() {
   const wrap=document.createElement('div'); wrap.id='overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
@@ -1531,10 +1627,12 @@ function showWorldMap() {
   }).join('');
   wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:90vw;max-height:85vh;overflow-y:auto;position:relative">
     🗺 WELTKARTE<br><br>
+    <canvas id="minimap-canvas" width="260" height="70" style="display:block;margin:0 auto 12px;image-rendering:pixelated"></canvas>
     <div style="text-align:left;padding:0 8px">${nodes}</div>
     <br><button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ Schließen</button>
   </div>`;
   document.body.appendChild(wrap);
+  drawMiniMap();
 }
 function travelToArea(areaId) {
   const a = AREAS.find(a=>a.id===areaId); if(!a) return;
@@ -1552,6 +1650,7 @@ function travelToArea(areaId) {
   }
   document.getElementById('overlay')?.remove();
   addLog(`🗺 Reist nach ${a.name}!`);
+  MUSIC.play(a.id);
   refresh();
 }
 
@@ -2958,6 +3057,7 @@ function save(){
     guild:G.guild, dayNight:G.dayNight, heroSprite:G.heroSprite, worldBossSteps:G.worldBossSteps,
     difficulty:G.difficulty, tutorialStep:G.tutorialStep,
     prestigeCoins:G.prestigeCoins, prestigeUpgrades:G.prestigeUpgrades,
+    battleHistory:G.battleHistory, dailyChallenge:G.dailyChallenge, storyChains:G.storyChains,
   }));}catch(_){}
 }
 
@@ -2976,6 +3076,7 @@ function load(){
     G.worldBossSteps=d.worldBossSteps||0;
     G.difficulty=d.difficulty||'normal'; G.tutorialStep=d.tutorialStep||99;
     G.prestigeCoins=d.prestigeCoins||0; G.prestigeUpgrades=d.prestigeUpgrades||{};
+    G.battleHistory=d.battleHistory||[]; G.dailyChallenge=d.dailyChallenge||null; G.storyChains=d.storyChains||{};
     if(!G.p.eq.pet) G.p.eq.pet=null;
     if(!G.p.subclass) G.p.subclass=null;
     if(!G.p.eq.helm) G.p.eq.helm=null;
@@ -2998,9 +3099,193 @@ function flashHit(el){el.classList.remove('hit-flash');void el.offsetWidth;el.cl
 
 function toggleMute(){
   const muted = SFX.toggleMute();
+  MUSIC.setMuted(muted);
   const btn = document.getElementById('mute-btn');
   if(btn) btn.textContent = muted ? '🔇' : '🔊';
 }
+
+// ── BATTLE HISTORY ────────────────────────────────────────────
+function recordBattleHistory(e, result) {
+  if (!G.battleHistory) G.battleHistory = [];
+  G.battleHistory.unshift({ name:e.name, result, dmgDealt:G.battleStats.dmgDealt, dmgTaken:G.battleStats.dmgTaken, ts:Date.now() });
+  if (G.battleHistory.length > 15) G.battleHistory.pop();
+}
+
+function showBattleHistory() {
+  const h = G.battleHistory||[];
+  const rows = h.length ? h.map(b=>{
+    const t = new Date(b.ts); const timeStr=`${t.getHours().toString().padStart(2,'0')}:${t.getMinutes().toString().padStart(2,'0')}`;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:6px">
+      <span style="color:${b.result==='win'?'var(--green)':'#e05252'}">${b.result==='win'?'✅':'💀'} ${b.name.slice(0,16)}</span>
+      <span style="color:var(--dim)">${timeStr}</span>
+    </div>`;
+  }).join('') : '<div style="font-size:7px;color:var(--dim);padding:10px">Noch keine Kämpfe.</div>';
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:90vw;max-height:80vh;overflow-y:auto">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:10px">⚔ KAMPF-VERLAUF</div>
+    ${rows}
+    <br><button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+// ── STORY CHAIN QUESTS ────────────────────────────────────────
+function tickStoryChain(foeId, isBoss) {
+  if (typeof STORY_CHAINS === 'undefined') return;
+  for (const chain of STORY_CHAINS) {
+    const state = G.storyChains[chain.id] = G.storyChains[chain.id] || {step:0, kills:{}};
+    if (state.done) continue;
+    const step = chain.steps[state.step];
+    if (!step) continue;
+    if (step.boss && !isBoss) continue;
+    if (foeId === step.target) {
+      state.kills[step.target] = (state.kills[step.target]||0)+1;
+      if (state.kills[step.target] >= step.qty) {
+        state.step++;
+        const nextStep = chain.steps[state.step];
+        if (!nextStep) {
+          state.done = true;
+          chain.rewards.forEach(r => addInv(r));
+          gainXP(chain.xpBonus||0); earnGold(chain.goldBonus||0);
+          SFX.victory();
+          showOverlay(`🎉 ${chain.title}\nABGESCHLOSSEN!\n\n${chain.finalText}`);
+          addLog(`📖 Quest-Kette "${chain.title}" abgeschlossen!`);
+        } else {
+          showOverlay(`📖 ${chain.title}\nSchritt ${state.step+1}/${chain.steps.length}\n\n${nextStep.story}`);
+          addLog(`📖 ${chain.title}: ${nextStep.label}`);
+        }
+      }
+    }
+  }
+}
+
+function showStoryChains() {
+  if (typeof STORY_CHAINS === 'undefined') { showOverlay('❌ Keine Quest-Ketten!'); return; }
+  const rows = STORY_CHAINS.map(chain => {
+    const state = G.storyChains[chain.id]||{step:0,kills:{}};
+    const step = chain.steps[state.step];
+    const done = state.done;
+    const pct = done ? 100 : Math.floor((state.step/chain.steps.length)*100);
+    return `<div style="padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;font-size:7px">
+        <span style="color:${done?'var(--green)':'var(--accent)'}">${done?'✅':''} ${chain.title}</span>
+        <span style="color:var(--dim);font-size:6px">${done?'Fertig!':state.step+'/'+chain.steps.length}</span>
+      </div>
+      ${!done&&step?`<div style="font-size:6px;color:var(--dim);margin-top:3px">${step.label} (${state.kills[step.target]||0}/${step.qty})</div>`:''}
+      <div style="height:3px;background:var(--border);margin-top:4px"><div style="height:100%;background:${done?'var(--green)':'var(--accent)'};width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:90vw;max-height:82vh;overflow-y:auto">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:10px">📖 QUEST-KETTEN</div>
+    ${rows}
+    <br><button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+// ── DAILY CHALLENGE ───────────────────────────────────────────
+const DAILY_CHALLENGES = [
+  { foe:'dragon',    name:'Drachen-Tag',     icon:'🐉', reward:'dragon_scale',   rewardQty:1, xp:800,  gold:400 },
+  { foe:'demon',     name:'Dämon-Invasion',  icon:'😈', reward:'chaos_crystal',  rewardQty:1, xp:600,  gold:350 },
+  { foe:'void_lich', name:'Lich-Auferstehung',icon:'💀',reward:'void_robe',      rewardQty:1, xp:1200, gold:600 },
+  { foe:'dark_mage', name:'Magiertag',       icon:'🔮', reward:'mana_crystal',   rewardQty:2, xp:500,  gold:300 },
+  { foe:'troll',     name:'Troll-Ansturm',   icon:'👹', reward:'berserker_axe',  rewardQty:1, xp:400,  gold:250 },
+  { foe:'vampire',   name:'Vampir-Nacht',    icon:'🧛', reward:'magic_ring',     rewardQty:1, xp:450,  gold:280 },
+];
+
+function generateDailyChallenge() {
+  const today = new Date().toDateString();
+  const idx = Math.abs(today.split('').reduce((h,c)=>Math.imul(31,h)+c.charCodeAt(0)|0,0)) % DAILY_CHALLENGES.length;
+  G.dailyChallenge = { ...DAILY_CHALLENGES[idx], date:today, done:false };
+}
+
+function showDailyChallenge() {
+  if (!G.dailyChallenge || G.dailyChallenge.date !== new Date().toDateString()) generateDailyChallenge();
+  const dc = G.dailyChallenge;
+  const foe = FOES[dc.foe]||{}; const reward = ITEMS[dc.reward]||{};
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;text-align:center">
+    <div style="font-size:11px;margin-bottom:4px">${dc.icon}</div>
+    <div style="color:var(--accent);font-size:9px;margin-bottom:6px">TAGES-HERAUSFORDERUNG</div>
+    <div style="color:var(--text);font-size:8px;margin-bottom:10px">${dc.name}</div>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:14px">
+      Gegner: ${foe.icon||''} ${foe.name||dc.foe}<br>
+      Belohnung: ${reward.icon||''} ${reward.name||dc.reward} ×${dc.rewardQty}<br>
+      +${dc.xp} XP · +${dc.gold} Gold
+    </div>
+    ${dc.done
+      ? '<div style="color:var(--green);font-size:8px;margin-bottom:12px">✅ Heute erledigt!</div>'
+      : `<button onclick="startDailyChallengeFight()" style="width:100%;background:var(--accent);color:var(--bg);border:none;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin-bottom:6px">⚔ ANNEHMEN</button>`
+    }
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function startDailyChallengeFight() {
+  document.getElementById('overlay')?.remove();
+  const dc = G.dailyChallenge; if (!dc||dc.done) return;
+  startCombat(dc.foe, true);
+  G.combat._dailyChallenge = true;
+  addLog(`${dc.icon} Tages-Herausforderung: ${dc.name}!`);
+}
+
+// ── CHIPTUNE MUSIC SYSTEM ─────────────────────────────────────
+const MUSIC = (() => {
+  let ac = null; let beatTimer = null; let muted = false; let beatIdx = 0;
+  const MELODIES = {
+    forest:     [262,294,330,294,262,294,349,330],
+    cave:       [196,0,185,196,0,175,165,0],
+    dungeon:    [220,233,220,208,196,208,220,0],
+    graveyard:  [174,0,185,174,164,0,155,164],
+    castle:     [262,247,233,247,262,294,247,0],
+    volcanic:   [220,246,261,246,220,0,246,261],
+    void:       [110,116,123,116,110,0,103,0],
+    underwater: [220,246,276,246,220,196,0,196],
+    sky:        [330,370,415,370,330,294,262,0],
+    ice:        [196,220,247,220,196,175,0,175],
+    void_rift:  [87,92,98,92,87,0,82,0],
+  };
+  function note(freq, dur) {
+    if (!ac||!freq||muted) return;
+    const o=ac.createOscillator(); const g=ac.createGain();
+    o.type='square'; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.035, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime+dur);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime+dur);
+  }
+  return {
+    play(areaId) {
+      if (!ac) { try { ac=new(window.AudioContext||window.webkitAudioContext)(); } catch(e){ return; } }
+      this.stop(); if (muted) return;
+      const m = MELODIES[areaId]||MELODIES.forest;
+      beatIdx = 0;
+      beatTimer = setInterval(()=>{ note(m[beatIdx%m.length], 0.2); beatIdx++; }, 320);
+    },
+    stop() { clearInterval(beatTimer); beatTimer=null; },
+    setMuted(v) { muted=v; if(v) this.stop(); },
+    get muted(){ return muted; },
+  };
+})();
+
+// ── IDLE BOB ANIMATION ────────────────────────────────────────
+(function startIdleBob(){
+  let t=0; let frameId=null;
+  function bob(){
+    frameId=requestAnimationFrame(bob); t+=0.04;
+    const y=Math.sin(t)*2;
+    const pc=document.getElementById('player-canvas');
+    if(pc) pc.style.transform=`translateY(${y}px)`;
+    const cc=document.getElementById('char-canvas');
+    if(cc) cc.style.transform=`translateY(${y}px)`;
+  }
+  bob();
+})();
 
 // ── INIT ─────────────────────────────────────────────────────
 function init(){
@@ -3012,6 +3297,7 @@ function init(){
   addLog('🗺 Drücke EXPLORE um dein Abenteuer zu beginnen.');
   if(!G.p.inv.length){addInv('potion',true);addInv('wood_sword',true);}
   if(!hasSave) promptName(()=>save());
+  if(!G.dailyChallenge||G.dailyChallenge.date!==new Date().toDateString()) generateDailyChallenge();
   updateDailyTimer();
   updateDayNight();
   setInterval(weatherTick, 80);

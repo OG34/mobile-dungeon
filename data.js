@@ -230,6 +230,17 @@ const AREA_BOSSES = {
   void_rift: { name:'👑 Dimensionsherrscher', foeId:'void_lich', hpMult:6, atkMult:3, xpMult:8, goldMult:8, drops:[{id:'chaos_crystal',p:.5},{id:'void_robe',p:.4},{id:'chaos_blade',p:.2},{id:'elixir',p:1}] },
 };
 
+// ── MONSTER AFFIXES ──────────────────────────────────────────
+const MONSTER_AFFIXES = [
+  { id:'fortress', name:'Festung',  icon:'🛡', apply: e => { e.def = Math.floor(e.def*1.8); } },
+  { id:'berserk',  name:'Rasend',   icon:'🔥', apply: e => { e.atk = Math.floor(e.atk*1.5); } },
+  { id:'toxic',    name:'Giftig',   icon:'☠',  apply: e => { e.statusDef={type:'poison',chance:.55,turns:3,value:Math.max(6,Math.floor(e.atk*0.2))}; } },
+  { id:'giant',    name:'Riesig',   icon:'⬆',  apply: e => { e.hp=Math.floor(e.hp*2); e.maxHp=e.hp; } },
+  { id:'swift',    name:'Flink',    icon:'💨', apply: e => { e._evasion=0.28; } },
+  { id:'enraged',  name:'Raserei',  icon:'💢', apply: e => { e._multiAtk=2; e.atk=Math.floor(e.atk*0.75); } },
+  { id:'vampiric', name:'Blutsauger',icon:'🩸', apply: e => { e._lifesteal=0.3; } },
+];
+
 // ── SHADOW KING ──────────────────────────────────────────────
 const SHADOW_KING = {
   id:'shadow_king', name:'👑 Shadow King', sprite:'shadow_king',
@@ -505,4 +516,47 @@ const DAILY_POOL = [
   {type:'gold',qty:300,             label:'Verdiene 300 Gold',      xpR:180, goldR:0, itemR:'elixir'},
   {type:'kill',target:'goblin',qty:3,label:'Töte 3 Goblins',       xpR:90,  goldR:70},
   {type:'kill',target:'skeleton',qty:2,label:'Töte 2 Skelette',    xpR:100, goldR:80},
+];
+
+// ── STORY QUEST CHAINS ───────────────────────────────────────
+const STORY_CHAINS = [
+  {
+    id: 'chain_forest',
+    title: 'Der verlorene Ritter',
+    steps: [
+      { label:'Töte 3 Goblins im Wald',    type:'kill', target:'goblin', qty:3,  story:'Ein Ritter wurde im Wald zuletzt gesehen. Goblins haben die Gegend überrannt!' },
+      { label:'Töte den Goblin-König',      type:'kill', target:'goblin', qty:1,  boss:true, story:'Der Goblin-König hält den Ritter gefangen. Befreie ihn!' },
+      { label:'Töte 2 Trolle in den Höhlen',type:'kill',target:'troll',  qty:2,  story:'Der Ritter ist befreit! Aber Trolle blockieren den Rückweg.' },
+    ],
+    rewards: ['runed_sword','elixir','elixir','elixir'],
+    xpBonus: 500,
+    goldBonus: 300,
+    finalText: '🎉 Der Ritter ist gerettet! Er übergibt dir sein Schwert als Dank.',
+  },
+  {
+    id: 'chain_undead',
+    title: 'Die Fluch-Quelle',
+    steps: [
+      { label:'Töte 5 Skelette',       type:'kill', target:'skeleton', qty:5, story:'Eine dunkle Energie korrumpiert den Friedhof. Skelette erheben sich!' },
+      { label:'Töte 3 Zombies',        type:'kill', target:'zombie',   qty:3, story:'Zombies beschützen den Fluch-Altar. Räume sie weg!' },
+      { label:'Besiege den Lich-Lord', type:'kill', target:'wraith',   qty:1, boss:true, story:'Der Lich-Lord selbst steht hinter dem Fluch. Ende ihn!' },
+    ],
+    rewards: ['shadow_helm','magic_ring','elixir','mana_crystal'],
+    xpBonus: 800,
+    goldBonus: 500,
+    finalText: '💀 Der Fluch ist gebrochen! Die Toten ruhen wieder in Frieden.',
+  },
+  {
+    id: 'chain_dragon',
+    title: 'Drachenherz',
+    steps: [
+      { label:'Töte 2 Feuer-Elementare',  type:'kill', target:'fire_elemental', qty:2, story:'Ein Drache terrorisiert die Vulkanregion. Sein Nest muss zerstört werden.' },
+      { label:'Töte 3 Lavagolems',        type:'kill', target:'lava_golem',     qty:3, story:'Die Lavagolems bewachen das Drachenei. Vernichte sie!' },
+      { label:'Besiege den Drachen',      type:'kill', target:'dragon',         qty:1, boss:true, story:'Der Drache selbst erscheint! Dein Schicksal entscheidet sich hier.' },
+    ],
+    rewards: ['dragon_scale','berserker_axe','elixir','chaos_crystal'],
+    xpBonus: 1200,
+    goldBonus: 800,
+    finalText: '🐉 Der Drache ist gefallen! Du nimmst sein Herzschuppe als Trophäe.',
+  },
 ];
