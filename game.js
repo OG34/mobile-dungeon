@@ -957,6 +957,15 @@ const ITEMS = {
   herbs:        { name:'Kräuter',           icon:'🌿', slot:null, qty:0,                             value:6,   buyable:false, rarity:'common'    },
   // Scroll
   id_scroll:    { name:'Identifizierungs-Schriftrolle', icon:'📜', slot:null, hp:0,                  value:50,  buyable:true,  rarity:'uncommon'  },
+  // Cooking results
+  strength_brew: { name:'Stärke-Sud', icon:'🍵', slot:null, buffAtk:15, buffLeft:5, value:60, buyable:false, rarity:'uncommon' },
+  big_potion:    { name:'Großer Heiltrank', icon:'🧴', slot:null, hp:80, value:45, buyable:false, rarity:'uncommon' },
+  roasted_herb:  { name:'Gebratenes Kraut', icon:'🍃', slot:null, buffDef:8, buffLeft:4, value:35, buyable:false, rarity:'common' },
+  // Fishing
+  fish:          { name:'Fisch',          icon:'🐟', slot:null, hp:30, value:15, buyable:false, rarity:'common' },
+  rare_fish:     { name:'Seltener Fisch', icon:'🐠', slot:null, hp:0,  value:90, buyable:false, rarity:'rare'   },
+  // Artifact
+  soul_gem: { name:'Seelen-Stein', icon:'💎', slot:'acc', atk:2, def:2, artifact:true, value:600, buyable:false, rarity:'legendary' },
 };
 
 const SKILLS = [
@@ -1078,6 +1087,47 @@ const AREA_STORIES = {
   ice:        '❄ Die Eistundra\nFrost beißt. Blizzards toben.\nLegenden enden hier...',
 };
 
+// ── NPC DIALOGUE LINES ───────────────────────────────────────
+const NPC_MERCHANT_LINES = [
+  '🧙 "Nur heute! Alles muss weg!"',
+  '🧙 "Frischer Loot direkt aus dem Dungeon!"',
+  '🧙 "Ps-st... ich hab was Besonderes für dich."',
+  '🧙 "Kaufst du oder schaust du nur?"',
+  '🧙 "Das Schwert? Er braucht es nicht mehr."',
+];
+const NPC_STRANGER_LINES = [
+  '🤫 "Hüte dich vor dem Schatten..."',
+  '🤫 "Dieser Wald birgt dunkle Geheimnisse."',
+  '🤫 "Der König wird dich töten. Sei vorsichtig."',
+  '🤫 "Folge dem Mondlicht... und du findest deinen Weg."',
+  '🤫 "Ich habe tausend Helden gesehen. Keiner kehrte zurück."',
+];
+
+// ── BESTIARY MILESTONES ───────────────────────────────────────
+const BESTIARY_MILESTONES = [10, 25, 50];
+
+// ── RUNE COMBINATION ─────────────────────────────────────────
+const RUNE_COMBINE = {
+  atk_rune:  { needs:3, result:'void_rune' },
+  def_rune:  { needs:3, result:'void_rune' },
+  crit_rune: { needs:3, result:'wind_rune' },
+  mp_rune:   { needs:3, result:'wind_rune' },
+};
+
+// ── WORLD BOSS ───────────────────────────────────────────────
+const WORLD_BOSS_DATA = { id:'world_boss', name:'⚡ WELTENBEZWINGER', sprite:'chaos_dragon', hp:5000, atk:220, def:100, xp:8000, gold:[3000,6000], status:{type:'burn',chance:0.6,turns:3,value:50}, drops:[{id:'chaos_crystal',p:0.8},{id:'chaos_blade',p:0.5},{id:'soul_gem',p:1.0}] };
+
+// ── HERO PALETTES ─────────────────────────────────────────────
+const HERO_PALETTES = [
+  { id:'warrior', name:'Krieger', p:null },
+  { id:'mage',    name:'Magier',  p:['#c8a882','#4a2e00','#7b52cc','#3a1a6a','#cc77ff','#ddccff','#4488ff','#ffffff','#666688'] },
+  { id:'ranger',  name:'Jäger',   p:['#c8a882','#2e1a00','#5a8a3a','#2a4a1a','#88cc44','#aaccaa','#886622','#ffffff','#556633'] },
+  { id:'rogue',   name:'Schurke', p:['#c8a882','#1a1a1a','#333333','#111111','#666666','#444444','#cc4444','#ffffff','#333333'] },
+];
+
+// ── WEATHER ELEMENT MAP ───────────────────────────────────────
+const WEATHER_ELEMENT = { underwater:'water', sky:'lightning', ice:'ice', cave:'earth', forest:'nature', castle:'fire' };
+
 // ── CRAFTING ─────────────────────────────────────────────────
 const CRAFTING = [
   { id:'c_elixir',  label:'Elixier brauen',   requires:[{id:'potion',qty:3}],                                  result:'elixir',       resultQty:1 },
@@ -1088,6 +1138,9 @@ const CRAFTING = [
   { id:'c_herb_pot',label:'Heiltrank ×2 (Kräuter)', requires:[{id:'herbs',qty:3,res:true}],                    result:'potion',       resultQty:2, resReq:true },
   { id:'c_ore_shld',label:'Erz-Schild (Erz)',  requires:[{id:'ore',qty:5,res:true}],                           result:'iron_shield',  resultQty:1, resReq:true },
   { id:'c_wood_bow',label:'Holzbogen (Holz)',   requires:[{id:'wood',qty:6,res:true}],                          result:'hunter_bow',   resultQty:1, resReq:true },
+  { id:'ck_strength', label:'🍵 Stärke-Sud (Kräuter+Erz)', requires:[{id:'herbs',qty:2,res:true},{id:'ore',qty:1,res:true}], result:'strength_brew', resultQty:1, resReq:true },
+  { id:'ck_bigpot',   label:'🧴 Großer Trank (Kräuter+Holz)', requires:[{id:'herbs',qty:3,res:true},{id:'wood',qty:2,res:true}], result:'big_potion', resultQty:1, resReq:true },
+  { id:'ck_roast',    label:'🍃 Geröstetes Kraut (Kräuter×4)', requires:[{id:'herbs',qty:4,res:true}], result:'roasted_herb', resultQty:2, resReq:true },
 ];
 
 // ── QUESTS ──────────────────────────────────────────────────
