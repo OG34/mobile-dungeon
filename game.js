@@ -369,7 +369,8 @@ function gainXP(amount) {
     p.xp -= p.xpNext;
     p.level++;
     p.xpNext = xpFor(p.level);
-    p.baseAtk+=1; p.baseDef+=1; p.maxHp+=15; p.maxMp+=5;
+    const lv=p.level; const tier=lv<=20?1:lv<=50?2:3;
+    p.baseAtk+=[1,2,4][tier-1]; p.baseDef+=[1,2,3][tier-1]; p.maxHp+=[15,25,40][tier-1]; p.maxMp+=[5,8,12][tier-1];
     p.hp=Math.min(p.hp+10, stats().maxHp); p.mp=Math.min(p.mp+3, stats().maxMp);
     p.statPoints+=2;
     p.talentPoints = (p.talentPoints||0) + 1;
@@ -604,14 +605,15 @@ function startCombat(foeId, isBoss) {
   const em = isElite ? 2.2 : 1;
   const diffMult = G.difficulty==='easy'?0.75 : G.difficulty==='hard'?1.35 : 1;
   const m=(1+(G.p.level-1)*0.15)*(isBoss?2:1)*em*diffMult;
+  const xpScale=G.p.level>=51?Math.pow(1.08,G.p.level-50):G.p.level>=21?Math.pow(1.04,G.p.level-20):1;
   const goldMult = isBoss?3 : isElite?3 : 1;
   const drops=(DROPS[foeId]||[]).map(d=>(isBoss||isElite)?{...d,p:Math.min(1,d.p*(isElite?2.5:3))}:d);
   G.combat={
     id:foeId, isBoss, isElite, name:(isElite?'⚡ ELITE ':isBoss?'⭐ ':'')+base.name, sprite:base.sprite,
     hp:Math.floor(base.hp*m), maxHp:Math.floor(base.hp*m),
     atk:Math.floor(base.atk*m), def:Math.floor(base.def*m),
-    xp:Math.floor(base.xp*m*(isBoss?1.5:isElite?2:1)),
-    gold:[base.gold[0]*goldMult, base.gold[1]*goldMult],
+    xp:Math.floor(base.xp*m*xpScale*(isBoss?1.5:isElite?2:1)),
+    gold:[Math.floor(base.gold[0]*goldMult*xpScale), Math.floor(base.gold[1]*goldMult*xpScale)],
     drops, playerTurn:true, playerStatus:[], enemyStatus:[], combo:0,
     statusDef:base.status, isKing:false,
     atkBonus:0, atkBonusTurns:0, defBonus:0, defBonusTurns:0,
