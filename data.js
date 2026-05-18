@@ -518,6 +518,10 @@ const QUEST_POOL = [
   {type:'step',qty:100, label:'Gehe 100 Schritte', xpR:200, goldR:120, itemR:'potion'},
   {type:'gold',qty:80,  label:'Verdiene 80 Gold',  xpR:55,  goldR:0,   itemR:'potion'},
   {type:'gold',qty:200, label:'Verdiene 200 Gold', xpR:120, goldR:0,   itemR:'elixir'},
+  {type:'craft',qty:3,  label:'Stelle 3 Items her', xpR:90,  goldR:60},
+  {type:'craft',qty:5,  label:'Stelle 5 Items her', xpR:150, goldR:100, itemR:'potion'},
+  {type:'survive',qty:10, label:'Überlebe 10 Kampfrunden', xpR:80,  goldR:50},
+  {type:'survive',qty:25, label:'Überlebe 25 Kampfrunden', xpR:160, goldR:100, itemR:'elixir'},
 ];
 
 const DAILY_POOL = [

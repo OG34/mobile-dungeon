@@ -596,50 +596,60 @@ function renderShopSell(){
   });
 }
 
+function shopItemMinLv(item){
+  const v=Math.max(item.atk||0, item.def||0);
+  if(v>30) return 30; if(v>20) return 20; return 0;
+}
+function shopItemBetter(item){
+  // Returns true if item is strictly better in its slot than what player has equipped
+  const sl=item.slot; if(!sl||sl==='rune'||sl==='pet') return false;
+  const eq=G.p.eq[sl]; if(!eq) return true; // nothing equipped → always better
+  const cur=ITEMS[eq.id]; if(!cur) return true;
+  return (item.atk||0)>(cur.atk||0) || (item.def||0)>(cur.def||0);
+}
+function shopBuildRow(buy,id,item){
+  const price=Math.ceil(item.value*1.5);
+  const parts=[];
+  if(item.atk)       parts.push(`ATK+${item.atk}`);
+  if(item.def)       parts.push(`DEF+${item.def}`);
+  if(item.maxHp)     parts.push(`HP+${item.maxHp}`);
+  if(item.maxMp)     parts.push(`MP+${item.maxMp}`);
+  if(item.hp)        parts.push(`Heilt ${item.hp}`);
+  if(item.mp)        parts.push(`+${item.mp}MP`);
+  if(item.xpBonus)   parts.push(`XP+${Math.round(item.xpBonus*100)}%`);
+  if(item.goldBonus) parts.push(`Gold+${Math.round(item.goldBonus*100)}%`);
+  if(item.critBonus) parts.push(`+${Math.round(item.critBonus*100)}%Krit`);
+  const canAfford=G.p.gold>=price;
+  const better=shopItemBetter(item);
+  const minLv=shopItemMinLv(item);
+  const badge=better?`<span style="color:#6f6;font-size:6px;margin-left:3px">⬆ Empfohlen</span>`:'';
+  const lvLabel=minLv?`<span style="color:var(--dim);font-size:6px;margin-left:3px">Min. LV ${minLv}</span>`:'';
+  const row=document.createElement('div'); row.className='shop-row';
+  const btn=`<button class="shop-btn" style="${canAfford?'border-color:var(--accent)':''}" ${canAfford?'':'disabled'} onclick="buyItem('${id}')">Buy</button>`;
+  row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}${badge}${lvLabel}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div>${btn}`;
+  buy.appendChild(row);
+}
+function shopCatHeader(buy,label,color){
+  const h=document.createElement('div');
+  h.style.cssText=`padding:6px 0 2px;font-size:7px;color:${color};width:100%;border-top:1px solid var(--border);margin-top:4px`;
+  h.textContent=label; buy.appendChild(h);
+}
 function updateShopScreen(){
   document.getElementById('shop-gold-val').textContent=G.p.gold;
   const buy=document.getElementById('shop-buy-list'); buy.innerHTML='';
-  Object.entries(ITEMS).filter(([,it])=>it.buyable&&it.slot!=='pet').forEach(([id,item])=>{
-    const price=Math.ceil(item.value*1.5);
-    const parts=[];
-    if(item.atk)   parts.push(`ATK+${item.atk}`);
-    if(item.def)   parts.push(`DEF+${item.def}`);
-    if(item.maxHp) parts.push(`HP+${item.maxHp}`);
-    if(item.maxMp) parts.push(`MP+${item.maxMp}`);
-    if(item.hp)    parts.push(`Heilt ${item.hp}`);
-    if(item.mp)    parts.push(`+${item.mp}MP`);
-    const row=document.createElement('div'); row.className='shop-row';
-    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Buy</button>`;
-    buy.appendChild(row);
-  });
-  // runes section
-  const runeHeader=document.createElement('div');
-  runeHeader.style.cssText='padding:6px 0;font-size:7px;color:#aa66ff;width:100%';
-  runeHeader.textContent='💎 Runen'; buy.appendChild(runeHeader);
-  Object.entries(ITEMS).filter(([,it])=>it.buyable&&it.slot==='rune').forEach(([id,item])=>{
-    const price=Math.ceil(item.value*1.5);
-    const parts=[];
-    if(item.atk) parts.push(`ATK+${item.atk}`);
-    if(item.def) parts.push(`DEF+${item.def}`);
-    if(item.maxMp) parts.push(`MP+${item.maxMp}`);
-    if(item.critBonus) parts.push(`+${Math.round(item.critBonus*100)}%Krit`);
-    const row=document.createElement('div'); row.className='shop-row';
-    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Buy</button>`;
-    buy.appendChild(row);
-  });
-  // pets section
-  const petHeader=document.createElement('div');
-  petHeader.style.cssText='padding:6px 0;font-size:7px;color:var(--accent);width:100%';
-  petHeader.textContent='🐾 Begleiter'; buy.appendChild(petHeader);
-  Object.entries(ITEMS).filter(([,it])=>it.buyable&&it.slot==='pet').forEach(([id,item])=>{
-    const price=Math.ceil(item.value*1.5);
-    const parts=[];
-    if(item.def) parts.push(`DEF+${item.def}`);
-    if(item.xpBonus) parts.push(`XP+${Math.round(item.xpBonus*100)}%`);
-    if(item.goldBonus) parts.push(`Gold+${Math.round(item.goldBonus*100)}%`);
-    const row=document.createElement('div'); row.className='shop-row';
-    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${G.p.gold<price?'disabled':''} onclick="buyItem('${id}')">Buy</button>`;
-    buy.appendChild(row);
+  const cats=[
+    {label:'⚔ Waffen',     color:'#e07070', filter:([,it])=>it.buyable&&it.slot==='weapon'},
+    {label:'🛡 Rüstung',   color:'#70aaff', filter:([,it])=>it.buyable&&(it.slot==='armor'||it.slot==='helm'||it.slot==='gloves'||it.slot==='boots')},
+    {label:'💍 Accessoires',color:'#ffcc55', filter:([,it])=>it.buyable&&it.slot==='acc'},
+    {label:'🧪 Tränke',    color:'#70e0a0', filter:([,it])=>it.buyable&&!it.slot},
+    {label:'💎 Runen',     color:'#aa66ff', filter:([,it])=>it.buyable&&it.slot==='rune'},
+    {label:'🐾 Begleiter', color:'var(--accent)', filter:([,it])=>it.buyable&&it.slot==='pet'},
+  ];
+  cats.forEach(({label,color,filter},ci)=>{
+    const entries=Object.entries(ITEMS).filter(filter);
+    if(!entries.length) return;
+    shopCatHeader(buy,label,color);
+    entries.forEach(([id,item])=>shopBuildRow(buy,id,item));
   });
   if(G.shopMode==='sell') renderShopSell();
 }

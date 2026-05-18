@@ -615,7 +615,7 @@ function startCombat(foeId, isBoss) {
     atk:Math.floor(base.atk*m), def:Math.floor(base.def*m),
     xp:Math.floor(base.xp*m*xpScale*(isBoss?1.5:isElite?2:1)),
     gold:[Math.floor(base.gold[0]*goldMult*xpScale), Math.floor(base.gold[1]*goldMult*xpScale)],
-    drops, playerTurn:true, playerStatus:[], enemyStatus:[], combo:0,
+    drops, playerTurn:true, playerStatus:[], enemyStatus:[], combo:0, rounds:0,
     statusDef:base.status, isKing:false,
     atkBonus:0, atkBonusTurns:0, defBonus:0, defBonusTurns:0,
   };
@@ -882,6 +882,7 @@ function hideCombatItems(){document.getElementById('combat-item-picker').classLi
 
 function enemyTurn() {
   if(!G.combat) return;
+  G.combat.rounds=(G.combat.rounds||0)+1; tickQuestSurvive();
   // Boss phase 2
   if (!G.combat.phase2 && G.combat.isBoss && G.combat.hp < G.combat.maxHp * 0.5) {
     G.combat.phase2 = true;
@@ -1340,6 +1341,7 @@ function doCraft(recipeId) {
   SFX.itemGet();
   addLog(`⚗ ${res.icon} ${res.name} gecraftet!`);
   showOverlay(`⚗ Gecraftet!\n${res.icon} ${res.name}`);
+  tickQuestCraft();
   refresh();
 }
 
@@ -1389,11 +1391,22 @@ function floatDmg(el,text,color='#e05252'){
 }
 
 // ── QUESTS ───────────────────────────────────────────────────
+function questScaledQty(t){
+  const lv=G.p.level||1;
+  if(t.type==='kill')    return Math.max(5, Math.floor(5*Math.sqrt(lv)));
+  if(t.type==='gold')    return Math.floor(50*lv);
+  if(t.type==='step')    return Math.max(t.qty, Math.floor(t.qty*Math.sqrt(lv/5)));
+  if(t.type==='craft')   return Math.max(t.qty, Math.floor(t.qty*Math.sqrt(lv/5)));
+  if(t.type==='survive') return Math.max(t.qty, Math.floor(t.qty*Math.sqrt(lv/5)));
+  return t.qty;
+}
 function generateQuests(){
   while(G.quests.length<3){
     const used=new Set(G.quests.map(q=>q.label));
     const av=QUEST_POOL.filter(q=>!used.has(q.label)); if(!av.length) break;
-    const t=av[Math.floor(Math.random()*av.length)]; G.quests.push({...t,progress:0});
+    const t=av[Math.floor(Math.random()*av.length)];
+    const qty=questScaledQty(t);
+    G.quests.push({...t,qty,progress:0});
   }
 }
 
@@ -1410,6 +1423,16 @@ function tickQuestStep(){
 function tickQuestGold(g){
   let ch=false;
   G.quests.forEach(q=>{ if(q.type==='gold'&&q.progress<q.qty){q.progress=Math.min(q.qty,q.progress+g);ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${q.label}!`);} });
+  if(ch) updateQuestScreen();
+}
+function tickQuestCraft(){
+  let ch=false;
+  G.quests.forEach(q=>{ if(q.type==='craft'&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${q.label}!`);} });
+  if(ch) updateQuestScreen();
+}
+function tickQuestSurvive(){
+  let ch=false;
+  G.quests.forEach(q=>{ if(q.type==='survive'&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${q.label}!`);} });
   if(ch) updateQuestScreen();
 }
 
