@@ -341,7 +341,7 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 .quest-prog-wrap{height:6px;background:var(--border);margin:6px 0}
 .quest-prog{height:100%;background:var(--blue);transition:width .4s}
 .quest-prog.done{background:var(--green)}
-.quest-info{display:flex;justify-content:space-between;align-items:center;font-size:6px;color:var(--dim)}
+.quest-info{display:flex;justify-content:space-between;align-items:center;font-size:7px;color:var(--dim)}
 .quest-reward{color:var(--accent)}
 .quest-claim{
   margin-top:8px;
@@ -603,43 +603,51 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 /* ── QUICK BUTTONS ── */
 #explore-quick-btns{
   display:flex;
-  gap:6px;
-  width:100%;
+  flex-wrap:wrap;
+  gap:5px;
   justify-content:center;
+  padding:5px;
 }
 .qbtn{
   background:var(--panel);
   color:var(--dim);
   border:1px solid var(--border);
-  padding:5px 10px;
+  border-radius:4px;
+  padding:5px 4px;
   font-family:'Press Start 2P',monospace;
-  font-size:6px;
+  font-size:16px;
   cursor:pointer;
-  flex:1;
+  width:48px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
 }
+.qbtn-icon{font-size:16px;line-height:1}
+.qbtn-label{font-size:5px;color:var(--dim);line-height:1}
 .qbtn:active{background:var(--border);color:var(--accent)}
+
+/* ── MORE MENU ── */
+.more-cat{font-size:6px;color:var(--accent);margin:8px 0 4px;text-transform:uppercase}
+.more-btn{
+  width:100%;
+  text-align:left;
+  padding:7px 10px;
+  font-size:6px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-family:'Press Start 2P',monospace;
+  cursor:pointer;
+  display:block;
+  margin-bottom:3px;
+}
+.more-btn:active{background:var(--border);color:var(--accent)}
 
 /* ── CLASS / PET RARITY ── */
 .inv-item.pet{border-color:#52c07a}
 #s-class{color:var(--accent)}
-
-/* ── SECOND QUICK BUTTONS ROW ── */
-#explore-quick-btns2{
-  display:flex;
-  gap:6px;
-  width:100%;
-  justify-content:center;
-  flex-wrap:wrap;
-}
-
-/* ── THIRD QUICK BUTTONS ROW ── */
-#explore-quick-btns3{
-  display:flex;
-  gap:6px;
-  width:100%;
-  justify-content:center;
-  flex-wrap:wrap;
-}
 
 /* ── SPEEDRUN TIMER ── */
 #speedrun-timer{
@@ -780,7 +788,7 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 }
 
 /* ── TOUCH TARGETS ── */
-.qbtn { min-width: 44px; min-height: 44px; font-size: 18px; }
+.qbtn { min-width: 44px; min-height: 44px; }
 .cbtn { min-height: 48px; font-size: 8px; padding: 10px 6px; }
 .nav-btn { min-height: 52px; padding: 8px 4px; }
 button.salloc { min-width: 32px; min-height: 32px; }

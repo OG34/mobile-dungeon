@@ -1124,6 +1124,45 @@ function showTutorialHint(step) {
   setTimeout(()=>el.remove(), 4800);
 }
 
+// ── MORE MENU ─────────────────────────────────────────────────
+function showMoreMenu() {
+  document.getElementById('overlay')?.remove();
+  const wrap = document.createElement('div');
+  wrap.id = 'overlay';
+  wrap.style.cssText = 'position:fixed;inset:0;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.85);z-index:100';
+  wrap.innerHTML = `<div id="overlay-box" style="width:100%;max-width:400px;max-height:80dvh;overflow-y:auto;padding:12px 12px 20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="color:var(--accent);font-size:9px">☰ MEHR</span>
+      <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:4px 8px;font-family:inherit;font-size:7px;cursor:pointer">✖</button>
+    </div>
+    <div class="more-cat">⚔ KAMPF</div>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showPvP()">⚔ PvP</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();startBossRush()">⚡ Boss Rush</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showOverlay('Bald verfügbar')">🏟 Arena</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showDailyChallenge()">🎯 Daily Challenge</button>
+    <div class="more-cat">🏰 DUNGEONS</div>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showDailyDungeon()">🏰 Daily Dungeon</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showSeasonalDungeon()">🌸 Saisonaler Dungeon</button>
+    <div class="more-cat">👤 CHARAKTER</div>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showCompanions()">🧑‍🤝‍🧑 Begleiter</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showGuild()">🏛 Gilde</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showPrestigeShop()">⭐ Prestige-Shop</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showSpriteSelect()">🎨 Sprite</button>
+    <div class="more-cat">📊 INFO</div>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showStats()">📊 Stats</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showHighscore()">🏆 Highscore</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showBattleHistory()">📜 Kampfhistorie</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showBestiary()">📗 Bestiary</button>
+    <div class="more-cat">⚙ SYSTEM</div>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showSettings()">⚙ Einstellungen</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showBank()">🏦 Bank</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showLootFilter()">🗑 Loot-Filter</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();showRuneCombine()">💫 Runen</button>
+    <button class="more-btn" onclick="document.getElementById('overlay').remove();exportCode()">📋 Export</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
 // ── STAT ALLOCATION ──────────────────────────────────────────
 function allocateStat(type) {
   const p = G.p;
