@@ -18,13 +18,18 @@ function drawSprite(canvas, key, scale=4, paletteOverride=null) {
 }
 
 function drawPlayer(canvas) {
-  const p = G.p; const prestige = p.prestige||0;
+  const p = G.p;
+  const prestige = p.prestige||0;
   let palette = prestige>=3 ? PRESTIGE_PALETTES[3] : prestige>=2 ? PRESTIGE_PALETTES[2] : prestige>=1 ? PRESTIGE_PALETTES[1] : null;
+  // pick sprite key based on class
+  const classSprite = {warrior:'warrior', mage:'mage', ranger:'ranger', rogue:'rogue', berserker:'warrior', paladin:'warrior', archmage:'mage', druid:'mage', assassin:'rogue', hunter:'ranger'}[p.class] || 'warrior';
+  const spriteKey = (SPRITES[classSprite] ? classSprite : 'player');
+  // hero palette override (only if no prestige palette)
   if (!palette && G.heroSprite && G.heroSprite !== 'warrior') {
     const hp = HERO_PALETTES.find(h=>h.id===G.heroSprite);
     if (hp && hp.p) palette = hp.p;
   }
-  drawSprite(canvas, 'player', 4, palette);
+  drawSprite(canvas, spriteKey, 4, palette);
 }
 
 // ── SOUND ENGINE ────────────────────────────────────────────

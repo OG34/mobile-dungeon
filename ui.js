@@ -1234,7 +1234,6 @@ function showMoreMenu() {
       <button onclick="closeOverlay()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:4px 8px;font-family:inherit;font-size:7px;cursor:pointer">✖</button>
     </div>
     <div class="more-cat">⚔ KAMPF</div>
-    <button class="more-btn" onclick="closeOverlay();showPvP()">⚔ PvP</button>
     <button class="more-btn" onclick="closeOverlay();startBossRush()">⚡ Boss Rush</button>
     <button class="more-btn" onclick="closeOverlay();startArena()">🏟 Arena</button>
     <button class="more-btn" onclick="closeOverlay();showDailyChallenge()">🎯 Daily Challenge</button>
@@ -1256,7 +1255,6 @@ function showMoreMenu() {
     <button class="more-btn" onclick="closeOverlay();showBank()">🏦 Bank</button>
     <button class="more-btn" onclick="closeOverlay();showLootFilter()">🗑 Loot-Filter</button>
     <button class="more-btn" onclick="closeOverlay();showRuneCombine()">💫 Runen</button>
-    <button class="more-btn" onclick="closeOverlay();exportCode()">📋 Export</button>
   </div>`;
   document.body.appendChild(wrap);
 }
