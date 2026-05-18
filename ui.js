@@ -920,8 +920,34 @@ function confirmName(){
   document.getElementById('name-overlay')?.remove();
   document.getElementById('pcombat-name').textContent=G.p.name;
   refresh();
-  setTimeout(()=>showTutorialHint(0),800);
+  if(G.p.kills===0&&G.p.level===1&&!G.tutorialDone) showWelcomeOverlay();
+  else setTimeout(()=>showTutorialHint(0),800);
   if(window._onNameDone) window._onNameDone();
+}
+
+function showWelcomeOverlay(){
+  const classNames={warrior:'Krieger',mage:'Magier',rogue:'Schurke'};
+  const cn=classNames[G.p.class]||G.p.class;
+  const wrap=document.createElement('div'); wrap.id='welcome-overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.95);z-index:110';
+  wrap.innerHTML=`<div style="min-width:270px;max-width:90vw;text-align:center;padding:18px">
+    <div style="font-size:11px;color:var(--accent);margin-bottom:12px">⚔ WILLKOMMEN, ${G.p.name}!</div>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:14px">Als ${cn} beginnst du im Verzauberten Wald.</div>
+    <div style="font-size:7px;color:var(--text);text-align:left;line-height:2;margin-bottom:16px">
+      → Tippe ERKUNDEN um dein erstes Monster zu finden<br>
+      → Kämpfe, sammle Items, steige auf<br>
+      → Besiege den Shadow King um die Legende zu werden
+    </div>
+    <button onclick="dismissWelcome()" style="width:100%;background:var(--accent);color:var(--bg);border:none;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer">▶ Los geht's!</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function dismissWelcome(){
+  document.getElementById('welcome-overlay')?.remove();
+  G.tutorialDone=true;
+  save();
+  setTimeout(()=>showTutorialHint(0),400);
 }
 
 // ── SPRITE SELECT ─────────────────────────────────────────────
@@ -1168,11 +1194,13 @@ function cancelFishing() {
 
 // ── TUTORIAL ──────────────────────────────────────────────────
 const TUTORIAL_HINTS = [
-  '💡 Drücke EXPLORE um dein Abenteuer zu starten!',
-  '💡 Benutze Skills im Kampf für mehr Schaden!',
-  '💡 Levle auf um neue Fähigkeiten freizuschalten!',
-  '💡 Öffne Schatzkisten für seltene Ausrüstung!',
-  '💡 Rüste Items aus im Inventar für Boni!',
+  '💡 Tippe ERKUNDEN um Abenteuer zu erleben!',
+  '💡 Skills im Kampf verursachen mehr Schaden!',
+  '💡 Ausrüstung im Inventar anlegen für Boni!',
+  '💡 Im Shop kannst du Items kaufen & verkaufen.',
+  '💡 Tagesquests geben täglich Belohnungen!',
+  '💡 Crafting: kombiniere Ressourcen zu Items!',
+  '💡 Levelup: vergib Stat-Punkte unter Charakter!',
 ];
 
 function showTutorialHint(step) {

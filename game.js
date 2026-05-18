@@ -276,6 +276,7 @@ const G = {
   guild: null,
   difficulty: 'normal',
   tutorialStep: 0,
+  tutorialDone: false,
   battleHistory: [],
   dailyChallenge: null,
   storyChains: {},
@@ -717,7 +718,7 @@ function combatAction(act) {
     if(sc&&sc.berserker&&crit) dmg=Math.floor(dmg*2);
     totalDmg+=dmg; e.hp-=dmg;
     floatDmg(ec,(crit?'💥':'')+dmg,crit?'#ffd700':'#e05252');
-    shake(ec); flashHit(ec);
+    shake(ec); flashHit(ec); flashEnemy();
   }
   // Weather element bonus
   const foeWeakTo = FOES[G.combat.id]?.weakTo;
@@ -734,7 +735,7 @@ function combatAction(act) {
   G.battleStats.dmgDealt+=totalDmg;
   if(crit&&totalDmg>G.battleStats.highCrit) G.battleStats.highCrit=totalDmg;
   if(e.combo>=3) combatLog(`🔥 COMBO ×${e.combo}!`);
-  if(crit){ combatLog(`💥 KRITISCH! ${totalDmg} Schaden!`); SFX.crit(); }
+  if(crit){ combatLog(`💥 KRITISCH! ${totalDmg} Schaden!`); SFX.crit(); const app=document.getElementById('app');if(app){app.classList.remove('shake');void app.offsetWidth;app.classList.add('shake');setTimeout(()=>app.classList.remove('shake'),260);} }
   else if(hits>1){ combatLog(`${wType==='axe'?'🪓 Axt-Cleave':'🏹 Doppelschlag'}! ${totalDmg} Schaden!`); SFX.hit(); }
   else    { combatLog(`⚔ Du schlägst für ${totalDmg} Schaden!`); SFX.hit(); }
   updateCombatUI(); updateHUD();
@@ -928,7 +929,7 @@ function enemyTurn() {
       if(ec3){ec3.classList.remove('enemy-lunge');void ec3.offsetWidth;ec3.classList.add('enemy-lunge');setTimeout(()=>ec3.classList.remove('enemy-lunge'),400);}
       const pc=document.getElementById('player-combat-canvas');
       floatDmg(pc,'-'+dmg,'#e05252');
-      shake(pc); flashHit(pc);
+      shake(pc); flashHit(pc); flashPlayer();
       if(!resisted&&e.statusDef&&Math.random()<e.statusDef.chance) applyStatus('player',e.statusDef.type,e.statusDef.turns,e.statusDef.value);
       else if(resisted&&e.statusDef) combatLog('💠 Status widerstanden!');
       // Vampiric affix: enemy heals on hit
@@ -1959,7 +1960,7 @@ function save(){
     bank:G.bank, resources:G.resources, companion:G.companion,
     speedrun:G.speedrun, storyShown:G.storyShown,
     guild:G.guild, dayNight:G.dayNight, heroSprite:G.heroSprite, worldBossSteps:G.worldBossSteps,
-    difficulty:G.difficulty, tutorialStep:G.tutorialStep,
+    difficulty:G.difficulty, tutorialStep:G.tutorialStep, tutorialDone:G.tutorialDone,
     prestigeCoins:G.prestigeCoins, prestigeUpgrades:G.prestigeUpgrades,
     battleHistory:G.battleHistory, dailyChallenge:G.dailyChallenge, storyChains:G.storyChains,
     invSort:G.invSort,
@@ -1979,7 +1980,7 @@ function load(){
     G.storyShown=d.storyShown||[];
     G.guild=d.guild||null; G.dayNight=d.dayNight||6; G.heroSprite=d.heroSprite||'warrior';
     G.worldBossSteps=d.worldBossSteps||0;
-    G.difficulty=d.difficulty||'normal'; G.tutorialStep=d.tutorialStep||99;
+    G.difficulty=d.difficulty||'normal'; G.tutorialStep=d.tutorialStep||99; G.tutorialDone=d.tutorialDone||false;
     G.prestigeCoins=d.prestigeCoins||0; G.prestigeUpgrades=d.prestigeUpgrades||{};
     G.battleHistory=d.battleHistory||[]; G.dailyChallenge=d.dailyChallenge||null; G.storyChains=d.storyChains||{};
     G.invSort=d.invSort||'none';
@@ -2002,6 +2003,8 @@ function pct(v,max){return `${Math.min(100,Math.max(0,(v/max)*100))}%`;}
 function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function shake(el){el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');}
 function flashHit(el){el.classList.remove('hit-flash');void el.offsetWidth;el.classList.add('hit-flash');}
+function flashEnemy(){const c=document.getElementById('enemy-canvas');if(!c)return;c.style.filter='brightness(3) saturate(0) sepia(1) hue-rotate(-30deg)';setTimeout(()=>{c.style.filter='';},120);}
+function flashPlayer(){const c=document.getElementById('player-combat-canvas');if(!c)return;c.style.filter='brightness(0.4) sepia(1) hue-rotate(200deg)';setTimeout(()=>{c.style.filter='';},120);}
 
 function toggleMute(){
   const muted = SFX.toggleMute();
@@ -2173,10 +2176,9 @@ function init(){
   if(!loadDailyQuests()) generateDailyQuests();
   generateQuests(); updateArea(); refresh();
   drawPlayer(document.getElementById('player-canvas'));
-  addLog('🌟 Willkommen bei Pixel Quest RPG!');
-  addLog('🗺 Drücke EXPLORE um dein Abenteuer zu beginnen.');
   if(!G.p.inv.length){addInv('potion',true);addInv('wood_sword',true);}
   if(!hasSave) promptName(()=>save());
+  else if(G.p.kills===0){const log=document.getElementById('log');if(!log||!log.children.length)addLog('⚔ Willkommen! Drücke ERKUNDEN um dein Abenteuer zu starten!');}
   if(!G.dailyChallenge||G.dailyChallenge.date!==new Date().toDateString()) generateDailyChallenge();
   updateDailyTimer();
   updateDayNight();
