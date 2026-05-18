@@ -436,6 +436,10 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
   color:var(--accent);
   line-height:2;
   animation:popIn .25s ease;
+  max-height:85vh;
+  max-width:92vw;
+  overflow-y:auto;
+  box-sizing:border-box;
 }
 @keyframes popIn{
   from{transform:scale(.7);opacity:0}

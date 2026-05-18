@@ -1305,9 +1305,10 @@ function showCrafting() {
     return `<button style="${btnStyle};${canCraft?'':'color:var(--dim)'}" ${canCraft?`onclick="doCraft('${r.id}')"`:'disabled'}>${res?.icon||''} ${r.label}<br><span style="color:var(--dim);font-size:5px">${req} → ${res?.name}</span></button>`;
   }).join('');
   const resBadge=`<div style="font-size:6px;color:var(--accent);margin-bottom:8px;padding:4px;background:var(--panel);border:1px solid var(--border)">${resLine}</div>`;
-  wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:90vw">
-    ⚗ CRAFTING<br><br>${resBadge}${rows}
-    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ Schließen</button>
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:92vw;max-height:82vh;display:flex;flex-direction:column;overflow:hidden">
+    <div style="flex-shrink:0;padding-bottom:6px">⚗ CRAFTING<br><br>${resBadge}</div>
+    <div style="overflow-y:auto;flex:1;padding-right:2px">${rows}</div>
+    <div style="flex-shrink:0;padding-top:6px"><button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:8px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ Schließen</button></div>
   </div>`;
   document.body.appendChild(wrap);
 }
