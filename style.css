@@ -629,6 +629,16 @@ canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
   gap:6px;
   width:100%;
   justify-content:center;
+  flex-wrap:wrap;
+}
+
+/* ── THIRD QUICK BUTTONS ROW ── */
+#explore-quick-btns3{
+  display:flex;
+  gap:6px;
+  width:100%;
+  justify-content:center;
+  flex-wrap:wrap;
 }
 
 /* ── SPEEDRUN TIMER ── */

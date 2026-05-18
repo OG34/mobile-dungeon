@@ -627,7 +627,11 @@ function drawSprite(canvas, key, scale=4, paletteOverride=null) {
 
 function drawPlayer(canvas) {
   const p = G.p; const prestige = p.prestige||0;
-  const palette = prestige>=3 ? PRESTIGE_PALETTES[3] : prestige>=2 ? PRESTIGE_PALETTES[2] : prestige>=1 ? PRESTIGE_PALETTES[1] : null;
+  let palette = prestige>=3 ? PRESTIGE_PALETTES[3] : prestige>=2 ? PRESTIGE_PALETTES[2] : prestige>=1 ? PRESTIGE_PALETTES[1] : null;
+  if (!palette && G.heroSprite && G.heroSprite !== 'warrior') {
+    const hp = HERO_PALETTES.find(h=>h.id===G.heroSprite);
+    if (hp && hp.p) palette = hp.p;
+  }
   drawSprite(canvas, 'player', 4, palette);
 }
 
@@ -1186,6 +1190,7 @@ const G = {
     eq:{weapon:null,armor:null,acc:null,pet:null,helm:null,gloves:null,boots:null},
     inv:[], buffs:[],
     talents:{}, talentPoints:0,
+    bestiaryRewarded:{},
   },
   area: AREAS[0],
   combat: null,
@@ -1211,6 +1216,10 @@ const G = {
   speedrun: { active:false, startTime:0, bestTime:null },
   storyShown: [],
   autoBattle: false,
+  dayNight: 6,
+  heroSprite: 'warrior',
+  worldBossSteps: 0,
+  guild: null,
 };
 
 // ── STATS ────────────────────────────────────────────────────
@@ -1240,6 +1249,7 @@ function stats() {
             atk+=enchant.atk||0; def+=enchant.def||0;
             maxHp+=enchant.maxHp||0; maxMp+=enchant.maxMp||0;
           }
+          if (invSlot._artLevel) { atk+=invSlot._artLevel; def+=invSlot._artLevel; }
         }
         equippedIds.push(eq.id);
       }
@@ -1303,6 +1313,8 @@ function gainXP(amount) {
   if (pet && pet.xpBonus) amount = Math.floor(amount * (1 + pet.xpBonus));
   const s = stats();
   if (s.xpBoost > 0) amount = Math.floor(amount * (1 + s.xpBoost));
+  if (G.dayNight >= 21 || G.dayNight < 5) amount = Math.floor(amount * 1.15);
+  if (G.guild && G.guild.name==='Drachentöter') amount = Math.floor(amount * 1.1);
   p.xp += amount;
   while (p.xp >= p.xpNext) {
     p.xp -= p.xpNext;
@@ -1360,7 +1372,7 @@ const EVENTS = [
   {t:'dungeon',  w:3}, {t:'arena',   w:2}, {t:'smith',   w:3},
   {t:'oracle',   w:2}, {t:'thief',   w:2}, {t:'meteor',  w:2},
   {t:'divine',   w:2}, {t:'gather',  w:5}, {t:'pvp',     w:1},
-  {t:'nothing',  w:2},
+  {t:'fish',     w:4}, {t:'nothing',  w:2},
 ];
 const CHEST_LOOT = ['potion','potion','elixir','iron_sword','leather','iron_shield','health_ring','magic_ring','battle_brew','atk_rune','def_rune','crit_rune','mp_rune'];
 
@@ -1376,7 +1388,10 @@ function doStep() {
   const p = G.p;
   if (p.hp<=0) { addLog('❌ Du bist tot! Benutze einen Trank.'); return; }
   G.steps++;
+  G.worldBossSteps = (G.worldBossSteps||0) + 1;
+  if (G.worldBossSteps >= 200) { G.worldBossSteps = 0; triggerWorldBoss(); return; }
   document.getElementById('step-val').textContent = G.steps;
+  if (G.steps % 5 === 0) { G.dayNight = (G.dayNight + 1) % 24; updateDayNight(); }
   tickQuestStep(); tickDailyStep();
   SFX.step();
   p.mp = Math.min(stats().maxMp, p.mp + 3);
@@ -1401,9 +1416,9 @@ function doStep() {
     ];
     opts[Math.floor(Math.random()*opts.length)](); refresh();
   } else if (ev.t==='merchant') {
-    addLog('🧙 Ein Wanderhändler bietet seine Waren an!'); showMerchant();
+    addLog(NPC_MERCHANT_LINES[Math.floor(Math.random()*NPC_MERCHANT_LINES.length)]); showMerchant();
   } else if (ev.t==='stranger') {
-    addLog('🤫 Ein mysteriöser Fremder tritt aus dem Schatten...'); showStranger();
+    addLog(NPC_STRANGER_LINES[Math.floor(Math.random()*NPC_STRANGER_LINES.length)]); showStranger();
   } else if (ev.t==='trap') {
     const dmg=Math.max(1,Math.floor(p.hp*0.2));
     p.hp=Math.max(1,p.hp-dmg);
@@ -1433,12 +1448,15 @@ function doStep() {
     SFX.heal(); addLog(`✨ Göttliche Gnade! Vollständig geheilt! (+${heal} HP, +${mp} MP)`); refresh();
   } else if (ev.t==='gather') {
     const types=['wood','ore','herbs']; const res=types[Math.floor(Math.random()*types.length)];
-    const amt=Math.floor(Math.random()*3)+1;
+    let amt=Math.floor(Math.random()*3)+1;
+    if (G.guild && G.guild.name==='Waldläufer') amt += 1;
     G.resources[res]=(G.resources[res]||0)+amt;
     const icons={wood:'🪵',ore:'🪨',herbs:'🌿'};
     const names={wood:'Holz',ore:'Erz',herbs:'Kräuter'};
     addLog(`${icons[res]} +${amt} ${names[res]} gesammelt! (Gesamt: ${G.resources[res]})`);
     SFX.itemGet(); refresh();
+  } else if (ev.t==='fish') {
+    showFishingEvent();
   } else if (ev.t==='pvp') {
     addLog('⚔ Eine Aufforderung zum Duell!'); showPvPEvent();
   } else {
@@ -1452,6 +1470,7 @@ function earnGold(g) {
   if (pet && pet.goldBonus) g = Math.floor(g * (1 + pet.goldBonus));
   const s = stats();
   if (s.goldFind > 0) g = Math.floor(g * (1 + s.goldFind));
+  if (G.guild && G.guild.name==='Schatzhüter') g = Math.floor(g * 1.1);
   G.p.gold+=g; G.p.totalGoldEarned+=g; tickQuestGold(g); tickDailyGold(g);
   checkAchievements();
 }
@@ -1469,6 +1488,22 @@ function applyStatus(target, type, turns, value) {
   list.push({type,turns,value});
   SFX.status();
   combatLog(`${STATUS_ICONS[type]} ${target==='player'?G.p.name:G.combat.name} ist ${STATUS_LABELS[type]}!`);
+  // Status combos
+  const types = list.map(s=>s.type);
+  if (types.includes('burn') && types.includes('poison')) {
+    const explodeDmg = 30 + G.p.level * 3;
+    if (target === 'enemy') {
+      G.combat.hp -= explodeDmg;
+      floatDmg(document.getElementById('enemy-canvas'), '💥'+explodeDmg, '#ff8800');
+      combatLog(`💥 KOMBO: Feuer+Gift = Explosion! ${explodeDmg} Schaden!`);
+    } else {
+      G.p.hp -= explodeDmg;
+      floatDmg(document.getElementById('player-combat-canvas'), '💥'+explodeDmg, '#ff8800');
+      combatLog(`💥 Feuer+Gift Explosion! -${explodeDmg} HP!`);
+    }
+    for (let i=list.length-1;i>=0;i--) { if(list[i].type==='burn'||list[i].type==='poison') list.splice(i,1); }
+    SFX.crit();
+  }
 }
 
 function processStatuses(target) {
@@ -1582,6 +1617,14 @@ function combatAction(act) {
     floatDmg(ec,(crit?'💥':'')+dmg,crit?'#ffd700':'#e05252');
     shake(ec); flashHit(ec);
   }
+  // Weather element bonus
+  const foeWeakTo = FOES[G.combat.id]?.weakTo;
+  const areaElem = WEATHER_ELEMENT[G.area.id] || null;
+  if (foeWeakTo && areaElem && foeWeakTo === areaElem) {
+    const bonus = Math.floor(totalDmg * 0.2);
+    totalDmg += bonus; e.hp -= bonus;
+    combatLog(`🌤 Elementvorteil! +20% Schaden!`);
+  }
   // Bow: 25% stun on hit
   if(wType==='bow'&&Math.random()<0.25) { applyStatus('enemy','stun',1,0); }
   // Lifesteal
@@ -1665,8 +1708,16 @@ function useItemInCombat(idx) {
     const ex=p.buffs.find(b=>b.type==='atk');
     if(ex) ex.left=Math.max(ex.left,item.buffLeft);
     else p.buffs.push({type:'atk',val:item.buffAtk,left:item.buffLeft});
-    combatLog(`⚗ Battle Brew! +${item.buffAtk} ATK für ${item.buffLeft} Kämpfe!`);
+    combatLog(`⚗ +${item.buffAtk} ATK für ${item.buffLeft} Kämpfe!`);
     floatDmg(document.getElementById('player-combat-canvas'),`+${item.buffAtk}ATK`,'#e8c96b');
+  }
+  if(item.buffDef){
+    p.buffs=p.buffs||[];
+    const ex=p.buffs.find(b=>b.type==='def');
+    if(ex) ex.left=Math.max(ex.left,item.buffLeft);
+    else p.buffs.push({type:'def',val:item.buffDef,left:item.buffLeft});
+    combatLog(`🍃 +${item.buffDef} DEF für ${item.buffLeft} Kämpfe!`);
+    floatDmg(document.getElementById('player-combat-canvas'),`+${item.buffDef}DEF`,'#52c07a');
   }
   slot.qty=(slot.qty||1)-1; if(slot.qty<=0) p.inv.splice(idx,1);
   combatLog(`🧪 ${item.name} benutzt!`); hideCombatItems(); setCombatBtns(false);
@@ -1701,6 +1752,13 @@ function hideCombatItems(){document.getElementById('combat-item-picker').classLi
 
 function enemyTurn() {
   if(!G.combat) return;
+  // Boss phase 2
+  if (!G.combat.phase2 && G.combat.isBoss && G.combat.hp < G.combat.maxHp * 0.5) {
+    G.combat.phase2 = true;
+    G.combat.atk = Math.floor(G.combat.atk * 1.5);
+    combatLog(`💥 ${G.combat.name} Phase 2! ATK ×1.5!`);
+    SFX.boss();
+  }
   const p=G.p; const e=G.combat; const s=stats();
   // Staff MP regen
   if(s.mpRegen>0){ p.mp=Math.min(s.maxMp,p.mp+s.mpRegen); updateHUD(); }
@@ -1722,7 +1780,8 @@ function enemyTurn() {
     if(s.evasion>0&&Math.random()<s.evasion){ combatLog('💨 Ausgewichen!'); }
     else {
       const crit=Math.random()<0.10;
-      const dmg=Math.max(1,Math.floor((e.atk-s.def+rand(-2,2))*(crit?1.8:1)));
+      const nightMult = (G.dayNight >= 21 || G.dayNight < 5) ? 1.1 : 1;
+      const dmg=Math.max(1,Math.floor((e.atk-s.def+rand(-2,2))*(crit?1.8:1)*nightMult));
       // Status resist
       const resisted=s.resist>0&&Math.random()<s.resist;
       p.hp-=dmg; G.battleStats.dmgTaken+=dmg;
@@ -1778,7 +1837,21 @@ function hardcoreReset(){
 function combatWin() {
   const p=G.p; const e=G.combat;
   const g=rand(e.gold[0],e.gold[1]); earnGold(g); p.kills++;
-  if (G.bestiary[e.id]) G.bestiary[e.id].killed++;
+  if (G.bestiary[e.id]) { G.bestiary[e.id].killed++; checkBestiaryReward(e.id); }
+  // Artifact kills
+  for (const slot of Object.values(G.p.eq)) {
+    if (slot && ITEMS[slot.id]?.artifact) {
+      const invSlot = G.p.inv.find(i=>i.id===slot.id&&i.equipped);
+      if (invSlot) {
+        invSlot._artKills = (invSlot._artKills||0) + 1;
+        if (invSlot._artKills % 50 === 0) {
+          invSlot._artLevel = (invSlot._artLevel||0) + 1;
+          addLog(`💎 Seelen-Stein LV${invSlot._artLevel}! (+1 ATK, +1 DEF)`);
+          SFX.levelUp();
+        }
+      }
+    }
+  }
   combatLog(`🎉 Sieg! +${e.xp} XP  +${g} Gold`);
   tickQuestKill(e.id); tickDailyKill(e.id);
   for(const drop of e.drops){ if(Math.random()<drop.p){ addInv(drop.id); const it=ITEMS[drop.id]; combatLog(`📦 ${it.rarity==='legendary'?'🌟':it.rarity==='epic'?'💜':''} ${it.name}!`); } }
@@ -2436,7 +2509,7 @@ function updateInvScreen(){
       div.onclick=()=>{ showOverlay(`📜 Unidentifiziertes Item\n\n[${item.slot}]\n\nSchriftrolle benutzen?`); setTimeout(()=>{ if(confirm('Schriftrolle benutzen?')) identifyItem(idx); },300); };
     } else {
       div.innerHTML=`${item.icon}${upgLabel}<small>${item.name.slice(0,9)}</small>${slot.qty>1?`<small>x${slot.qty}</small>`:''}`;
-      div.onclick=()=>{ if(slot.equipped&&item.slot&&item.slot!=='pet'){ showUpgradeMenu(idx); } else { useItem(idx); } };
+      div.onclick=()=>{ if(slot.equipped&&item.slot&&item.slot!=='pet'){ showUpgradeMenu(idx); } else if(!item.slot){ showConsumableMenu(idx); } else { useItem(idx); } };
     }
     let t;
     div.addEventListener('touchstart',()=>{t=setTimeout(()=>{ if(!slot.equipped)sellItem(idx); },600);},{passive:true});
@@ -2444,6 +2517,21 @@ function updateInvScreen(){
     div.addEventListener('touchmove',()=>clearTimeout(t),{passive:true});
     grid.appendChild(div);
   });
+}
+
+function showConsumableMenu(idx) {
+  const slot=G.p.inv[idx]; if(!slot) return; const item=ITEMS[slot.id]; if(!item) return;
+  const btnStyle='display:block;width:100%;background:var(--panel);border:1px solid var(--border);padding:8px;font-family:\'Press Start 2P\',monospace;font-size:6px;cursor:pointer;margin-bottom:6px';
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:240px;max-width:90vw;text-align:center">
+    ${item.icon} ${item.name}<br><br>
+    <button onclick="useItem(${idx});document.getElementById('overlay').remove()" style="${btnStyle};color:var(--green)">🧪 Benutzen</button>
+    <button onclick="recycleItem(${idx})" style="${btnStyle};color:#ffaa44">♻ Zerlegen</button>
+    <button onclick="sellItem(${idx});document.getElementById('overlay').remove();refresh()" style="${btnStyle};color:var(--dim)">💱 Verkaufen</button>
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:none;color:var(--dim);font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖</button>
+  </div>`;
+  document.body.appendChild(wrap);
 }
 
 function showUpgradeMenu(idx) {
@@ -3057,6 +3145,213 @@ function startDailyDungeon(){
   showScreen('explore'); doStep();
 }
 
+// ── FISHING ──────────────────────────────────────────────────
+function showFishingEvent() {
+  const result = Math.random();
+  let caught, msg;
+  if (result < 0.05) { caught='rare_fish'; msg='🐠 Seltener Fisch! Könnte wertvoll sein...'; }
+  else if (result < 0.6) { caught='fish'; msg='🐟 Einen Fisch gefangen!'; }
+  else { msg='🎣 Nichts gebissen...'; }
+  if (caught) { addInv(caught); SFX.itemGet(); }
+  addLog('🎣 Du wirfst die Angel aus... ' + msg);
+  refresh();
+}
+
+// ── RECYCLE ───────────────────────────────────────────────────
+function recycleItem(invIdx) {
+  const slot=G.p.inv[invIdx]; if(!slot||slot.equipped) return;
+  const item=ITEMS[slot.id]; if(!item) return;
+  const r=item.rarity||'common';
+  if(r==='common')         { G.resources.wood+=1; }
+  else if(r==='uncommon')  { G.resources.ore+=2; }
+  else if(r==='rare')      { G.resources.ore+=3; G.resources.herbs+=2; }
+  else                     { G.resources.ore+=5; G.resources.herbs+=3; G.resources.wood+=3; }
+  if(slot.qty>1) slot.qty--; else G.p.inv.splice(invIdx,1);
+  addLog(`♻ ${item.name} zerlegt! Ressourcen erhalten.`);
+  document.getElementById('overlay')?.remove();
+  refresh();
+}
+
+// ── BESTIARY REWARD ───────────────────────────────────────────
+function checkBestiaryReward(foeId) {
+  const b = G.bestiary[foeId]; if (!b) return;
+  if (!G.p.bestiaryRewarded) G.p.bestiaryRewarded = {};
+  const prev = G.p.bestiaryRewarded[foeId] || 0;
+  const REWARDS = [{kills:10,baseAtk:1,label:'+1 ATK'},{kills:25,baseDef:1,label:'+1 DEF'},{kills:50,maxHp:10,label:'+10 MaxHP'}];
+  for (const r of REWARDS) {
+    if (b.killed >= r.kills && prev < r.kills) {
+      G.p.bestiaryRewarded[foeId] = r.kills;
+      if (r.baseAtk) G.p.baseAtk += r.baseAtk;
+      if (r.baseDef) G.p.baseDef += r.baseDef;
+      if (r.maxHp)  { G.p.maxHp += r.maxHp; G.p.hp += r.maxHp; }
+      addLog(`📖 Bestiarium: ${FOES[foeId]?.name} ×${r.kills} → ${r.label}!`);
+      SFX.levelUp();
+    }
+  }
+}
+
+// ── DAY/NIGHT ─────────────────────────────────────────────────
+function updateDayNight() {
+  const h = G.dayNight;
+  const isNight = h >= 21 || h < 5;
+  const sceneWrap = document.getElementById('scene-wrap');
+  if (sceneWrap) sceneWrap.style.filter = isNight ? 'brightness(0.6) hue-rotate(30deg)' : '';
+  const el = document.getElementById('daynightlbl');
+  if (el) el.textContent = isNight ? '🌙 Nacht' : h < 12 ? '🌄 Morgen' : '☀️ Tag';
+}
+
+// ── RUNE COMBINE ──────────────────────────────────────────────
+function showRuneCombine() {
+  const rows = Object.entries(RUNE_COMBINE).map(([runeId, combo]) => {
+    const item = ITEMS[runeId]; const res = ITEMS[combo.result];
+    const count = G.p.inv.filter(i=>i.id===runeId).length;
+    const canDo = count >= combo.needs;
+    return `<div class="shop-row"><span class="shop-icon">${item.icon}×${combo.needs}</span>
+      <div class="shop-info"><div class="shop-name">${item.name} → ${res.name}</div>
+      <div class="shop-stat">Hast du: ${count}/${combo.needs}</div></div>
+      <button class="shop-btn" onclick="doRuneCombine('${runeId}')" ${canDo?'':'disabled'}>${res.icon}</button>
+    </div>`;
+  }).join('');
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:290px;max-width:90vw;max-height:85vh;overflow-y:auto;text-align:left">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:10px">💫 RUNEN KOMBINIEREN</div>
+    ${rows||'<div style="color:var(--dim);font-size:7px;padding:8px">Keine kombinierbaren Runen im Inventar.</div>'}
+    <br><button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function doRuneCombine(runeId) {
+  const combo = RUNE_COMBINE[runeId]; if (!combo) return;
+  const runesInInv = G.p.inv.filter(i=>i.id===runeId);
+  if (runesInInv.length < combo.needs) { showOverlay('❌ Nicht genug Runen!'); return; }
+  for (let i = 0; i < combo.needs; i++) {
+    const idx = G.p.inv.indexOf(runesInInv[i]);
+    G.p.inv.splice(idx, 1);
+  }
+  addInv(combo.result);
+  const res = ITEMS[combo.result];
+  SFX.levelUp();
+  document.getElementById('overlay')?.remove();
+  addLog(`💫 Runen kombiniert! ${res.icon} ${res.name} erhalten!`);
+  showRuneCombine(); refresh();
+}
+
+// ── EXPORT CODE ───────────────────────────────────────────────
+function exportCode() {
+  const data = { name:G.p.name, level:G.p.level, kills:G.p.kills, gold:G.p.totalGoldEarned, steps:G.steps, prestige:G.p.prestige||0 };
+  const code = btoa(JSON.stringify(data));
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;text-align:center">
+    🏅 RANGLISTEN-CODE<br><br>
+    <div style="font-size:6px;color:var(--dim);word-break:break-all;border:1px solid var(--border);padding:8px;margin:8px 0">${code}</div>
+    <div style="font-size:7px;color:var(--dim)">${G.p.name} · LV${G.p.level} · ${G.p.kills} Kills</div><br>
+    <button onclick="navigator.clipboard?.writeText('${code}').then(()=>addLog('📋 Code kopiert!'))" style="width:100%;background:var(--accent);color:var(--bg);border:none;padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:6px">📋 Kopieren</button>
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+// ── GUILD ─────────────────────────────────────────────────────
+const GUILD_RANKS = ['Neuling','Lehrling','Geselle','Meister','Champion','Legende'];
+function showGuild() {
+  const g = G.guild;
+  if (!g) {
+    const wrap = document.createElement('div'); wrap.id='overlay';
+    wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+    wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;text-align:center">
+      🏛 GILDE<br><br>
+      <span style="font-size:7px;color:var(--dim)">Tritt einer Gilde bei für tägliche Missionen und Belohnungen!</span><br><br>
+      <button onclick="joinGuild('Drachentöter')" style="width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:4px">⚔ Drachentöter (Kampf)</button>
+      <button onclick="joinGuild('Schatzhüter')" style="width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:4px">💰 Schatzhüter (Gold)</button>
+      <button onclick="joinGuild('Waldläufer')" style="width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:8px">🌲 Waldläufer (Erkunden)</button>
+      <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
+    </div>`;
+    document.body.appendChild(wrap);
+    return;
+  }
+  const rankName = GUILD_RANKS[Math.min(g.rank, GUILD_RANKS.length-1)];
+  const xpToNext = (g.rank+1)*500;
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;text-align:left">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:10px">🏛 ${g.name}</div>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:6px">Rang: ${rankName} · Gilden-XP: ${g.xp}/${xpToNext}</div>
+    <div style="height:6px;background:var(--border);margin-bottom:10px"><div style="height:100%;background:var(--accent);width:${Math.min(100,g.xp/xpToNext*100)}%"></div></div>
+    <div style="font-size:7px;color:var(--dim)">Gilden-Bonus: ${g.name==='Drachentöter'?'+10% XP':g.name==='Schatzhüter'?'+10% Gold':'+1 Ressource/Step'}</div><br>
+    <button onclick="document.getElementById('overlay').remove();claimGuildDaily()" style="width:100%;background:var(--green);color:var(--bg);border:none;padding:8px;font-family:inherit;font-size:7px;cursor:pointer;margin-bottom:6px">📦 Tagesbonus abholen</button>
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function joinGuild(name) {
+  G.guild = { name, xp:0, rank:0 };
+  document.getElementById('overlay')?.remove();
+  addLog(`🏛 Gilde "${name}" beigetreten!`); refresh();
+  showGuild();
+}
+function claimGuildDaily() {
+  if (!G.guild) return;
+  const today = new Date().toDateString();
+  if (G.guild.lastClaim === today) { showOverlay('❌ Heute bereits abgeholt!'); return; }
+  G.guild.lastClaim = today;
+  G.guild.xp += 100;
+  if (G.guild.xp >= (G.guild.rank+1)*500) { G.guild.rank++; addLog(`🏛 Gilden-Rang: ${GUILD_RANKS[Math.min(G.guild.rank,GUILD_RANKS.length-1)]}!`); SFX.levelUp(); }
+  const bonus = G.guild.name==='Drachentöter' ? ()=>{ gainXP(G.p.level*20); } :
+                G.guild.name==='Schatzhüter'  ? ()=>{ earnGold(G.p.level*15); } :
+                ()=>{ G.resources.wood+=2; G.resources.ore+=1; G.resources.herbs+=2; };
+  bonus();
+  addLog('🏛 Gilden-Tagesbonus erhalten!'); SFX.chest(); refresh();
+}
+
+// ── WORLD BOSS ────────────────────────────────────────────────
+function triggerWorldBoss() {
+  addLog('🌍 Der WELTENBEZWINGER erscheint! Ein mächtiger Feind!');
+  SFX.boss(); SFX.boss();
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;text-align:center;border-color:#ff4444">
+    ⚡ WELTENBEZWINGER ⚡<br><br>
+    <span style="font-size:7px;color:var(--dim)">HP: ${WORLD_BOSS_DATA.hp} · ATK: ${WORLD_BOSS_DATA.atk}<br>Garantierte Legendary-Drops!</span><br><br>
+    <button onclick="document.getElementById('overlay').remove();startWorldBoss()" style="width:100%;background:#2a0000;color:#ff4444;border:2px solid #cc0000;padding:10px;font-family:inherit;font-size:8px;cursor:pointer;margin-bottom:6px">⚔ KÄMPFEN</button>
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">🏃 Fliehen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function startWorldBoss() {
+  const d = WORLD_BOSS_DATA;
+  G.combat = { id:d.id, isBoss:true, name:d.name, sprite:d.sprite, hp:d.hp, maxHp:d.hp, atk:d.atk, def:d.def, xp:d.xp, gold:d.gold, statusDef:d.status, drops:d.drops, playerTurn:true, playerStatus:[], enemyStatus:[], combo:0, isWorldBoss:true };
+  enterCombatScreen(d.sprite, true, false);
+}
+
+// ── SPRITE SELECT ─────────────────────────────────────────────
+function showSpriteSelect() {
+  const rows = HERO_PALETTES.map(hp => {
+    const active = G.heroSprite === hp.id;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px;border:1px solid ${active?'var(--accent)':'var(--border)'};margin-bottom:6px;cursor:pointer" onclick="selectHeroSprite('${hp.id}')">
+      <span style="font-size:9px;color:${active?'var(--accent)':'var(--text)'}">${active?'▶ ':''}${hp.name}</span>
+      ${active?'<span style="font-size:7px;color:var(--accent)">(aktiv)</span>':''}
+    </div>`;
+  }).join('');
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;text-align:left">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:10px">🎨 CHARAKTER-STIL</div>
+    ${rows}
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Schließen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function selectHeroSprite(id) {
+  G.heroSprite = id;
+  document.getElementById('overlay')?.remove();
+  drawPlayer(document.getElementById('player-canvas'));
+  drawPlayer(document.getElementById('char-canvas'));
+  addLog(`🎨 Stil: ${HERO_PALETTES.find(h=>h.id===id)?.name||id}`);
+  showSpriteSelect();
+}
+
 // ── SAVE / LOAD ──────────────────────────────────────────────
 function save(){
   try{localStorage.setItem('pq_save',JSON.stringify({
@@ -3065,6 +3360,7 @@ function save(){
     battleStats:G.battleStats, lootFilter:G.lootFilter, hardcore:G.hardcore,
     bank:G.bank, resources:G.resources, companion:G.companion,
     speedrun:G.speedrun, storyShown:G.storyShown,
+    guild:G.guild, dayNight:G.dayNight, heroSprite:G.heroSprite, worldBossSteps:G.worldBossSteps,
   }));}catch(_){}
 }
 
@@ -3079,6 +3375,8 @@ function load(){
     G.bank=d.bank||[]; G.resources=d.resources||{wood:0,ore:0,herbs:0};
     G.companion=d.companion||null; G.speedrun=d.speedrun||{active:false,startTime:0,bestTime:null};
     G.storyShown=d.storyShown||[];
+    G.guild=d.guild||null; G.dayNight=d.dayNight||6; G.heroSprite=d.heroSprite||'warrior';
+    G.worldBossSteps=d.worldBossSteps||0;
     if(!G.p.eq.pet) G.p.eq.pet=null;
     if(!G.p.subclass) G.p.subclass=null;
     if(!G.p.eq.helm) G.p.eq.helm=null;
@@ -3086,6 +3384,7 @@ function load(){
     if(!G.p.eq.boots) G.p.eq.boots=null;
     if(!G.p.talents) G.p.talents={};
     if(G.p.talentPoints===undefined) G.p.talentPoints=0;
+    if(!G.p.bestiaryRewarded) G.p.bestiaryRewarded={};
     document.getElementById('step-val').textContent=G.steps; return true;
   }catch(_){return false;}
 }
@@ -3115,6 +3414,7 @@ function init(){
   if(!G.p.inv.length){addInv('potion',true);addInv('wood_sword',true);}
   if(!hasSave) promptName(()=>save());
   updateDailyTimer();
+  updateDayNight();
   setInterval(weatherTick, 80);
   const srEl=document.getElementById('speedrun-timer');
   if(srEl) srEl.style.display=G.speedrun.active?'block':'none';
