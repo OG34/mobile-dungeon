@@ -1,10 +1,11 @@
-const CACHE = 'pixel-quest-v1';
+const CACHE = 'pixel-quest-v3';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './sprites.js',
   './data.js',
+  './ui.js',
   './game.js',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap',
