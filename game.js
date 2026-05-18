@@ -852,32 +852,32 @@ const AREAS = [
 ];
 
 const FOES = {
-  rat:      { name:'Rat',      sprite:'rat',      hp:8,  atk:2,  def:0,  xp:5,   gold:[1,3],   status:null },
-  slime:    { name:'Slime',    sprite:'slime',    hp:14, atk:4,  def:1,  xp:10,  gold:[1,5],   status:null },
-  goblin:   { name:'Goblin',   sprite:'goblin',   hp:22, atk:7,  def:2,  xp:18,  gold:[3,10],  status:{type:'stun',   chance:.25,turns:1,value:0} },
-  bat:      { name:'Bat',      sprite:'bat',      hp:18, atk:8,  def:1,  xp:16,  gold:[2,7],   status:null },
-  wolf:     { name:'Wolf',     sprite:'wolf',     hp:28, atk:9,  def:2,  xp:24,  gold:[2,8],   status:null },
-  troll:    { name:'Troll',    sprite:'troll',    hp:45, atk:12, def:5,  xp:40,  gold:[8,18],  status:null },
-  skeleton: { name:'Skeleton', sprite:'skeleton', hp:38, atk:11, def:4,  xp:35,  gold:[5,15],  status:null,                                          element:'undead', weakTo:'light' },
-  zombie:   { name:'Zombie',   sprite:'zombie',   hp:50, atk:13, def:3,  xp:45,  gold:[6,16],  status:{type:'poison', chance:.35,turns:3,value:6},   element:'undead', weakTo:'light' },
-  ghost:    { name:'Ghost',    sprite:'ghost',    hp:42, atk:15, def:6,  xp:55,  gold:[8,20],  status:{type:'stun',   chance:.20,turns:1,value:0},   element:'undead', weakTo:'light' },
-  demon:    { name:'Demon',    sprite:'demon',    hp:70, atk:18, def:7,  xp:90,  gold:[15,40], status:{type:'burn',   chance:.30,turns:2,value:10},  element:'fire',   weakTo:'ice'   },
-  dragon:         { name:'Dragon',         sprite:'dragon',         hp:90,  atk:20, def:8,  xp:120, gold:[25,70],  status:{type:'burn',chance:.40,turns:3,value:12},  element:'fire', weakTo:'ice' },
-  fire_elemental: { name:'Fire Elemental', sprite:'fire_elemental', hp:130, atk:28, def:10, xp:170, gold:[22,55],  status:{type:'burn',chance:.50,turns:2,value:12},  element:'fire', weakTo:'ice' },
-  lava_golem:     { name:'Lava Golem',     sprite:'lava_golem',     hp:180, atk:32, def:15, xp:230, gold:[32,80],  status:{type:'burn',chance:.40,turns:3,value:15},  element:'fire', weakTo:'ice' },
-  phoenix:        { name:'Phoenix',        sprite:'phoenix',        hp:145, atk:35, def:8,  xp:210, gold:[28,68],  status:{type:'burn',chance:.45,turns:2,value:14},  element:'fire', weakTo:'ice' },
-  void_shade:     { name:'Void Shade',     sprite:'void_shade',     hp:165, atk:42, def:12, xp:290, gold:[42,105], status:{type:'stun',chance:.30,turns:1,value:0},   element:'void', weakTo:'light' },
-  shadow_spider:  { name:'Shadow Spider',  sprite:'shadow_spider',  hp:195, atk:48, def:14, xp:340, gold:[55,130], status:{type:'poison',chance:.50,turns:4,value:18}, element:'void', weakTo:'light' },
-  chaos_dragon:   { name:'Chaos Dragon',   sprite:'chaos_dragon',   hp:260, atk:58, def:18, xp:480, gold:[85,210], status:{type:'burn',chance:.50,turns:3,value:22},  element:'void', weakTo:'light' },
-  sea_serpent:    { name:'Sea Serpent',    sprite:'sea_serpent',    hp:320, atk:68, def:22, xp:600, gold:[100,260],status:{type:'poison',chance:.40,turns:3,value:25}, element:'water',weakTo:'lightning' },
-  coral_crab:     { name:'Coral Crab',     sprite:'coral_crab',     hp:380, atk:72, def:28, xp:680, gold:[115,290],status:{type:'stun',chance:.25,turns:1,value:0},   element:'water',weakTo:'lightning' },
-  deep_kraken:    { name:'Deep Kraken',    sprite:'deep_kraken',    hp:460, atk:82, def:24, xp:820, gold:[145,380],status:{type:'stun',chance:.35,turns:2,value:0},   element:'water',weakTo:'lightning' },
-  storm_hawk:     { name:'Storm Hawk',     sprite:'storm_hawk',     hp:440, atk:90, def:20, xp:850, gold:[140,360],status:{type:'stun',chance:.30,turns:1,value:0},   element:'air',  weakTo:'earth' },
-  wind_giant:     { name:'Wind Giant',     sprite:'wind_giant',     hp:540, atk:98, def:30, xp:1000,gold:[180,460],status:null,                                        element:'air',  weakTo:'earth' },
-  thunder_wyrm:   { name:'Thunder Wyrm',   sprite:'thunder_wyrm',   hp:620, atk:110,def:26, xp:1200,gold:[220,580],status:{type:'burn',chance:.45,turns:3,value:30},  element:'lightning',weakTo:'earth' },
-  ice_golem:      { name:'Ice Golem',      sprite:'ice_golem',      hp:700, atk:120,def:40, xp:1400,gold:[280,720],status:{type:'stun',chance:.30,turns:1,value:0},   element:'ice',  weakTo:'fire' },
-  frost_troll:    { name:'Frost Troll',    sprite:'frost_troll',    hp:820, atk:130,def:35, xp:1600,gold:[320,850],status:{type:'poison',chance:.35,turns:3,value:40}, element:'ice',  weakTo:'fire' },
-  blizzard_dragon:{ name:'Blizzard Dragon',sprite:'blizzard_dragon',hp:1000,atk:150,def:45, xp:2000,gold:[450,1200],status:{type:'burn',chance:.50,turns:4,value:45},  element:'ice',  weakTo:'fire' },
+  rat:      { name:'Rat',      icon:'🐀', sprite:'rat',      hp:8,  atk:2,  def:0,  xp:5,   gold:[1,3],   status:null },
+  slime:    { name:'Slime',    icon:'🫧', sprite:'slime',    hp:14, atk:4,  def:1,  xp:10,  gold:[1,5],   status:null },
+  goblin:   { name:'Goblin',   icon:'👺', sprite:'goblin',   hp:22, atk:7,  def:2,  xp:18,  gold:[3,10],  status:{type:'stun',   chance:.25,turns:1,value:0} },
+  bat:      { name:'Bat',      icon:'🦇', sprite:'bat',      hp:18, atk:8,  def:1,  xp:16,  gold:[2,7],   status:null },
+  wolf:     { name:'Wolf',     icon:'🐺', sprite:'wolf',     hp:28, atk:9,  def:2,  xp:24,  gold:[2,8],   status:null },
+  troll:    { name:'Troll',    icon:'👹', sprite:'troll',    hp:45, atk:12, def:5,  xp:40,  gold:[8,18],  status:null },
+  skeleton: { name:'Skeleton', icon:'💀', sprite:'skeleton', hp:38, atk:11, def:4,  xp:35,  gold:[5,15],  status:null,                                          element:'undead', weakTo:'light' },
+  zombie:   { name:'Zombie',   icon:'🧟', sprite:'zombie',   hp:50, atk:13, def:3,  xp:45,  gold:[6,16],  status:{type:'poison', chance:.35,turns:3,value:6},   element:'undead', weakTo:'light' },
+  ghost:    { name:'Ghost',    icon:'👻', sprite:'ghost',    hp:42, atk:15, def:6,  xp:55,  gold:[8,20],  status:{type:'stun',   chance:.20,turns:1,value:0},   element:'undead', weakTo:'light' },
+  demon:    { name:'Demon',    icon:'😈', sprite:'demon',    hp:70, atk:18, def:7,  xp:90,  gold:[15,40], status:{type:'burn',   chance:.30,turns:2,value:10},  element:'fire',   weakTo:'ice'   },
+  dragon:         { name:'Dragon',         icon:'🐉', sprite:'dragon',         hp:90,  atk:20, def:8,  xp:120, gold:[25,70],  status:{type:'burn',chance:.40,turns:3,value:12},  element:'fire', weakTo:'ice' },
+  fire_elemental: { name:'Fire Elemental', icon:'🔥', sprite:'fire_elemental', hp:130, atk:28, def:10, xp:170, gold:[22,55],  status:{type:'burn',chance:.50,turns:2,value:12},  element:'fire', weakTo:'ice' },
+  lava_golem:     { name:'Lava Golem',     icon:'🌋', sprite:'lava_golem',     hp:180, atk:32, def:15, xp:230, gold:[32,80],  status:{type:'burn',chance:.40,turns:3,value:15},  element:'fire', weakTo:'ice' },
+  phoenix:        { name:'Phoenix',        icon:'🦅', sprite:'phoenix',        hp:145, atk:35, def:8,  xp:210, gold:[28,68],  status:{type:'burn',chance:.45,turns:2,value:14},  element:'fire', weakTo:'ice' },
+  void_shade:     { name:'Void Shade',     icon:'🌑', sprite:'void_shade',     hp:165, atk:42, def:12, xp:290, gold:[42,105], status:{type:'stun',chance:.30,turns:1,value:0},   element:'void', weakTo:'light' },
+  shadow_spider:  { name:'Shadow Spider',  icon:'🕷', sprite:'shadow_spider',  hp:195, atk:48, def:14, xp:340, gold:[55,130], status:{type:'poison',chance:.50,turns:4,value:18}, element:'void', weakTo:'light' },
+  chaos_dragon:   { name:'Chaos Dragon',   icon:'🐲', sprite:'chaos_dragon',   hp:260, atk:58, def:18, xp:480, gold:[85,210], status:{type:'burn',chance:.50,turns:3,value:22},  element:'void', weakTo:'light' },
+  sea_serpent:    { name:'Sea Serpent',    icon:'🐍', sprite:'sea_serpent',    hp:320, atk:68, def:22, xp:600, gold:[100,260],status:{type:'poison',chance:.40,turns:3,value:25}, element:'water',weakTo:'lightning' },
+  coral_crab:     { name:'Coral Crab',     icon:'🦀', sprite:'coral_crab',     hp:380, atk:72, def:28, xp:680, gold:[115,290],status:{type:'stun',chance:.25,turns:1,value:0},   element:'water',weakTo:'lightning' },
+  deep_kraken:    { name:'Deep Kraken',    icon:'🦑', sprite:'deep_kraken',    hp:460, atk:82, def:24, xp:820, gold:[145,380],status:{type:'stun',chance:.35,turns:2,value:0},   element:'water',weakTo:'lightning' },
+  storm_hawk:     { name:'Storm Hawk',     icon:'🦅', sprite:'storm_hawk',     hp:440, atk:90, def:20, xp:850, gold:[140,360],status:{type:'stun',chance:.30,turns:1,value:0},   element:'air',  weakTo:'earth' },
+  wind_giant:     { name:'Wind Giant',     icon:'💨', sprite:'wind_giant',     hp:540, atk:98, def:30, xp:1000,gold:[180,460],status:null,                                        element:'air',  weakTo:'earth' },
+  thunder_wyrm:   { name:'Thunder Wyrm',   icon:'⚡', sprite:'thunder_wyrm',   hp:620, atk:110,def:26, xp:1200,gold:[220,580],status:{type:'burn',chance:.45,turns:3,value:30},  element:'lightning',weakTo:'earth' },
+  ice_golem:      { name:'Ice Golem',      icon:'🧊', sprite:'ice_golem',      hp:700, atk:120,def:40, xp:1400,gold:[280,720],status:{type:'stun',chance:.30,turns:1,value:0},   element:'ice',  weakTo:'fire' },
+  frost_troll:    { name:'Frost Troll',    icon:'❄', sprite:'frost_troll',    hp:820, atk:130,def:35, xp:1600,gold:[320,850],status:{type:'poison',chance:.35,turns:3,value:40}, element:'ice',  weakTo:'fire' },
+  blizzard_dragon:{ name:'Blizzard Dragon',icon:'🌨', sprite:'blizzard_dragon',hp:1000,atk:150,def:45, xp:2000,gold:[450,1200],status:{type:'burn',chance:.50,turns:4,value:45},  element:'ice',  weakTo:'fire' },
 };
 
 const DROPS = {
@@ -1372,7 +1372,7 @@ const EVENTS = [
   {t:'dungeon',  w:3}, {t:'arena',   w:2}, {t:'smith',   w:3},
   {t:'oracle',   w:2}, {t:'thief',   w:2}, {t:'meteor',  w:2},
   {t:'divine',   w:2}, {t:'gather',  w:5}, {t:'pvp',     w:1},
-  {t:'fish',     w:4}, {t:'nothing',  w:2},
+  {t:'fish',     w:4}, {t:'inn',     w:3}, {t:'nothing', w:2},
 ];
 const CHEST_LOOT = ['potion','potion','elixir','iron_sword','leather','iron_shield','health_ring','magic_ring','battle_brew','atk_rune','def_rune','crit_rune','mp_rune'];
 
@@ -1399,7 +1399,13 @@ function doStep() {
 
   const ev = pick(EVENTS);
   if (ev.t==='combat'||ev.t==='boss') {
-    startCombat(G.area.foes[Math.floor(Math.random()*G.area.foes.length)], ev.t==='boss');
+    const isNight = G.dayNight >= 21 || G.dayNight < 5;
+    let foePool = G.area.foes.slice();
+    if (isNight) {
+      const nightFoes = ['skeleton','zombie','ghost'].filter(f => !foePool.includes(f));
+      foePool = [...foePool, ...nightFoes];
+    }
+    startCombat(foePool[Math.floor(Math.random()*foePool.length)], ev.t==='boss');
   } else if (ev.t==='gold') {
     const g=Math.floor((Math.random()*8+2)*p.level); earnGold(g); SFX.goldPickup(); addLog(`💰 Du findest ${g} Gold!`); refresh();
   } else if (ev.t==='heal') {
@@ -1459,6 +1465,8 @@ function doStep() {
     showFishingEvent();
   } else if (ev.t==='pvp') {
     addLog('⚔ Eine Aufforderung zum Duell!'); showPvPEvent();
+  } else if (ev.t==='inn') {
+    addLog('🏠 Du entdeckst ein Wirtshaus. Ausruhen?'); showInn();
   } else {
     const msgs=['🌲 Nichts passiert.','🌫️ Seltsamer Nebel...','🍄 Bunte Pilze.','🐦 Vögel zwitschern.','💨 Der Wind flüstert.','🕸️ Überall Spinnweben.','🌙 Der Mond steht tief.'];
     addLog(msgs[Math.floor(Math.random()*msgs.length)]);
@@ -1922,6 +1930,31 @@ function merchantBuy(id,price){
   G.p.gold-=price; addInv(id); addLog(`🧙 ${ITEMS[id].icon} ${ITEMS[id].name} für ${price}🪙 gekauft!`);
   document.getElementById('overlay')?.remove(); refresh();
 }
+function showInn() {
+  const p=G.p; const s=stats();
+  const cost=Math.max(15,Math.floor(p.level*10));
+  const missingHp=s.maxHp-p.hp; const missingMp=s.maxMp-p.mp;
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;text-align:center">
+    <div style="color:var(--accent);font-size:9px;margin-bottom:8px">🏠 WIRTSHAUS</div>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:10px">HP: ${p.hp}/${s.maxHp} · MP: ${p.mp}/${s.maxMp}</div>
+    ${missingHp===0&&missingMp===0?`<div style="font-size:7px;color:var(--green);margin-bottom:10px">✓ Du bist bereits vollständig erholt!</div>`:`<div style="font-size:7px;color:var(--dim);margin-bottom:10px">Vollständige Erholung für <b style="color:var(--text)">${cost} 🪙</b></div>`}
+    ${missingHp>0||missingMp>0?`<button onclick="doRest(${cost})" style="width:100%;background:var(--green);color:var(--bg);border:none;padding:10px;font-family:inherit;font-size:8px;cursor:pointer;margin-bottom:6px">💤 Ausruhen (${cost} 🪙)</button>`:''}
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">🚪 Verlassen</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+function doRest(cost) {
+  if(G.p.gold<cost){showOverlay('❌ Kein Gold!');return;}
+  G.p.gold-=cost; const s=stats();
+  G.p.hp=s.maxHp; G.p.mp=s.maxMp;
+  SFX.heal();
+  document.getElementById('overlay')?.remove();
+  addLog(`🏠 Ausgeruht! HP und MP vollständig wiederhergestellt.`);
+  refresh();
+}
+
 function showStranger(){
   const xp=Math.floor(20*G.p.level); const g=Math.floor(15*G.p.level);
   const btnStyle='display:block;width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);border-bottom:2px solid var(--accent2);padding:10px;margin-bottom:6px;font-family:\'Press Start 2P\',monospace;font-size:7px;cursor:pointer';
@@ -2307,40 +2340,79 @@ function showWorldMap() {
   const nodes=AREAS.map((a,i)=>{
     const locked=lvl<a.min;
     const active=G.area.id===a.id;
-    const col=active?'var(--accent)':locked?'#333':'#666';
-    const tx=active?'var(--text)':locked?'#333':'#aaa';
-    const y=20+i*52;
-    return `<div style="display:flex;align-items:center;gap:10px;margin:4px 0">
-      <div style="width:36px;height:36px;border:2px solid ${col};display:flex;align-items:center;justify-content:center;font-size:18px;background:${active?'#1a1a30':'transparent'}">${locked?'🔒':a.icon}</div>
-      <div style="text-align:left">
-        <div style="font-size:7px;color:${tx}">${a.name}</div>
-        <div style="font-size:6px;color:var(--dim)">LV ${a.min}–${a.max}</div>
+    const col=active?'var(--accent)':locked?'#333':'#556';
+    const tx=active?'var(--text)':locked?'#444':'#aaa';
+    const clickable=!locked&&!active;
+    return `<div style="display:flex;align-items:center;gap:10px;margin:4px 0;${clickable?'cursor:pointer;':''}opacity:${locked?0.4:1}"
+      ${clickable?`onclick="travelToArea('${a.id}')"`:''}
+      title="${locked?'Benötigt LV '+a.min:active?'Aktuelles Gebiet':'Reisen → '+a.name}">
+      <div style="width:36px;height:36px;border:2px solid ${col};display:flex;align-items:center;justify-content:center;font-size:18px;background:${active?'#1a1a30':clickable?'#111':'transparent'}">${locked?'🔒':a.icon}</div>
+      <div style="text-align:left;flex:1">
+        <div style="font-size:7px;color:${tx}">${a.name}${active?' ◀':''}</div>
+        <div style="font-size:6px;color:var(--dim)">LV ${a.min}–${a.max}${clickable?' · Tippen zum Reisen':''}</div>
       </div>
-      ${i<AREAS.length-1?'<div style="position:absolute;left:18px;margin-top:36px;width:2px;height:16px;background:#333"></div>':''}
     </div>`;
   }).join('');
-  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:90vw;position:relative">
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:90vw;max-height:85vh;overflow-y:auto;position:relative">
     🗺 WELTKARTE<br><br>
     <div style="text-align:left;padding:0 8px">${nodes}</div>
     <br><button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ Schließen</button>
   </div>`;
   document.body.appendChild(wrap);
 }
+function travelToArea(areaId) {
+  const a = AREAS.find(a=>a.id===areaId); if(!a) return;
+  if(G.p.level < a.min){showOverlay('❌ Level zu niedrig!');return;}
+  if(G.combat){showOverlay('❌ Beende zuerst den Kampf!');return;}
+  G.area = a;
+  document.getElementById('area-name').textContent = a.name;
+  document.getElementById('area-icon').textContent = a.icon;
+  drawBackground(a.id);
+  initWeather(a.id);
+  if(!G.storyShown.includes(a.id) && AREA_STORIES[a.id]){
+    G.storyShown.push(a.id);
+    setTimeout(()=>showOverlay(AREA_STORIES[a.id]), 400);
+  }
+  document.getElementById('overlay')?.remove();
+  addLog(`🗺 Reist nach ${a.name}!`);
+  refresh();
+}
 
 // ── BESTIARY ─────────────────────────────────────────────────
 function showBestiary() {
   const entries=Object.entries(G.bestiary);
+  const MILESTONES=[{kills:10,label:'+1 ATK',icon:'⚔'},{kills:25,label:'+1 DEF',icon:'🛡'},{kills:50,label:'+10 HP',icon:'❤'}];
   let rows=entries.length?entries.map(([id,b])=>{
     const f=FOES[id]||{}; const name=f.name||id;
-    return `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:7px">
-      <span>${name}</span><span style="color:var(--dim)">Gesehen:${b.seen} Kills:${b.killed}</span>
+    const rewarded=G.p.bestiaryRewarded?.[id]||0;
+    const milestoneHtml=MILESTONES.map(m=>{
+      const done=b.killed>=m.kills;
+      const claimed=rewarded>=m.kills;
+      const pct=Math.min(100,Math.floor(b.killed/m.kills*100));
+      return `<div style="margin-top:3px">
+        <div style="display:flex;justify-content:space-between;font-size:5px;color:${claimed?'var(--green)':done?'var(--accent)':'var(--dim)'}">
+          <span>${m.icon} ×${m.kills} → ${m.label}</span>
+          <span>${claimed?'✓':b.killed+'/'+m.kills}</span>
+        </div>
+        <div style="height:3px;background:var(--border);margin-top:1px">
+          <div style="height:100%;background:${claimed?'var(--green)':'var(--accent)'};width:${pct}%"></div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;font-size:7px;margin-bottom:2px">
+        <span>${f.icon||'👾'} ${name}</span>
+        <span style="color:var(--dim);font-size:6px">Gesehen:${b.seen} Kills:${b.killed}</span>
+      </div>
+      ${milestoneHtml}
     </div>`;
   }).join(''):'<div style="font-size:7px;color:var(--dim);padding:8px">Noch keine Gegner erforscht.</div>';
   const wrap=document.createElement('div'); wrap.id='overlay';
-  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100;overflow-y:auto';
-  wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:90vw;max-height:80vh;overflow-y:auto">
-    📖 BESTIARIUM<br><br><div style="text-align:left">${rows}</div><br>
-    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖</button>
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:290px;max-width:90vw;max-height:85vh;overflow-y:auto">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:10px">📖 BESTIARIUM</div>
+    <div style="text-align:left">${rows}</div><br>
+    <button onclick="document.getElementById('overlay').remove()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ Schließen</button>
   </div>`;
   document.body.appendChild(wrap);
 }
@@ -3195,14 +3267,54 @@ function startDailyDungeon(){
 
 // ── FISHING ──────────────────────────────────────────────────
 function showFishingEvent() {
-  const result = Math.random();
-  let caught, msg;
-  if (result < 0.05) { caught='rare_fish'; msg='🐠 Seltener Fisch! Könnte wertvoll sein...'; }
-  else if (result < 0.6) { caught='fish'; msg='🐟 Einen Fisch gefangen!'; }
-  else { msg='🎣 Nichts gebissen...'; }
-  if (caught) { addInv(caught); SFX.itemGet(); }
-  addLog('🎣 Du wirfst die Angel aus... ' + msg);
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+  const sweetPct=30+Math.floor(Math.random()*45);
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;text-align:center">
+    <div style="color:var(--accent);font-size:9px;margin-bottom:8px">🎣 ANGELN</div>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:12px">Drücke HAKEN! wenn der Zeiger im grünen Bereich ist!</div>
+    <div id="fish-bar-wrap" style="position:relative;height:22px;background:var(--panel);border:1px solid var(--border);border-radius:2px;overflow:hidden;margin-bottom:14px">
+      <div id="fish-sweet" style="position:absolute;top:0;bottom:0;width:25%;left:${sweetPct}%;background:rgba(0,255,80,0.25);border-left:1px solid #0f0;border-right:1px solid #0f0"></div>
+      <div id="fish-ptr" style="position:absolute;top:0;bottom:0;width:3px;background:#fff;left:0"></div>
+    </div>
+    <button id="fish-hook-btn" onclick="doFishHook()" style="width:100%;background:var(--accent2);color:var(--bg);border:none;padding:10px;font-family:inherit;font-size:9px;cursor:pointer;margin-bottom:6px">🪝 HAKEN!</button>
+    <button onclick="cancelFishing()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:inherit;font-size:7px;cursor:pointer">✖ Aufgeben</button>
+  </div>`;
+  document.body.appendChild(wrap);
+  let pos=0, dir=1;
+  window._fishState={sweetPct,done:false};
+  window._fishInt=setInterval(()=>{
+    if(window._fishState.done) return;
+    pos+=dir*2.5; if(pos>=100||pos<=0) dir*=-1;
+    window._fishState.pos=pos;
+    const ptr=document.getElementById('fish-ptr');
+    if(ptr) ptr.style.left=pos+'%';
+  },30);
+}
+function doFishHook() {
+  const st=window._fishState; if(!st||st.done) return;
+  st.done=true; clearInterval(window._fishInt);
+  const pos=st.pos||0; const sw=st.sweetPct;
+  const inSweet=pos>=sw && pos<=sw+25;
+  const nearSweet=pos>=sw-12 && pos<=sw+37;
+  document.getElementById('overlay')?.remove();
+  if(inSweet){
+    const rare=Math.random()<0.35;
+    const caught=rare?'rare_fish':'fish';
+    addInv(caught); SFX.itemGet();
+    addLog(rare?'🐠 PERFEKTER TREFFER! Seltener Fisch!':'🐟 Guter Treffer! Fisch gefangen!');
+  } else if(nearSweet){
+    addInv('fish'); SFX.itemGet();
+    addLog('🐟 Knapp! Kleiner Fisch gefangen.');
+  } else {
+    addLog('🎣 Verpasst! Der Fisch entkam...');
+  }
   refresh();
+}
+function cancelFishing() {
+  clearInterval(window._fishInt); window._fishState=null;
+  document.getElementById('overlay')?.remove();
+  addLog('🎣 Angeln abgebrochen.');
 }
 
 // ── RECYCLE ───────────────────────────────────────────────────
