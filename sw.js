@@ -1,8 +1,9 @@
-const CACHE = 'pixel-quest-v5';
+const CACHE = 'pixel-quest-v6';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
+  './lang.js',
   './sprites.js',
   './data.js',
   './ui.js',
