@@ -616,37 +616,6 @@ function earnGold(g) {
   checkAchievements();
 }
 
-function floatGold(amount) {
-  const el = document.createElement('div');
-  el.style.cssText = `position:fixed;bottom:28%;left:50%;transform:translateX(-50%);font-size:9px;color:#ffd700;font-family:'Press Start 2P',monospace;text-align:center;pointer-events:none;z-index:200;animation:floatItemUp 1.2s ease forwards`;
-  el.textContent = '+' + amount + 'g';
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(), 1200);
-}
-
-function floatItem(icon, name, rarity) {
-  const colors = {legendary:'#ffd700', epic:'#cc44ff', rare:'#4488ff', uncommon:'#44cc44', common:'#888'};
-  const el = document.createElement('div');
-  el.style.cssText = `position:fixed;bottom:35%;left:50%;transform:translateX(-50%);font-size:11px;color:${colors[rarity]||'#888'};font-family:'Press Start 2P',monospace;text-align:center;pointer-events:none;z-index:200;animation:floatItemUp 1.8s ease forwards`;
-  el.textContent = icon + ' ' + name;
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(), 1800);
-}
-
-function burstStars() {
-  for (let i=0; i<8; i++) {
-    const el = document.createElement('div');
-    const angle = (i/8)*Math.PI*2;
-    const dist = 60+Math.random()*40;
-    const dx = Math.cos(angle)*dist, dy = Math.sin(angle)*dist;
-    el.style.cssText = `position:fixed;top:50%;left:50%;width:8px;height:8px;background:#ffd700;border-radius:50%;pointer-events:none;z-index:400;transform:translate(-50%,-50%);animation:burst 0.7s ease forwards`;
-    el.style.setProperty('--dx', dx+'px');
-    el.style.setProperty('--dy', dy+'px');
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(), 700);
-  }
-}
-
 function setBusy(v) { G.busy=v; document.getElementById('explore-btn').disabled=v; }
 
 // ── STATUS EFFECTS ───────────────────────────────────────────
@@ -1250,41 +1219,6 @@ function buyPrestigeUpgrade(id) {
   G.prestigeCoins-=s.cost; G.prestigeUpgrades[id]=(G.prestigeUpgrades[id]||0)+1;
   addLog(`💫 ${s.label} erworben!`); SFX.levelUp();
   document.getElementById('overlay')?.remove(); save(); showPrestigeShop();
-}
-
-// ── PRESTIGE CONFIRM / NEW PRESTIGE ─────────────────────────
-function showPrestigeConfirm() {
-  if (G.p.level < 30) { showOverlay(G.lang==='en'?'❌ Reach level 30 to prestige!':'❌ Erreiche Level 30 für Prestige!'); return; }
-  const coins = Math.floor(G.p.level / 5);
-  document.getElementById('overlay')?.remove();
-  const wrap = document.createElement('div'); wrap.id='overlay';
-  wrap.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
-  wrap.innerHTML = `<div id="overlay-box" style="min-width:280px;max-width:90vw;text-align:center">
-    <div style="color:var(--accent);font-size:9px;margin-bottom:8px">⭐ PRESTIGE</div>
-    <div style="font-size:7px;color:var(--dim);margin-bottom:10px">${G.lang==='en'?'Reset level, stats, talents & class.<br>Keep gold, items & achievements.':'Level, Stats, Talente & Klasse zurücksetzen.<br>Gold, Items & Achievements bleiben!'}</div>
-    <div style="font-size:8px;color:var(--accent);margin-bottom:12px">🪙 +${coins} ${G.lang==='en'?'Prestige Coins':'Prestige-Münzen'}</div>
-    <button onclick="doNewPrestige()" style="display:block;width:100%;background:#2a1a00;color:var(--accent);border:2px solid var(--accent);border-bottom:3px solid #a08830;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin-bottom:8px">⭐ ${G.lang==='en'?'Prestige!':'Prestige!'}</button>
-    <button onclick="document.getElementById('overlay').remove()" style="display:block;width:100%;background:var(--panel);color:var(--dim);border:1px solid var(--border);padding:8px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ ${G.lang==='en'?'Cancel':'Abbrechen'}</button>
-  </div>`;
-  document.body.appendChild(wrap);
-}
-
-function doNewPrestige() {
-  document.getElementById('overlay')?.remove();
-  const p = G.p;
-  const coins = Math.floor(p.level / 5);
-  p.prestige = (p.prestige||0) + 1;
-  G.prestigeCoins = (G.prestigeCoins||0) + coins;
-  // Reset player stats
-  p.level = 1; p.xp = 0; p.xpNext = 100;
-  p.baseAtk = 8; p.baseDef = 3; p.maxHp = 100; p.maxMp = 30;
-  p.hp = 100; p.mp = 30;
-  p.statPoints = 0; p.talentPoints = 0; p.talents = {};
-  p.class = null; p.subclass = null; p.kills = 0;
-  // Keep: gold, inventory, equipment, quests, achievements
-  addLog(`⭐ Prestige ${p.prestige}! +${coins} 🪙 Prestige-Münzen!`);
-  showOverlay(`⭐ PRESTIGE ${p.prestige}\n+${coins} 🪙 ${G.lang==='en'?'Prestige Coins':'Prestige-Münzen'}!`);
-  updateArea(); refresh(); save();
 }
 
 // ── DUNGEON GAUNTLET ─────────────────────────────────────────
