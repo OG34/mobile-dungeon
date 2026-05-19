@@ -1317,7 +1317,7 @@ function showCrafting() {
     const req=r.requires.map(x=>`${x.qty}× ${x.res?{wood:'Holz',ore:'Erz',herbs:'Kräuter'}[x.id]:ITEMS[x.id]?.name||x.id}`).join(', ');
     const res=ITEMS[r.result];
     const canCraft=r.requires.every(x=>{ if(x.res) return (G.resources[x.id]||0)>=x.qty; const s=G.p.inv.find(i=>i.id===x.id); return s&&(s.qty||1)>=x.qty; });
-    return `<button style="${btnStyle};${canCraft?'':'color:var(--dim)'}" ${canCraft?`onclick="doCraft('${r.id}')"`:'disabled'}>${res?.icon||''} ${r.label}<br><span style="color:var(--dim);font-size:5px">${req} → ${res?.name}</span></button>`;
+    return `<button style="${btnStyle};${canCraft?'':'color:var(--dim)'}" ${canCraft?`onclick="doCraft('${r.id}')"`:'disabled'}>${res?.icon||''} ${(G.lang==='en'&&r.labelEn)?r.labelEn:r.label}<br><span style="color:var(--dim);font-size:5px">${req} → ${res?.name}</span></button>`;
   }).join('');
   const resBadge=`<div style="font-size:6px;color:var(--accent);margin-bottom:8px;padding:4px;background:var(--panel);border:1px solid var(--border)">${resLine}</div>`;
   wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:92vw;max-height:82vh;display:flex;flex-direction:column;overflow:hidden">
@@ -1422,27 +1422,27 @@ function generateQuests(){
 
 function tickQuestKill(id){
   let ch=false;
-  G.quests.forEach(q=>{ if(q.type==='kill'&&(q.target===id||q.target==='any')&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${q.label}!`);} });
+  G.quests.forEach(q=>{ if(q.type==='kill'&&(q.target===id||q.target==='any')&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${(G.lang==='en'&&q.labelEn)?q.labelEn:q.label}!`);} });
   if(ch) updateQuestScreen();
 }
 function tickQuestStep(){
   let ch=false;
-  G.quests.forEach(q=>{ if(q.type==='step'&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${q.label}!`);} });
+  G.quests.forEach(q=>{ if(q.type==='step'&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${(G.lang==='en'&&q.labelEn)?q.labelEn:q.label}!`);} });
   if(ch) updateQuestScreen();
 }
 function tickQuestGold(g){
   let ch=false;
-  G.quests.forEach(q=>{ if(q.type==='gold'&&q.progress<q.qty){q.progress=Math.min(q.qty,q.progress+g);ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${q.label}!`);} });
+  G.quests.forEach(q=>{ if(q.type==='gold'&&q.progress<q.qty){q.progress=Math.min(q.qty,q.progress+g);ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${(G.lang==='en'&&q.labelEn)?q.labelEn:q.label}!`);} });
   if(ch) updateQuestScreen();
 }
 function tickQuestCraft(){
   let ch=false;
-  G.quests.forEach(q=>{ if(q.type==='craft'&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${q.label}!`);} });
+  G.quests.forEach(q=>{ if(q.type==='craft'&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${(G.lang==='en'&&q.labelEn)?q.labelEn:q.label}!`);} });
   if(ch) updateQuestScreen();
 }
 function tickQuestSurvive(){
   let ch=false;
-  G.quests.forEach(q=>{ if(q.type==='survive'&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${q.label}!`);} });
+  G.quests.forEach(q=>{ if(q.type==='survive'&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`📜 Quest: ${(G.lang==='en'&&q.labelEn)?q.labelEn:q.label}!`);} });
   if(ch) updateQuestScreen();
 }
 
@@ -1461,7 +1461,8 @@ function updateQuestScreen(){
     const done=q.progress>=q.qty;
     const card=document.createElement('div'); card.className='quest-card'+(done?' done':'');
     const rew=[`+${q.xpR} XP`,`+${q.goldR}🪙`]; if(q.itemR) rew.push(ITEMS[q.itemR]?.icon||'');
-    card.innerHTML=`<div class="quest-title">${q.label}</div><div class="quest-prog-wrap"><div class="quest-prog${done?' done':''}" style="width:${pct(q.progress,q.qty)}"></div></div><div class="quest-info"><span>${q.progress}/${q.qty}</span><span class="quest-reward">${rew.join('  ')}</span></div>${done?`<button class="quest-claim" onclick="claimQuest(${idx})">✅ CLAIM</button>`:''}`;
+    const qlabel=(G.lang==='en'&&q.labelEn)?q.labelEn:q.label;
+    card.innerHTML=`<div class="quest-title">${qlabel}</div><div class="quest-prog-wrap"><div class="quest-prog${done?' done':''}" style="width:${pct(q.progress,q.qty)}"></div></div><div class="quest-info"><span>${q.progress}/${q.qty}</span><span class="quest-reward">${rew.join('  ')}</span></div>${done?`<button class="quest-claim" onclick="claimQuest(${idx})">✅ CLAIM</button>`:''}`;
     list.appendChild(card);
   });
   updateDailyQuestScreen();
@@ -1491,17 +1492,17 @@ function generateDailyQuests(){
 
 function tickDailyKill(id){
   if(!G.daily) return; let ch=false;
-  G.daily.quests.forEach(q=>{ if(q.type==='kill'&&(q.target===id||q.target==='any')&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`⭐ Tagesquest: ${q.label}!`);} });
+  G.daily.quests.forEach(q=>{ if(q.type==='kill'&&(q.target===id||q.target==='any')&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`⭐ ${G.lang==='en'?'Daily Quest':'Tagesquest'}: ${(G.lang==='en'&&q.labelEn)?q.labelEn:q.label}!`);} });
   if(ch){saveDailyQuests();updateDailyQuestScreen();}
 }
 function tickDailyStep(){
   if(!G.daily) return; let ch=false;
-  G.daily.quests.forEach(q=>{ if(q.type==='step'&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`⭐ Tagesquest: ${q.label}!`);} });
+  G.daily.quests.forEach(q=>{ if(q.type==='step'&&q.progress<q.qty){q.progress++;ch=true;if(q.progress>=q.qty)addLog(`⭐ ${G.lang==='en'?'Daily Quest':'Tagesquest'}: ${(G.lang==='en'&&q.labelEn)?q.labelEn:q.label}!`);} });
   if(ch){saveDailyQuests();updateDailyQuestScreen();}
 }
 function tickDailyGold(g){
   if(!G.daily) return; let ch=false;
-  G.daily.quests.forEach(q=>{ if(q.type==='gold'&&q.progress<q.qty){q.progress=Math.min(q.qty,q.progress+g);ch=true;if(q.progress>=q.qty)addLog(`⭐ Tagesquest: ${q.label}!`);} });
+  G.daily.quests.forEach(q=>{ if(q.type==='gold'&&q.progress<q.qty){q.progress=Math.min(q.qty,q.progress+g);ch=true;if(q.progress>=q.qty)addLog(`⭐ ${G.lang==='en'?'Daily Quest':'Tagesquest'}: ${(G.lang==='en'&&q.labelEn)?q.labelEn:q.label}!`);} });
   if(ch){saveDailyQuests();updateDailyQuestScreen();}
 }
 
@@ -1524,7 +1525,8 @@ function updateDailyQuestScreen(){
     const card=document.createElement('div'); card.className='quest-card'+(done?' done':'');
     card.style.borderLeftColor='var(--accent)'; card.style.borderLeftWidth='3px';
     const rew=[`+${q.xpR} XP`,`+${q.goldR>0?q.goldR+'🪙':''}`]; if(q.itemR) rew.push(ITEMS[q.itemR]?.icon||'');
-    card.innerHTML=`<div class="quest-title">⭐ ${q.label}</div><div class="quest-prog-wrap"><div class="quest-prog${done?' done':''}" style="width:${pct(q.progress,q.qty)}"></div></div><div class="quest-info"><span>${q.progress}/${q.qty}</span><span class="quest-reward">${rew.join('  ')}</span></div>`;
+    const dqlabel=(G.lang==='en'&&q.labelEn)?q.labelEn:q.label;
+    card.innerHTML=`<div class="quest-title">⭐ ${dqlabel}</div><div class="quest-prog-wrap"><div class="quest-prog${done?' done':''}" style="width:${pct(q.progress,q.qty)}"></div></div><div class="quest-info"><span>${q.progress}/${q.qty}</span><span class="quest-reward">${rew.join('  ')}</span></div>`;
     list.appendChild(card);
   });
   const allDone=G.daily.quests.every(q=>q.progress>=q.qty);
