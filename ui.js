@@ -1315,6 +1315,36 @@ function showMoreMenu() {
   document.body.appendChild(wrap);
 }
 
+// ── LEVEL UP SCREEN ──────────────────────────────────────────
+function showLevelUpScreen(oldLv, newLv, gains) {
+  const existing = document.getElementById('levelup-overlay');
+  if (existing) existing.remove();
+  const wrap = document.createElement('div');
+  wrap.id = 'levelup-overlay';
+  wrap.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:150;animation:fadeIn .3s ease';
+  wrap.innerHTML = `
+    <div style="text-align:center;padding:24px;max-width:280px">
+      <div style="font-size:7px;color:var(--dim);margin-bottom:6px;letter-spacing:2px">LEVEL UP!</div>
+      <div style="font-size:28px;color:var(--accent);text-shadow:0 0 30px rgba(232,201,107,0.8);margin-bottom:4px">${newLv}</div>
+      <div style="font-size:7px;color:var(--dim);margin-bottom:20px">${oldLv} → ${newLv}</div>
+      <div style="font-size:6px;color:var(--text);line-height:2.2;margin-bottom:20px">
+        ${gains.atk?`<div>⚔ ATK <span style="color:var(--accent)">+${gains.atk}</span></div>`:''}
+        ${gains.def?`<div>🛡 DEF <span style="color:var(--accent)">+${gains.def}</span></div>`:''}
+        ${gains.maxHp?`<div>❤ MaxHP <span style="color:var(--accent)">+${gains.maxHp}</span></div>`:''}
+        ${gains.maxMp?`<div>💙 MaxMP <span style="color:var(--accent)">+${gains.maxMp}</span></div>`:''}
+        ${gains.statPoints?`<div>⭐ <span style="color:var(--accent)">${gains.statPoints} Stat Point${gains.statPoints>1?'s':''}</span> to assign!</div>`:''}
+      </div>
+      <button onclick="document.getElementById('levelup-overlay').remove()"
+        style="background:var(--accent);color:var(--bg);border:none;border-bottom:3px solid var(--accent2);padding:12px 32px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer">
+        ▶ CONTINUE
+      </button>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+  // auto-dismiss after 4 seconds if player doesn't tap
+  setTimeout(() => { document.getElementById('levelup-overlay')?.remove(); }, 4000);
+}
+
 // ── STAT ALLOCATION ──────────────────────────────────────────
 function allocateStat(type) {
   const p = G.p;
