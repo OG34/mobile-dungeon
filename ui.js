@@ -17,8 +17,8 @@ function showMerchant() {
   wrap.id='overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:100';
   wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;max-width:90vw;text-align:center">
-    🧙 Wanderhändler<br><br>
-    <span style="font-size:7px;color:var(--dim)">Sonderangebote — 50% Rabatt!</span><br><br>
+    🧙 ${G.lang==='en'?'TRAVELING MERCHANT':'WANDERHÄNDLER'}<br><br>
+    <span style="font-size:7px;color:var(--dim)">${G.lang==='en'?'Special offers — 50% off!':'Sonderangebote — 50% Rabatt!'}</span><br><br>
     ${picks.map(([id,it])=>`<button style="${btnStyle}" onclick="merchantBuy('${id}',${Math.ceil(it.value*0.75)})">${it.icon} ${it.name} &nbsp;${Math.ceil(it.value*0.75)}🪙<br><span style="color:var(--dim)">${it.rarity}</span></button>`).join('')}
     <button style="${closeStyle}" onclick="document.getElementById('overlay').remove()">🚶 Weiter</button>
   </div>`;
@@ -36,7 +36,7 @@ function showInn() {
   const wrap=document.createElement('div'); wrap.id='overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
   wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;text-align:center">
-    <div style="color:var(--accent);font-size:9px;margin-bottom:8px">🏠 WIRTSHAUS</div>
+    <div style="color:var(--accent);font-size:9px;margin-bottom:8px">🏨 ${G.lang==='en'?'INN':'GASTHAUS'}</div>
     <div style="font-size:7px;color:var(--dim);margin-bottom:10px">HP: ${p.hp}/${s.maxHp} · MP: ${p.mp}/${s.maxMp}</div>
     ${missingHp===0&&missingMp===0?`<div style="font-size:7px;color:var(--green);margin-bottom:10px">✓ Du bist bereits vollständig erholt!</div>`:`<div style="font-size:7px;color:var(--dim);margin-bottom:10px">Vollständige Erholung für <b style="color:var(--text)">${cost} 🪙</b></div>`}
     ${missingHp>0||missingMp>0?`<button onclick="doRest(${cost})" style="width:100%;background:var(--green);color:var(--bg);border:none;padding:10px;font-family:inherit;font-size:8px;cursor:pointer;margin-bottom:6px">💤 Ausruhen (${cost} 🪙)</button>`:''}
@@ -61,8 +61,8 @@ function showStranger(){
   wrap.id='overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.88);z-index:100';
   wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:90vw;text-align:center">
-    🤫 Mysteriöser Fremder<br><br>
-    <span style="font-size:7px;color:var(--dim)">"Wähle weise, Held..."</span><br><br>
+    🧙 ${G.lang==='en'?'STRANGER':'FREMDER'}<br><br>
+    <span style="font-size:7px;color:var(--dim)">${G.lang==='en'?'"Choose wisely, hero..."':'"Wähle weise, Held..."'}</span><br><br>
     <button style="${btnStyle}" onclick="strangerChoice('xp',${xp})">⭐ ${xp} Erfahrung</button>
     <button style="${btnStyle}" onclick="strangerChoice('gold',${g})">🪙 ${g} Gold</button>
   </div>`;
@@ -830,7 +830,7 @@ function showLootFilter() {
 function showRarePopup(item) {
   const el = document.createElement('div');
   el.className = 'rare-popup ' + (item.rarity||'');
-  el.innerHTML = `${item.icon||'📦'} ${item.rarity==='legendary'?'LEGENDÄR':'EPISCH'}!<br><span style="font-size:7px;color:inherit">${item.name}</span>`;
+  el.innerHTML = `${item.icon||'📦'} ${item.rarity==='legendary'?(G.lang==='en'?'LEGENDARY':'LEGENDÄR'):(G.lang==='en'?'EPIC':'EPISCH')}!<br><span style="font-size:7px;color:inherit">${iname(item.id)||item.name}</span>`;
   document.body.appendChild(el);
   setTimeout(()=>el.remove(), 2400);
 }
