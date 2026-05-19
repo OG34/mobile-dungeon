@@ -265,9 +265,6 @@ const G = {
   dungeonClears: 0,
   arena: null,
   bossRush: null,
-  tower: null,
-  towerBest: 0,
-  playTime: 0,
   weather: { particles: [], tick: 0 },
   battleStats: { dmgDealt:0, dmgTaken:0, highCrit:0, won:0, fled:0, lost:0 },
   lootFilter: 'common',
@@ -290,6 +287,9 @@ const G = {
   storyChains: {},
   invSort: 'none',
   lang: 'en',
+  tower: null,
+  towerBest: 0,
+  playTime: 0,
 };
 
 // ── NAME HELPERS ─────────────────────────────────────────────
@@ -782,7 +782,7 @@ function combatAction(act) {
 
   if(act==='flee'){
     e.combo=0;
-    if(Math.random()<0.45){ combatLog('🏃 Geflohen!'); SFX.flee(); setTimeout(()=>endCombat(true),800); }
+    if(Math.random()<0.45){ combatLog('🏃 Geflohen!'); SFX.flee(); setTimeout(endCombat,800); }
     else{ combatLog('😱 Flucht fehlgeschlagen!'); setTimeout(enemyTurn,700); }
     return;
   }
@@ -855,7 +855,6 @@ function useSkill(skillId) {
   }
   if(skill.fleeSkill){
     combatLog(`${skill.icon} ${skill.name}! Flucht gelungen!`); SFX.step();
-    if(G.tower){ addLog(`🗼 Tower ended at floor ${G.tower.floor}. Best: ${Math.max(G.towerBest||0,G.tower.floor)}`); if((G.towerBest||0)<G.tower.floor){G.towerBest=G.tower.floor;save();} G.tower=null; }
     G.combat=null; G.battleStats.fled++;
     setTimeout(()=>showScreen('explore',null),600); return;
   }
@@ -1139,8 +1138,12 @@ function combatWin() {
   },1100);
 }
 
-function endCombat(fleeOrLoss) {
-  if(fleeOrLoss && G.tower){ addLog(`🗼 Tower ended at floor ${G.tower.floor}. Best: ${Math.max(G.towerBest||0,G.tower.floor)}`); if((G.towerBest||0)<G.tower.floor){G.towerBest=G.tower.floor;save();} G.tower=null; }
+function endCombat() {
+  if(G.tower) {
+    addLog(`🗼 Tower ended at floor ${G.tower.floor}. Best: ${Math.max(G.towerBest||0, G.tower.floor)}`);
+    if((G.towerBest||0) < G.tower.floor) { G.towerBest = G.tower.floor; save(); }
+    G.tower = null;
+  }
   G.combat=null; hideSkillPicker(); hideCombatItems();
   if(G.autoBattle){ G.autoBattle=false; clearInterval(window._autoBattleInterval); window._autoBattleInterval=null; }
   G.p.buffs=(G.p.buffs||[]).filter(b=>{
@@ -1327,6 +1330,71 @@ function showDungeonLobby() {
     <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ ${G.lang==='en'?'Cancel':'Abbrechen'}</button>
   </div>`;
   document.body.appendChild(wrap);
+}
+
+// ── INFINITY TOWER ────────────────────────────────────────────
+function showTowerLobby() {
+  if (G.combat) { showOverlay(G.lang==='en'?'❌ Finish combat first!':'❌ Beende zuerst den Kampf!'); return; }
+  document.getElementById('overlay')?.remove();
+  const best = G.towerBest||0;
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;max-width:90vw;text-align:center">
+    <div style="font-size:11px;color:#cc88ff;margin-bottom:8px">🗼 ${G.lang==='en'?'INFINITY TOWER':'INFINITY TURM'}</div>
+    <div style="font-size:6px;color:var(--dim);line-height:2;margin-bottom:10px">${G.lang==='en'?'Endless floors — enemies scale each floor.<br>Heal every 5 floors. How far can you climb?':'Endlose Stockwerke — Gegner skalieren.<br>Heilung alle 5 Stockwerke. Wie weit kommst du?'}</div>
+    ${best>0?`<div style="font-size:7px;color:#cc88ff;margin-bottom:10px">🏆 ${G.lang==='en'?'Best Floor':'Bestes Stockwerk'}: ${best}</div>`:''}
+    <button onclick="document.getElementById('overlay').remove();startTower()" style="display:block;width:100%;background:#2a0040;color:#cc88ff;border:2px solid #cc88ff;border-bottom:3px solid #880088;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin-bottom:8px">🗼 ${G.lang==='en'?'CLIMB':'AUFSTEIGEN'}</button>
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ ${G.lang==='en'?'Cancel':'Abbrechen'}</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function startTower() {
+  if (G.combat || G.dungeon) { showOverlay(G.lang==='en'?'❌ Finish current activity first!':'❌ Beende die aktuelle Aktivität!'); return; }
+  G.tower = { floor:1 };
+  addLog(`🗼 ${G.lang==='en'?'Infinity Tower — the climb begins!':'Infinity Turm — der Aufstieg beginnt!'}`);
+  setBusy(false);
+  setTimeout(()=>towerStartFloor(), 400);
+}
+
+function towerStartFloor() {
+  if (!G.tower) return;
+  const floor = G.tower.floor;
+  const isBoss = floor%5===0;
+  const foes = G.area.foes;
+  const foeId = isBoss ? foes[foes.length-1] : foes[Math.floor(Math.random()*foes.length)];
+  startCombat(foeId, isBoss);
+  if (G.combat) {
+    const hpMult = 1+(floor-1)*0.25;
+    const atkMult = 1+(floor-1)*0.15;
+    G.combat.hp = Math.floor(G.combat.hp*hpMult);
+    G.combat.maxHp = G.combat.hp;
+    G.combat.atk = Math.floor(G.combat.atk*atkMult);
+    G.combat.name = `[F${floor}] ${G.combat.name}`;
+    addLog(`🗼 ${G.lang==='en'?'Floor':'Stockwerk'} ${floor}${isBoss?' — BOSS!':''}`);
+  }
+}
+
+function towerNextFloor() {
+  if (!G.tower) return;
+  const cleared = G.tower.floor;
+  if ((G.towerBest||0)<cleared) { G.towerBest=cleared; save(); }
+  G.tower.floor++;
+  if (G.tower.floor%5===1 && G.tower.floor>1) {
+    const h=Math.floor(stats().maxHp*0.3);
+    G.p.hp=Math.min(stats().maxHp,G.p.hp+h);
+    addLog(`🗼 ${G.lang==='en'?'Rest stop':'Rast'} — +${h} HP`);
+    refresh();
+  }
+  setTimeout(()=>towerStartFloor(), 800);
+}
+
+// ── STATS HELPER ──────────────────────────────────────────────
+function formatTime(secs) {
+  const h=Math.floor(secs/3600), m=Math.floor((secs%3600)/60), s=secs%60;
+  if(h>0) return `${h}h ${m}m`;
+  if(m>0) return `${m}m ${s}s`;
+  return `${s}s`;
 }
 
 // ── ARENA MODE ────────────────────────────────────────────────
@@ -2280,8 +2348,7 @@ function save(){
     difficulty:G.difficulty, tutorialStep:G.tutorialStep, tutorialDone:G.tutorialDone,
     prestigeCoins:G.prestigeCoins, prestigeUpgrades:G.prestigeUpgrades,
     battleHistory:G.battleHistory, dailyChallenge:G.dailyChallenge, storyChains:G.storyChains,
-    invSort:G.invSort, lang:G.lang,
-    towerBest:G.towerBest||0, playTime:G.playTime||0,
+    invSort:G.invSort, lang:G.lang, towerBest:G.towerBest||0, playTime:G.playTime||0,
   }));}catch(_){}
 }
 
@@ -2302,8 +2369,7 @@ function load(){
     G.difficulty=d.difficulty||'normal'; G.tutorialStep=d.tutorialStep||99; G.tutorialDone=d.tutorialDone||false;
     G.prestigeCoins=d.prestigeCoins||0; G.prestigeUpgrades=d.prestigeUpgrades||{};
     G.battleHistory=d.battleHistory||[]; G.dailyChallenge=d.dailyChallenge||null; G.storyChains=d.storyChains||{};
-    G.invSort=d.invSort||'none'; G.lang=d.lang||'en';
-    G.towerBest=d.towerBest||0; G.playTime=d.playTime||0;
+    G.invSort=d.invSort||'none'; G.lang=d.lang||'en'; G.towerBest=d.towerBest||0; G.playTime=d.playTime||0;
     if(!G.p.eq.pet) G.p.eq.pet=null;
     if(!G.p.subclass) G.p.subclass=null;
     if(!G.p.eq.helm) G.p.eq.helm=null;
@@ -2323,71 +2389,6 @@ function load(){
     }
     document.getElementById('step-val').textContent=G.steps; return true;
   }catch(_){return false;}
-}
-
-// ── INFINITY TOWER ────────────────────────────────────────────
-function showTowerLobby() {
-  if (G.combat) { showOverlay('❌ Finish current activity first!'); return; }
-  document.getElementById('overlay')?.remove();
-  const wrap = document.createElement('div'); wrap.id='overlay';
-  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
-  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;max-width:90vw;text-align:center">
-    <div style="font-size:11px;color:var(--accent);margin-bottom:8px">🗼 ${G.lang==='en'?'INFINITY TOWER':'UNENDLICHKEITSTURM'}</div>
-    <div style="font-size:6px;color:var(--dim);line-height:2;margin-bottom:12px">${G.lang==='en'?'Endless tower — how far can you climb?<br>Enemies grow stronger each floor.<br>Every 5 floors: Boss + HP restore.':'Endloser Turm — wie weit kannst du klettern?<br>Feinde werden pro Etage stärker.<br>Alle 5 Etagen: Boss + HP-Heilung.'}</div>
-    <div style="font-size:7px;color:var(--accent);margin-bottom:10px">🏆 ${G.lang==='en'?'Best Floor':'Beste Etage'}: ${G.towerBest||0}</div>
-    <button onclick="document.getElementById('overlay').remove();startTower()" style="display:block;width:100%;background:var(--accent);color:var(--bg);border:none;border-bottom:3px solid var(--accent2);padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin-bottom:8px">🗼 ${G.lang==='en'?'ENTER':'BETRETEN'}</button>
-    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ ${G.lang==='en'?'Cancel':'Abbrechen'}</button>
-  </div>`;
-  document.body.appendChild(wrap);
-}
-
-function startTower() {
-  if (G.combat || G.dungeon) { showOverlay('❌ Finish current activity first!'); return; }
-  G.tower = { floor: 1 };
-  addLog(`🗼 Tower Floor 1 — the climb begins!`);
-  setBusy(false);
-  setTimeout(() => towerStartFloor(), 400);
-}
-
-function towerStartFloor() {
-  if (!G.tower) return;
-  const floor = G.tower.floor;
-  const isBoss = floor % 5 === 0;
-  const foes = G.area.foes;
-  const foeId = isBoss ? foes[foes.length-1] : foes[Math.floor(Math.random()*foes.length)];
-  startCombat(foeId, isBoss);
-  if (G.combat) {
-    const hpMult = 1 + (floor-1)*0.25;
-    const atkMult = 1 + (floor-1)*0.15;
-    G.combat.hp = Math.floor(G.combat.hp * hpMult);
-    G.combat.maxHp = G.combat.hp;
-    G.combat.atk = Math.floor(G.combat.atk * atkMult);
-    G.combat.name = `[F${floor}] ${G.combat.name}`;
-    addLog(`🗼 Tower Floor ${floor}${isBoss?' — BOSS!':''}`);
-  }
-}
-
-function towerNextFloor() {
-  if (!G.tower) return;
-  G.tower.floor++;
-  if ((G.towerBest||0) < G.tower.floor-1) { G.towerBest = G.tower.floor-1; save(); }
-  if (G.tower.floor % 5 === 1) {
-    const h = Math.floor(stats().maxHp * 0.3);
-    G.p.hp = Math.min(stats().maxHp, G.p.hp + h);
-    addLog(`🗼 Floor ${G.tower.floor-1} clear! Resting... +${h} HP`);
-    refresh();
-  }
-  setTimeout(() => towerStartFloor(), 800);
-}
-
-// ── FORMAT TIME HELPER ────────────────────────────────────────
-function formatTime(secs) {
-  const h = Math.floor(secs/3600);
-  const m = Math.floor((secs%3600)/60);
-  const s = secs%60;
-  if (h>0) return `${h}h ${m}m`;
-  if (m>0) return `${m}m ${s}s`;
-  return `${s}s`;
 }
 
 setInterval(save,15000);

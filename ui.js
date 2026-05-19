@@ -777,75 +777,75 @@ function showHighscore() {
 // ── STATS SCREEN ──────────────────────────────────────────────
 function showStats() {
   const bs=G.battleStats; const s=stats(); const p=G.p;
-  const h=G.dayNight; const isNight=h>=21||h<5;
-  const timeStr=`${h.toString().padStart(2,'0')}:00 ${isNight?'🌙':'☀️'}`;
-  const row=(k,v,c='var(--accent)')=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:7px"><span style="color:var(--dim)">${k}</span><span style="color:${c}">${v}</span></div>`;
   const en=G.lang==='en';
+  const row=(k,v)=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:7px"><span style="color:var(--dim)">${k}</span><span style="color:var(--accent)">${v}</span></div>`;
+  const sec=(label)=>`<div style="font-size:6px;color:var(--dim);letter-spacing:1px;margin:8px 0 4px">${label}</div>`;
   const rows=[
-    row(en?'── ⚔ COMBAT ──':'── ⚔ KAMPF ──','','var(--dim)'),
-    row(en?'Battles Won':'Kämpfe gewonnen',bs.won),
-    row(en?'Battles Lost':'Niederlagen',bs.lost||0),
-    row(en?'Battles Fled':'Mal geflohen',bs.fled),
-    row(en?'Total Kills':'Kills gesamt',p.kills),
-    row(en?'Damage Dealt':'Schaden ausgeteilt',bs.dmgDealt),
-    row(en?'Damage Taken':'Schaden erhalten',bs.dmgTaken),
-    row(en?'Biggest Crit':'Höchster Krit',bs.highCrit),
-    row(en?'── 🗺 EXPLORATION ──':'── 🗺 ERKUNDUNG ──','','var(--dim)'),
-    row(en?'Explorations':'Erkundungen',G.steps),
-    row(en?'Dungeon Clears':'Dungeon Clears',G.dungeonClears),
-    row(en?'Tower Best Floor':'Bester Turmrang',G.towerBest||0),
-    row(en?'Prestige Count':'Prestige-Anzahl',p.prestige||0),
-    row(en?'── 💰 ECONOMY ──':'── 💰 WIRTSCHAFT ──','','var(--dim)'),
-    row(en?'Total Gold Earned':'Gold gesamt',p.totalGoldEarned),
-    row(en?'Current Gold':'Aktuelles Gold',p.gold),
-    row(en?'── ⏱ TIME ──':'── ⏱ ZEIT ──','','var(--dim)'),
-    row(en?'Play Time':'Spielzeit',formatTime(G.playTime||0)),
-    row(en?'In-Game Time':'Spielzeit-Uhr',timeStr,isNight?'#aaccff':'#ffcc44'),
-    row(en?'── 📊 CURRENT STATS ──':'── 📊 AKTUELLE WERTE ──','','var(--dim)'),
-    row('ATK / DEF',`${s.atk} / ${s.def}`),
-    row('MaxHP / MaxMP',`${s.maxHp} / ${s.maxMp}`),
-    row(en?'Crit Chance':'Krit-Chance',`${((0.15+(s.critBonus||0))*100).toFixed(0)}%`),
-    row('Lifesteal',s.lifesteal>0?`${(s.lifesteal*100).toFixed(0)}%`:'–'),
-    row(en?'Evasion':'Ausweichen',s.evasion>0?`${(s.evasion*100).toFixed(0)}%`:'–'),
+    sec(en?'⚔ COMBAT':'⚔ KAMPF'),
+    row(en?'Battles Won':'Kämpfe gewonnen', bs.won),
+    row(en?'Battles Lost':'Niederlagen', bs.lost||0),
+    row(en?'Fled':'Geflohen', bs.fled),
+    row(en?'Total Kills':'Kills gesamt', p.kills),
+    row(en?'Damage Dealt':'Schaden ausgeteilt', bs.dmgDealt),
+    row(en?'Damage Taken':'Schaden erhalten', bs.dmgTaken),
+    row(en?'Biggest Crit':'Höchster Krit', bs.highCrit),
+    sec(en?'🗺 EXPLORATION':'🗺 ERKUNDUNG'),
+    row(en?'Explorations':'Erkundungen', G.steps),
+    row(en?'Dungeon Clears':'Dungeon Clears', G.dungeonClears),
+    row(en?'Tower Best Floor':'Bestes Turmstockwerk', G.towerBest||0),
+    row(en?'Prestige Count':'Prestige-Anzahl', p.prestige||0),
+    row('Achievements', `${G.achievements.length}/${ACHIEVEMENTS.length}`),
+    sec(en?'💰 ECONOMY':'💰 WIRTSCHAFT'),
+    row(en?'Total Gold Earned':'Gold gesamt', p.totalGoldEarned||0),
+    row(en?'Current Gold':'Aktuelles Gold', p.gold),
+    row(en?'Resources':'Ressourcen', `🪵${G.resources?.wood||0} 🪨${G.resources?.ore||0} 🌿${G.resources?.herbs||0}`),
+    sec(en?'⏱ TIME':'⏱ ZEIT'),
+    row(en?'Play Time':'Spielzeit', formatTime(G.playTime||0)),
+    row(en?'In-Game Time':'Spielzeit (Welt)', `${(G.dayNight||6).toString().padStart(2,'0')}:00 ${(G.dayNight>=21||G.dayNight<5)?'🌙':'☀️'}`),
+    sec(en?'📊 CURRENT STATS':'📊 AKTUELLE WERTE'),
+    row('ATK / DEF', `${s.atk} / ${s.def}`),
+    row('MaxHP / MaxMP', `${s.maxHp} / ${s.maxMp}`),
+    row(en?'Crit Chance':'Krit-Chance', `${((0.15+(s.critBonus||0))*100).toFixed(0)}%`),
+    row('Lifesteal', s.lifesteal>0?`${(s.lifesteal*100).toFixed(0)}%`:'–'),
+    row(en?'Evasion':'Ausweichen', s.evasion>0?`${(s.evasion*100).toFixed(0)}%`:'–'),
   ].join('');
   const wrap=document.createElement('div'); wrap.id='overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
-  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;max-width:92vw;max-height:85vh;overflow-y:auto">
-    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:10px">📊 ${en?'STATISTICS':'STATISTIKEN'}</div>
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:92vw;max-height:85vh;overflow-y:auto">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:8px">📊 ${en?'STATISTICS':'STATISTIKEN'}</div>
     <div style="text-align:left">${rows}</div><br>
-    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ ${en?'Close':'Schließen'}</button>
+    <button onclick="closeOverlay()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ ${en?'Close':'Schließen'}</button>
   </div>`;
   document.body.appendChild(wrap);
 }
 
 // ── ITEM SETS ─────────────────────────────────────────────────
 function showItemSets() {
-  const p = G.p;
-  const rows = ITEM_SETS.map(set => {
-    const pieces = set.pieces.map(id => {
-      const item = ITEMS[id]; if(!item) return '';
-      const equipped = p.eq && Object.values(p.eq).some(e=>e&&e.id===id);
-      const inInv = p.inv.some(s=>s.id===id&&!s._unidentified);
-      const status = equipped ? '✅' : inInv ? '📦' : '❌';
-      const color = equipped ? 'var(--green)' : inInv ? 'var(--accent)' : 'var(--dim)';
+  const p=G.p; const en=G.lang==='en';
+  const rows=ITEM_SETS.map(set=>{
+    const equippedCount=set.pieces.filter(id=>p.eq&&Object.values(p.eq).some(e=>e&&e.id===id)).length;
+    const isComplete=equippedCount===set.pieces.length;
+    const pieces=set.pieces.map(id=>{
+      const item=ITEMS[id]; if(!item) return '';
+      const equipped=p.eq&&Object.values(p.eq).some(e=>e&&e.id===id);
+      const inInv=p.inv.some(s=>s.id===id&&!s._unidentified);
+      const status=equipped?'✅':inInv?'📦':'❌';
+      const color=equipped?'var(--green)':inInv?'var(--accent)':'var(--dim)';
       return `<div style="display:flex;align-items:center;gap:5px;padding:3px 0;font-size:6px;color:${color}">${status} ${item.icon} ${iname(id)}</div>`;
     }).join('');
-    const equippedCount = set.pieces.filter(id => p.eq && Object.values(p.eq).some(e=>e&&e.id===id)).length;
-    const isComplete = equippedCount === set.pieces.length;
-    const bonusColor = isComplete ? 'var(--green)' : 'var(--dim)';
-    const bonus = `ATK+${set.bonus.atk||0} DEF+${set.bonus.def||0}`;
-    return `<div style="background:var(--panel);border:1px solid ${isComplete?'var(--green)':'var(--border)'};padding:8px;margin-bottom:8px;border-radius:2px">
-      <div style="font-size:7px;color:${isComplete?'var(--green)':'var(--accent)'};margin-bottom:4px">${set.label}${isComplete?' ✨ ACTIVE':''}</div>
-      <div style="font-size:5px;color:${bonusColor};margin-bottom:6px">${G.lang==='en'?'Bonus':'Bonus'}: ${bonus} ${isComplete?'(active)':'('+equippedCount+'/'+set.pieces.length+')'}</div>
+    const bonus=`ATK+${set.bonus.atk||0} DEF+${set.bonus.def||0}`;
+    return `<div style="background:var(--panel);border:2px solid ${isComplete?'var(--green)':'var(--border)'};padding:8px;margin-bottom:8px">
+      <div style="font-size:7px;color:${isComplete?'var(--green)':'var(--accent)'};margin-bottom:4px">${set.label}${isComplete?' ✨':''}</div>
+      <div style="font-size:5px;color:${isComplete?'var(--green)':'var(--dim)'};margin-bottom:6px">${bonus} ${isComplete?`(${en?'ACTIVE':'AKTIV'})`:en?`(${equippedCount}/${set.pieces.length} equipped)`:`(${equippedCount}/${set.pieces.length} angelegt)`}</div>
       ${pieces}
     </div>`;
   }).join('');
-  const wrap = document.createElement('div'); wrap.id='overlay';
-  wrap.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
-  wrap.innerHTML = `<div id="overlay-box" style="min-width:290px;max-width:90vw;max-height:85vh;overflow-y:auto">
-    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:12px">🎽 ${G.lang==='en'?'ITEM SETS':'ITEM-SETS'}</div>
+  const wrap=document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:290px;max-width:90vw;max-height:85vh;overflow-y:auto">
+    <div style="text-align:center;color:var(--accent);font-size:9px;margin-bottom:12px">🎽 ${en?'ITEM SETS':'ITEM-SETS'}</div>
     ${rows}
-    <button onclick="closeOverlay()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;margin-top:4px">✖ ${G.lang==='en'?'Close':'Schließen'}</button>
+    <button onclick="closeOverlay()" style="width:100%;background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;margin-top:4px">✖ ${en?'Close':'Schließen'}</button>
   </div>`;
   document.body.appendChild(wrap);
 }
@@ -1376,9 +1376,9 @@ function showMoreMenu() {
     <button class="more-btn" onclick="closeOverlay();showDailyChallenge()">🎯 Daily Challenge</button>
     <div class="more-cat">${t('more_dungeons')}</div>
     <button class="more-btn" onclick="closeOverlay();showDungeonLobby()">🏰 ${G.lang==='en'?'Dungeon':'Dungeon'}</button>
+    <button class="more-btn" onclick="closeOverlay();showTowerLobby()">🗼 ${G.lang==='en'?'Infinity Tower':'Infinity Turm'}</button>
     <button class="more-btn" onclick="closeOverlay();showDailyDungeon()">🏰 Daily Dungeon</button>
     <button class="more-btn" onclick="closeOverlay();showSeasonalDungeon()">🌸 Saisonaler Dungeon</button>
-    <button class="more-btn" onclick="closeOverlay();showTowerLobby()">🗼 ${G.lang==='en'?'Tower':'Turm'}</button>
     <div class="more-cat">${t('more_char')}</div>
     <button class="more-btn" onclick="closeOverlay();showCompanions()">🧑‍🤝‍🧑 Begleiter</button>
     <button class="more-btn" onclick="closeOverlay();showGuild()">🏛 Gilde</button>
