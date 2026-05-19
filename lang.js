@@ -43,6 +43,10 @@ const STRINGS = {
     more_info: '📊 INFO', more_system: '⚙ SYSTEM',
     // Log first message
     log_start: '⚔ Welcome! Tap EXPLORE to start your adventure!',
+    // Area names
+    area_forest:'Enchanted Forest', area_cave:'Goblin Caves', area_dungeon:'Dark Dungeon', area_graveyard:'Cursed Graveyard', area_castle:'Shadow Castle', area_volcanic:'Volcanic Ruins', area_void:'Void Realm', area_underwater:'Abyssal Kingdom', area_sky:'Sky Fortress', area_ice:'Ice Tundra', area_void_rift:'Dimensional Rift',
+    // Log actions
+    log_found:'found', log_bought:'purchased', log_sold:'sold', log_crafted:'crafted', log_defeated:'defeated',
   },
   de: {
     nav_explore: 'Erkunden', nav_quests: 'Quests', nav_char: 'Charakter', nav_shop: 'Shop',
@@ -74,6 +78,10 @@ const STRINGS = {
     more_combat: '⚔ KAMPF', more_dungeons: '🏰 DUNGEONS', more_char: '👤 CHARAKTER',
     more_info: '📊 INFO', more_system: '⚙ SYSTEM',
     log_start: '⚔ Willkommen! Drücke ERKUNDEN um dein Abenteuer zu starten!',
+    // Area names
+    area_forest:'Verzauberter Wald', area_cave:'Goblin-Höhlen', area_dungeon:'Dunkler Kerker', area_graveyard:'Verfluchter Friedhof', area_castle:'Schattenburg', area_volcanic:'Vulkanruinen', area_void:'Leererreich', area_underwater:'Abyssales Königreich', area_sky:'Himmelsfestung', area_ice:'Eistundra', area_void_rift:'Dimensionsriss',
+    // Log actions
+    log_found:'gefunden', log_bought:'gekauft', log_sold:'verkauft', log_crafted:'gecraftet', log_defeated:'besiegt',
   }
 };
 
