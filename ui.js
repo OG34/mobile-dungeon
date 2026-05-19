@@ -405,7 +405,7 @@ function sellItem(idx){
   const item=ITEMS[slot.id]; if(!item) return;
   const price=Math.floor(item.value*0.5);
   if(slot.qty>1) slot.qty--; else p.inv.splice(idx,1);
-  earnGold(price); addLog(`💱 ${item.name} für ${price} Gold verkauft.`); refresh();
+  earnGold(price); addLog(`💱 ${iname(slot.id)} ${t('log_sold')} (${price} Gold).`); refresh();
 }
 
 function confirmSell(idx){
@@ -489,7 +489,7 @@ function updateInvScreen(){
       div.innerHTML=`❓<small>??? ${item.slot}</small>`;
       div.onclick=()=>{ showOverlay(`📜 Unidentifiziertes Item\n\n[${item.slot}]\n\nSchriftrolle benutzen?`); setTimeout(()=>{ if(confirm('Schriftrolle benutzen?')) identifyItem(idx); },300); };
     } else {
-      div.innerHTML=`${item.icon}${upgLabel}<small>${item.name.slice(0,9)}</small>${slot.qty>1?`<small>x${slot.qty}</small>`:''}`;
+      div.innerHTML=`${item.icon}${upgLabel}<small>${iname(slot.id).slice(0,9)}</small>${slot.qty>1?`<small>x${slot.qty}</small>`:''}`;
       div.onclick=()=>{ if(slot.equipped&&item.slot&&item.slot!=='pet'){ showUpgradeMenu(idx); } else if(!item.slot){ showConsumableMenu(idx); } else if(item.slot&&!slot.equipped){ showItemCompare(idx); } else { useItem(idx); } };
     }
     let t;
@@ -582,7 +582,7 @@ function buyItem(id){
   const item=ITEMS[id]; if(!item) return;
   const price=Math.ceil(item.value*1.5);
   if(G.p.gold<price){showOverlay(t('err_gold'));return;}
-  G.p.gold-=price; addInv(id); addLog(`🛒 ${item.name} gekauft!`); refresh(); updateShopScreen();
+  G.p.gold-=price; addInv(id); addLog(`🛒 ${iname(id)} ${t('log_bought')}!`); refresh(); updateShopScreen();
 }
 
 function renderShopSell(){
@@ -591,7 +591,7 @@ function renderShopSell(){
   G.p.inv.forEach((slot,idx)=>{
     const item=ITEMS[slot.id]; if(!item) return; const price=Math.floor(item.value*0.5);
     const row=document.createElement('div'); row.className='shop-row';
-    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}${slot.qty>1?` x${slot.qty}`:''}</div><div class="shop-stat">${slot.equipped?'[equipped]':''}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${slot.equipped?'disabled':''} onclick="sellItem(${idx});updateShopScreen()">Sell</button>`;
+    row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${iname(slot.id)}${slot.qty>1?` x${slot.qty}`:''}</div><div class="shop-stat">${slot.equipped?'[equipped]':''}</div></div><div class="shop-price">${price}🪙</div><button class="shop-btn" ${slot.equipped?'disabled':''} onclick="sellItem(${idx});updateShopScreen()">Sell</button>`;
     list.appendChild(row);
   });
 }
@@ -626,7 +626,7 @@ function shopBuildRow(buy,id,item){
   const lvLabel=minLv?`<span style="color:var(--dim);font-size:6px;margin-left:3px">Min. LV ${minLv}</span>`:'';
   const row=document.createElement('div'); row.className='shop-row';
   const btn=`<button class="shop-btn" style="${canAfford?'border-color:var(--accent)':''}" ${canAfford?'':'disabled'} onclick="buyItem('${id}')">Buy</button>`;
-  row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${item.name}${badge}${lvLabel}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div>${btn}`;
+  row.innerHTML=`<div class="shop-icon">${item.icon}</div><div class="shop-info"><div class="shop-name">${iname(id)}${badge}${lvLabel}</div><div class="shop-stat">${parts.join('  ')}</div></div><div class="shop-price">${price}🪙</div>${btn}`;
   buy.appendChild(row);
 }
 function shopCatHeader(buy,label,color){

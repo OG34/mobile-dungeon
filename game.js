@@ -289,6 +289,10 @@ const G = {
   lang: 'en',
 };
 
+// ── NAME HELPERS ─────────────────────────────────────────────
+function iname(id){const item=ITEMS[id];if(!item)return id;return(G.lang==='en'&&item.nameEn)?item.nameEn:item.name;}
+function fname(id){const foe=FOES[id];if(!foe)return id;return(G.lang==='en'&&foe.nameEn)?foe.nameEn:foe.name;}
+
 // ── STATS ────────────────────────────────────────────────────
 function stats() {
   const p = G.p;
@@ -410,7 +414,7 @@ function updateArea() {
   const lvl = G.p.level;
   const prevArea = G.area?.id;
   G.area = AREAS.find(a=>lvl>=a.min&&lvl<=a.max) || AREAS[AREAS.length-1];
-  document.getElementById('area-name').textContent = G.area.name;
+  document.getElementById('area-name').textContent = t('area_'+G.area.id)||G.area.name;
   document.getElementById('area-icon').textContent = G.area.icon;
   drawBackground(G.area.id);
   const bb = document.getElementById('boss-btn');
@@ -471,7 +475,7 @@ function doStep() {
     const amt=Math.floor(Math.random()*15+8); p.hp=Math.min(stats().maxHp,p.hp+amt); SFX.heal(); addLog(`🌿 Ein Heilkraut! +${amt} HP`); refresh();
   } else if (ev.t==='chest') {
     const id=CHEST_LOOT[Math.floor(Math.random()*CHEST_LOOT.length)]; addInv(id);
-    SFX.chest(); addLog(`📦 Schatzkiste! ${ITEMS[id].icon} ${ITEMS[id].name} gefunden!`); refresh();
+    SFX.chest(); addLog(`📦 Schatzkiste! ${ITEMS[id].icon} ${iname(id)} ${t('log_found')}!`); refresh();
   } else if (ev.t==='shrine') {
     const opts=[
       ()=>{ p.hp=stats().maxHp; addLog('⛩️ Heilschrein! HP vollständig geheilt.'); },
@@ -1043,7 +1047,7 @@ function combatWin() {
       G.challengerCleared=(G.challengerCleared||0)+1;
       save();
     }
-    addLog(`✅ ${e.name} besiegt!`);
+    addLog(`✅ ${(G.lang==='en'&&e.id&&FOES[e.id]?.nameEn)?e.name.replace(FOES[e.id].name,FOES[e.id].nameEn):e.name} ${t('log_defeated')}!`);
     if(isKing){ showVictory(); checkSpeedrunComplete(); }
     if(isDungeon) dungeonNextRoom();
     if(isArena) arenaNextRound();
@@ -1064,7 +1068,7 @@ function endCombat() {
 
 function updateCombatUI() {
   const e=G.combat; const p=G.p; const s=stats(); if(!e) return;
-  document.getElementById('enemy-name-lbl').textContent =e.name;
+  document.getElementById('enemy-name-lbl').textContent =(G.lang==='en'&&e.id&&FOES[e.id]?.nameEn)?e.name.replace(FOES[e.id].name,FOES[e.id].nameEn):e.name;
   document.getElementById('enemy-hp-text').textContent  =`${Math.max(0,e.hp)}/${e.maxHp}`;
   document.getElementById('enemy-hp-bar').style.width   =pct(Math.max(0,e.hp),e.maxHp);
   document.getElementById('pcombat-hp-text').textContent=`${Math.max(0,p.hp)}/${s.maxHp}`;
@@ -1345,7 +1349,7 @@ function doCraft(recipeId) {
   const res=ITEMS[r.result];
   document.getElementById('overlay')?.remove();
   SFX.itemGet();
-  addLog(`⚗ ${res.icon} ${res.name} gecraftet!`);
+  addLog(`⚗ ${res.icon} ${iname(r.result)} ${t('log_crafted')}!`);
   showOverlay(`⚗ Gecraftet!\n${res.icon} ${res.name}`);
   tickQuestCraft();
   refresh();
@@ -1574,7 +1578,7 @@ function updateCharScreen(){
     const upg=invSlot&&invSlot._upgrade?` +${invSlot._upgrade}`:'';
     const rune=invSlot&&invSlot._rune?` ${ITEMS[invSlot._rune]?.icon||''}`:'' ;
     const enc=invSlot&&invSlot._enchant?' ✨':'';
-    el.innerHTML=`${icons[sl]} <span>${eq?eq.name+upg+rune+enc:t('equip_empty')}</span>`;
+    el.innerHTML=`${icons[sl]} <span>${eq?iname(eq.id)+upg+rune+enc:t('equip_empty')}</span>`;
   }
   const clEl=document.getElementById('s-class');
   if(clEl){
@@ -1705,7 +1709,7 @@ function showBank(){
     const item=ITEMS[it.id]; if(!item||it.equipped) return '';
     return `<div class="shop-row" style="font-size:7px">
       <span class="shop-icon">${item.icon}</span>
-      <span class="shop-info"><div class="shop-name">${item.name}</div></span>
+      <span class="shop-info"><div class="shop-name">${iname(it.id)}</div></span>
       <button class="shop-btn" onclick="bankDeposit(${i})">Einlagern</button>
     </div>`;
   }).join('');
@@ -1713,7 +1717,7 @@ function showBank(){
     const item=ITEMS[it.id]; if(!item) return '';
     return `<div class="shop-row" style="font-size:7px">
       <span class="shop-icon">${item.icon}</span>
-      <span class="shop-info"><div class="shop-name">${item.name}</div></span>
+      <span class="shop-info"><div class="shop-name">${iname(it.id)}</div></span>
       <button class="shop-btn" onclick="bankWithdraw(${i})">Abheben</button>
     </div>`;
   }).join('');
