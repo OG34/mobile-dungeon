@@ -855,6 +855,20 @@ button.salloc { min-width: 32px; min-height: 32px; }
 }
 .challenger-active { border-left: 3px solid var(--accent); padding-left: 8px; }
 
+/* ── VISUAL POLISH ANIMATIONS ── */
+@keyframes floatItemUp {
+  0%  {opacity:1;transform:translateX(-50%) translateY(0)}
+  100%{opacity:0;transform:translateX(-50%) translateY(-60px)}
+}
+@keyframes fadeOutFlash {
+  0%  {opacity:1}
+  100%{opacity:0}
+}
+@keyframes burst {
+  0%  {transform:translate(-50%,-50%) translate(0,0);opacity:1}
+  100%{transform:translate(-50%,-50%) translate(var(--dx),var(--dy));opacity:0}
+}
+
 /* ── INSTALL BANNER ── */
 #install-banner {
   position: fixed; bottom: 66px; left: 0; right: 0;

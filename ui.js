@@ -1278,6 +1278,49 @@ function showTutorialHint(step) {
   setTimeout(()=>el.remove(), 4800);
 }
 
+// ── PRESTIGE CONFIRM ─────────────────────────────────────────
+function showPrestigeConfirm() {
+  if (G.p.level < 30) { showOverlay(G.lang==='en'?'❌ Need level 30+!':'❌ Level 30+ benötigt!'); return; }
+  const coins = Math.floor(G.p.level / 5);
+  document.getElementById('overlay')?.remove();
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;max-width:90vw;text-align:center">
+    <div style="font-size:11px;color:var(--accent);margin-bottom:8px">⭐ PRESTIGE</div>
+    <div style="font-size:6px;color:var(--dim);line-height:2;margin-bottom:12px">${G.lang==='en'
+      ?`Reset to LV1, but keep gold, items &amp; equipment.<br>Earn <b style="color:var(--accent)">${coins} prestige coins</b>!`
+      :`Reset auf LV1, behält Gold, Items &amp; Ausrüstung.<br><b style="color:var(--accent)">${coins} Prestige-Münzen</b> erhalten!`}</div>
+    <div style="font-size:6px;color:var(--dim);margin-bottom:12px">${G.lang==='en'
+      ?'Resets: level, XP, stats, talents, class, kills.'
+      :'Reset: Level, XP, Stats, Talente, Klasse, Kills.'}</div>
+    <button onclick="document.getElementById('overlay').remove();doPrestigeNew()" style="display:block;width:100%;background:var(--accent);color:var(--bg);border:none;border-bottom:3px solid var(--accent2);padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin-bottom:8px">⭐ ${G.lang==='en'?'PRESTIGE!':'PRESTIGE!'}</button>
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ ${G.lang==='en'?'Cancel':'Abbrechen'}</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function doPrestigeNew() {
+  const p = G.p;
+  if (p.level < 30) { showOverlay(G.lang==='en'?'❌ Need level 30+!':'❌ Level 30+ benötigt!'); return; }
+  const coins = Math.floor(p.level / 5);
+  p.prestige = (p.prestige||0) + 1;
+  G.prestigeCoins = (G.prestigeCoins||0) + coins;
+  // Reset stats to starting values
+  p.level = 1; p.xp = 0; p.xpNext = 100;
+  p.baseAtk = 8; p.baseDef = 3; p.maxHp = 100; p.maxMp = 30;
+  p.hp = 100; p.mp = 30;
+  p.statPoints = 0; p.talentPoints = 0; p.talents = {};
+  p.class = null; p.subclass = null; p.kills = 0;
+  // Keep: gold, inventory, equipment, quests, achievements
+  updateArea(); refresh();
+  document.getElementById('step-val').textContent = G.steps;
+  SFX.levelUp();
+  addLog(`⭐ Prestige ${p.prestige}! +${coins} Prestige-Münzen!`);
+  showOverlay(`⭐ PRESTIGE ${p.prestige}!\n+${coins} 💫 Prestige-Münzen!\n\nGold & Inventar behalten.`);
+  setTimeout(()=>{ showPrestigeShop(); }, 1600);
+  save();
+}
+
 // ── MORE MENU ─────────────────────────────────────────────────
 function showMoreMenu() {
   document.getElementById('overlay')?.remove();
@@ -1294,12 +1337,15 @@ function showMoreMenu() {
     <button class="more-btn" onclick="closeOverlay();startArena()">🏟 Arena</button>
     <button class="more-btn" onclick="closeOverlay();showDailyChallenge()">🎯 Daily Challenge</button>
     <div class="more-cat">${t('more_dungeons')}</div>
+    <button class="more-btn" onclick="closeOverlay();showDungeonLobby()">🏰 ${G.lang==='en'?'Dungeon':'Dungeon'}</button>
     <button class="more-btn" onclick="closeOverlay();showDailyDungeon()">🏰 Daily Dungeon</button>
     <button class="more-btn" onclick="closeOverlay();showSeasonalDungeon()">🌸 Saisonaler Dungeon</button>
     <div class="more-cat">${t('more_char')}</div>
     <button class="more-btn" onclick="closeOverlay();showCompanions()">🧑‍🤝‍🧑 Begleiter</button>
     <button class="more-btn" onclick="closeOverlay();showGuild()">🏛 Gilde</button>
     <button class="more-btn" onclick="closeOverlay();showPrestigeShop()">⭐ Prestige-Shop</button>
+    ${G.p.level>=30?`<button class="more-btn" onclick="closeOverlay();showPrestigeConfirm()" style="color:var(--accent);border-color:var(--accent)">⭐ Prestige!</button>`:''}
+
     <button class="more-btn" onclick="closeOverlay();showSpriteSelect()">🎨 Sprite</button>
     <div class="more-cat">${t('more_info')}</div>
     <button class="more-btn" onclick="closeOverlay();showStats()">📊 Stats</button>

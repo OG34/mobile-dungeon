@@ -512,6 +512,11 @@ const PRESTIGE_SHOP = [
   { id:'gold_keep',  label:'🪙 Mehr Gold behalten',   cost:2, max:3, desc:'50%→60%→70% Gold behalten' },
   { id:'start_item', label:'🎒 Start-Item +1',         cost:2, max:2, desc:'Behalte +1 extra Item nach Prestige' },
   { id:'xp_boost',   label:'⭐ +15% XP dauerhaft',   cost:3, max:2, desc:'Permanent +15% XP' },
+  { id:'p_atk',  label:'⚔ +8% ATK',           cost:1, max:5, desc:'+8% ATK per Stufe (permanent)' },
+  { id:'p_def',  label:'🛡 +8% DEF',           cost:1, max:5, desc:'+8% DEF per Stufe (permanent)' },
+  { id:'p_hp',   label:'❤ +10% MaxHP',         cost:1, max:5, desc:'+10% MaxHP per Stufe (permanent)' },
+  { id:'p_gold', label:'🪙 +15% Gold',         cost:1, max:5, desc:'+15% Gold-Drops per Stufe' },
+  { id:'p_xp',   label:'⭐ +15% XP',           cost:1, max:5, desc:'+15% XP-Gewinn per Stufe' },
 ];
 
 // ── QUESTS ──────────────────────────────────────────────────

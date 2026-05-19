@@ -382,9 +382,8 @@ function gainXP(amount) {
   if (s.xpBoost > 0) amount = Math.floor(amount * (1 + s.xpBoost));
   if (G.dayNight >= 21 || G.dayNight < 5) amount = Math.floor(amount * 1.15);
   if (G.guild && G.guild.name==='Drachentöter') amount = Math.floor(amount * 1.1);
-  // Prestige XP bonus
-  const pxp = (G.prestigeUpgrades||{}).p_xp||0;
-  if (pxp > 0) amount = Math.floor(amount * (1 + pxp*0.15));
+  const pu = G.prestigeUpgrades||{};
+  if (pu.p_xp) amount = Math.floor(amount * (1 + (pu.p_xp||0)*0.15));
   p.xp += amount;
   while (p.xp >= p.xpNext) {
     p.xp -= p.xpNext;
@@ -610,12 +609,42 @@ function earnGold(g) {
   const s = stats();
   if (s.goldFind > 0) g = Math.floor(g * (1 + s.goldFind));
   if (G.guild && G.guild.name==='Schatzhüter') g = Math.floor(g * 1.1);
-  // Prestige gold bonus
-  const pgold = (G.prestigeUpgrades||{}).p_gold||0;
-  if (pgold > 0) g = Math.floor(g * (1 + pgold*0.15));
+  const pu2 = G.prestigeUpgrades||{};
+  if (pu2.p_gold) g = Math.floor(g * (1 + (pu2.p_gold||0)*0.15));
   if (G.combat) floatGold(g);
   G.p.gold+=g; G.p.totalGoldEarned+=g; tickQuestGold(g); tickDailyGold(g);
   checkAchievements();
+}
+
+function floatGold(amount) {
+  const el = document.createElement('div');
+  el.style.cssText = `position:fixed;bottom:28%;left:50%;transform:translateX(-50%);font-size:9px;color:#ffd700;font-family:'Press Start 2P',monospace;text-align:center;pointer-events:none;z-index:200;animation:floatItemUp 1.2s ease forwards`;
+  el.textContent = '+' + amount + 'g';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1200);
+}
+
+function floatItem(icon, name, rarity) {
+  const colors = {legendary:'#ffd700', epic:'#cc44ff', rare:'#4488ff', uncommon:'#44cc44', common:'#888'};
+  const el = document.createElement('div');
+  el.style.cssText = `position:fixed;bottom:35%;left:50%;transform:translateX(-50%);font-size:11px;color:${colors[rarity]||'#888'};font-family:'Press Start 2P',monospace;text-align:center;pointer-events:none;z-index:200;animation:floatItemUp 1.8s ease forwards`;
+  el.textContent = icon + ' ' + name;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1800);
+}
+
+function burstStars() {
+  for (let i=0; i<8; i++) {
+    const el = document.createElement('div');
+    const angle = (i/8)*Math.PI*2;
+    const dist = 60+Math.random()*40;
+    const dx = Math.cos(angle)*dist, dy = Math.sin(angle)*dist;
+    el.style.cssText = `position:fixed;top:50%;left:50%;width:8px;height:8px;background:#ffd700;border-radius:50%;pointer-events:none;z-index:400;transform:translate(-50%,-50%);animation:burst 0.7s ease forwards`;
+    el.style.setProperty('--dx', dx+'px');
+    el.style.setProperty('--dy', dy+'px');
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 700);
+  }
 }
 
 function setBusy(v) { G.busy=v; document.getElementById('explore-btn').disabled=v; }
@@ -1034,11 +1063,10 @@ function defeatPlayer(){
   combatLog('💀 Du wurdest besiegt...'); setCombatBtns(false);
   if(G.combat) recordBattleHistory(G.combat,'loss');
   G.battleStats.lost=(G.battleStats.lost||0)+1;
-  // Death screen red flash
-  const flash=document.createElement('div');
-  flash.style.cssText='position:fixed;inset:0;background:rgba(220,0,0,0.5);z-index:300;pointer-events:none;animation:fadeOutFlash 0.8s forwards';
+  const flash = document.createElement('div');
+  flash.style.cssText = 'position:fixed;inset:0;background:rgba(220,0,0,0.5);z-index:300;pointer-events:none;animation:fadeOutFlash 0.8s forwards';
   document.body.appendChild(flash);
-  setTimeout(()=>flash.remove(),800);
+  setTimeout(()=>flash.remove(), 800);
   setTimeout(()=>{
     if(G.hardcore){
       saveHighscore();
@@ -1167,6 +1195,24 @@ function updateCombatUI() {
   }
   renderStatusRow('enemy-status',e.enemyStatus);
   renderStatusRow('player-status',e.playerStatus);
+  // Dungeon floor indicator
+  const dungeonBadge = document.getElementById('dungeon-floor-badge');
+  if (G.dungeon) {
+    const room = (G.dungeon.room||0)+1;
+    const max = G.dungeon.maxRooms||DUNGEON_ROOMS;
+    if (!dungeonBadge) {
+      const badge = document.createElement('div');
+      badge.id = 'dungeon-floor-badge';
+      badge.style.cssText = 'position:absolute;top:4px;right:6px;font-size:6px;color:var(--accent);background:rgba(0,0,0,0.7);padding:2px 5px;border:1px solid var(--accent);pointer-events:none;z-index:10';
+      badge.textContent = `🏰 ${room}/${max}`;
+      const stage = document.getElementById('combat-stage');
+      if (stage) stage.style.position='relative', stage.appendChild(badge);
+    } else {
+      dungeonBadge.textContent = `🏰 ${room}/${max}`;
+    }
+  } else if (dungeonBadge) {
+    dungeonBadge.remove();
+  }
 }
 
 function setCombatBtns(on){document.querySelectorAll('.cbtn').forEach(b=>b.disabled=!on);}
@@ -1298,9 +1344,28 @@ function dungeonComplete() {
   const r1=rewards[Math.floor(Math.random()*rewards.length)];
   const r2=rewards[Math.floor(Math.random()*rewards.length)];
   addInv(r1); addInv('elixir'); addInv('elixir');
+  const goldReward = 200 + DUNGEON_ROOMS * 50;
+  earnGold(goldReward);
+  G.prestigeCoins = (G.prestigeCoins||0) + 1;
   SFX.victory();
-  showOverlay(`🏆 GAUNTLET KLAR!\n5/5 Räume!\n${ITEMS[r1].icon} ${ITEMS[r1].name}\n+2 Elixiere`);
+  addLog(G.lang==='en'?'🏆 Dungeon complete! Rewards received!':'🏆 Dungeon abgeschlossen! Belohnung erhalten!');
+  showOverlay(`🏆 ${G.lang==='en'?'DUNGEON COMPLETE':'GAUNTLET KLAR'}!\n5/5 ${G.lang==='en'?'Rooms':'Räume'}!\n${ITEMS[r1].icon} ${ITEMS[r1].name}\n+2 Elixiere\n+${goldReward} Gold\n+1 💫 Prestige-Münze!`);
   refresh();
+}
+
+function showDungeonLobby() {
+  if (G.combat) { showOverlay(G.lang==='en'?'❌ Finish combat first!':'❌ Beende zuerst den Kampf!'); return; }
+  document.getElementById('overlay')?.remove();
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
+  wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;max-width:90vw;text-align:center">
+    <div style="font-size:11px;color:var(--accent);margin-bottom:8px">🏰 ${G.lang==='en'?'DUNGEON':'DUNGEON'}</div>
+    <div style="font-size:6px;color:var(--dim);line-height:2;margin-bottom:12px">${G.lang==='en'?'5 floors, 3 enemies each.<br>Boss at the end. Rare loot!':'5 Etagen, 3 Gegner pro Etage.<br>Boss am Ende. Seltene Beute!'}</div>
+    <div style="font-size:6px;color:var(--accent);margin-bottom:10px">💫 ${G.lang==='en'?'Reward: rare items + 1 prestige coin':'Belohnung: seltene Items + 1 Prestige-Münze'}</div>
+    <button onclick="document.getElementById('overlay').remove();startDungeon()" style="display:block;width:100%;background:var(--accent);color:var(--bg);border:none;border-bottom:3px solid var(--accent2);padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin-bottom:8px">⚔ ${G.lang==='en'?'ENTER':'BETRETEN'}</button>
+    <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ ${G.lang==='en'?'Cancel':'Abbrechen'}</button>
+  </div>`;
+  document.body.appendChild(wrap);
 }
 
 // ── ARENA MODE ────────────────────────────────────────────────
@@ -1742,6 +1807,27 @@ function updateCharScreen(){
   const equippedIds=Object.values(p.eq).filter(Boolean).map(e=>e.id);
   const setSel=document.getElementById('s-sets');
   if(setSel) setSel.textContent=ITEM_SETS.filter(s=>s.pieces.every(id=>equippedIds.includes(id))).map(s=>s.label).join(', ')||'–';
+  // Prestige display — dynamically add rows after Mode row
+  const hcEl = document.getElementById('s-hardcore');
+  if (hcEl) {
+    const modeRow = hcEl.closest('.stat-row');
+    if (modeRow) {
+      // Remove previous prestige rows
+      document.querySelectorAll('.prestige-stat-row').forEach(r=>r.remove());
+      if ((p.prestige||0) > 0 || (G.prestigeCoins||0) > 0) {
+        const pRow = document.createElement('div');
+        pRow.className = 'stat-row prestige-stat-row';
+        pRow.innerHTML = `<span>Prestige</span><span style="color:var(--accent)">${'⭐'.repeat(p.prestige||0)||'–'}</span>`;
+        modeRow.insertAdjacentElement('afterend', pRow);
+        if ((G.prestigeCoins||0) >= 0) {
+          const cRow = document.createElement('div');
+          cRow.className = 'stat-row prestige-stat-row';
+          cRow.innerHTML = `<span style="font-size:6px">${G.lang==='en'?'P. Coins':'P. Münzen'}</span><span style="color:var(--accent)">💫×${G.prestigeCoins||0}</span>`;
+          pRow.insertAdjacentElement('afterend', cRow);
+        }
+      }
+    }
+  }
   updateInvScreen();
 }
 
