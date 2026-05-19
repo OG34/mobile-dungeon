@@ -378,17 +378,19 @@ function gainXP(amount) {
   p.xp += amount;
   while (p.xp >= p.xpNext) {
     p.xp -= p.xpNext;
+    const oldLevel = p.level;
     p.level++;
     p.xpNext = xpFor(p.level);
     const lv=p.level; const tier=lv<=20?1:lv<=50?2:3;
-    p.baseAtk+=[1,2,4][tier-1]; p.baseDef+=[1,2,3][tier-1]; p.maxHp+=[15,25,40][tier-1]; p.maxMp+=[5,8,12][tier-1];
+    const atkGain=[1,2,4][tier-1]; const defGain=[1,2,3][tier-1]; const hpGain=[15,25,40][tier-1]; const mpGain=[5,8,12][tier-1];
+    p.baseAtk+=atkGain; p.baseDef+=defGain; p.maxHp+=hpGain; p.maxMp+=mpGain;
     p.hp=Math.min(p.hp+10, stats().maxHp); p.mp=Math.min(p.mp+3, stats().maxMp);
     p.statPoints+=2;
     p.talentPoints = (p.talentPoints||0) + 1;
     const ns = SKILLS.find(s=>s.unlockLv===p.level);
-    const extra = ns ? `\n${ns.icon} ${ns.name}\nfreigeschaltet!` : '';
     SFX.levelUp();
-    showOverlay(`⭐ LEVEL UP!\nLV ${p.level}\n+2 Stat +1 Talent${extra}`);
+    showLevelUpScreen(oldLevel, p.level, { atk: atkGain, def: defGain, maxHp: hpGain, maxMp: mpGain, statPoints: 2 });
+    if (ns) addLog(`${ns.icon} ${ns.name} freigeschaltet!`);
     if(G.tutorialStep===2){G.tutorialStep=3;setTimeout(()=>showTutorialHint(2),1200);}
     updateArea();
     if (p.level===5  && !p.class)    setTimeout(showClassSelect, 800);
@@ -436,6 +438,8 @@ const EVENTS = [
   {t:'divine',    w:2}, {t:'gather',  w:5}, {t:'pvp',     w:1},
   {t:'fish',      w:4}, {t:'inn',     w:3}, {t:'nothing', w:2},
   {t:'area_boss', w:2},
+  {t:'newshrine', w:4}, {t:'ambush',  w:6}, {t:'riddle',  w:3},
+  {t:'weather',   w:5}, {t:'traveler',w:4}, {t:'campfire',w:5},
 ];
 const CHEST_LOOT = ['potion','potion','elixir','iron_sword','leather','iron_shield','health_ring','magic_ring','battle_brew','atk_rune','def_rune','crit_rune','mp_rune','chain_mail','mage_robe','runed_sword','mp_potion','bone_dagger','battle_gauntlets','storm_boots'];
 
@@ -533,6 +537,54 @@ function doStep() {
     addLog('🏠 Du entdeckst ein Wirtshaus. Ausruhen?'); showInn();
   } else if (ev.t==='area_boss') {
     startAreaBoss(G.area.id);
+  } else if (ev.t==='newshrine') {
+    const h = Math.floor(stats().maxHp * 0.2);
+    G.p.hp = Math.min(stats().maxHp, G.p.hp + h);
+    G.p.mp = stats().maxMp;
+    SFX.heal();
+    addLog(`⛩️ You find a shrine! +${h} HP, full MP restored.`);
+    refresh();
+  } else if (ev.t==='ambush') {
+    const foes = G.area.foes;
+    const foeId = foes[Math.floor(Math.random()*foes.length)];
+    addLog(`⚠️ Ambush! A ${fname(foeId)} attacks!`);
+    SFX.boss();
+    setTimeout(() => startCombat(foeId, false), 400);
+  } else if (ev.t==='riddle') {
+    const riddles = [
+      { q: G.lang==='en'?'I have cities but no houses. I have mountains but no trees. What am I?':'Ich habe Städte aber keine Häuser. Was bin ich?', a: 'map', reward: 80 },
+      { q: G.lang==='en'?'The more you take, the more you leave behind. What am I?':'Je mehr du nimmst, desto mehr hinterlässt du. Was bin ich?', a: 'steps', reward: 60 },
+      { q: G.lang==='en'?'What has hands but cannot clap?':'Was hat Zeiger aber keine Hände?', a: 'clock', reward: 100 },
+    ];
+    const r = riddles[Math.floor(Math.random()*riddles.length)];
+    const gold = Math.floor(r.reward * (1 + G.p.level * 0.1));
+    const wrap=document.createElement('div'); wrap.id='overlay';
+    wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:100';
+    wrap.innerHTML=`<div id="overlay-box" style="min-width:260px;max-width:90vw;text-align:center">
+      <div style="font-size:8px;color:var(--accent);margin-bottom:10px">🧩 ${G.lang==='en'?'RIDDLE':'RÄTSEL'}</div>
+      <div style="font-size:6px;line-height:2;margin-bottom:16px">${r.q}</div>
+      <button onclick="earnGold(${gold});addLog('🧩 ${G.lang==='en'?`Correct! +${gold} Gold`:`Richtig! +${gold} Gold`}');closeOverlay()" style="display:block;width:100%;background:var(--panel);border:1px solid var(--accent);color:var(--accent);padding:8px;font-family:'Press Start 2P',monospace;font-size:6px;cursor:pointer;margin-bottom:6px">${G.lang==='en'?`✔ Answer: ${r.a} (+${gold}🪙)`:`✔ Antwort: ${r.a} (+${gold}🪙)`}</button>
+      <button onclick="addLog('🧩 ${G.lang==='en'?'You skip the riddle.':'Du gehst weiter.'}');closeOverlay()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px;font-family:'Press Start 2P',monospace;font-size:6px;cursor:pointer;width:100%">${G.lang==='en'?'✖ Skip':'✖ Überspringen'}</button>
+    </div>`;
+    document.body.appendChild(wrap);
+  } else if (ev.t==='campfire') {
+    const h = Math.floor(stats().maxHp * 0.3);
+    G.p.hp = Math.min(stats().maxHp, G.p.hp + h);
+    SFX.heal();
+    addLog(`🔥 ${G.lang==='en'?`You rest at a campfire. +${h} HP`:`Du rastest am Lagerfeuer. +${h} HP`}`);
+    refresh();
+  } else if (ev.t==='traveler') {
+    const gifts = ['potion','mp_potion','elixir','battle_brew','atk_rune','def_rune'];
+    const gift = gifts[Math.floor(Math.random()*gifts.length)];
+    addInv(gift);
+    addLog(`🧙 ${G.lang==='en'?`A traveler gives you a ${iname(gift)}!`:`Ein Reisender schenkt dir ${iname(gift)}!`}`);
+    refresh();
+  } else if (ev.t==='weather') {
+    const weathers = G.lang==='en'
+      ? ['A storm brews...','The fog thickens...','Rain begins to fall...','The air clears.']
+      : ['Ein Sturm zieht auf...','Der Nebel dichtet sich...','Regen beginnt zu fallen...','Die Luft klärt sich.'];
+    addLog(`🌦️ ${weathers[Math.floor(Math.random()*weathers.length)]}`);
+    refresh();
   } else {
     addLog(NPC_FLAVOR_LINES[Math.floor(Math.random()*NPC_FLAVOR_LINES.length)]);
   }
