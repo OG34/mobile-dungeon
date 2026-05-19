@@ -169,12 +169,13 @@ function showClassSelect() {
   const btnStyle='display:block;width:100%;background:var(--panel);color:var(--text);border:1px solid var(--border);border-bottom:3px solid var(--accent2);padding:12px 10px;margin-bottom:8px;font-family:\'Press Start 2P\',monospace;font-size:7px;cursor:pointer;text-align:left';
   const wrap=document.createElement('div'); wrap.id='overlay';
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
-  const opts=Object.entries(CLASSES).map(([id,cl])=>
-    `<button style="${btnStyle}" onclick="chooseClass('${id}')">${cl.icon} ${cl.name}<br><span style="color:var(--dim);font-size:6px">${cl.desc}</span></button>`
-  ).join('');
+  const opts=Object.entries(CLASSES).map(([id,cl])=>{
+    const name = (G.lang==='en'&&cl.nameEn) ? cl.nameEn : cl.name;
+    return `<button style="${btnStyle}" onclick="chooseClass('${id}')">${cl.icon} ${name}<br><span style="color:var(--dim);font-size:6px">${cl.desc}</span></button>`;
+  }).join('');
   wrap.innerHTML=`<div id="overlay-box" style="min-width:280px;max-width:90vw;text-align:center">
-    ⚔ KLASSE WÄHLEN ⚔<br><br>
-    <span style="font-size:6px;color:var(--dim)">LV 5 — Wähle deinen Weg!</span><br><br>
+    ⚔ ${G.lang==='en'?'CHOOSE CLASS':'KLASSE WÄHLEN'} ⚔<br><br>
+    <span style="font-size:6px;color:var(--dim)">LV 5 — ${G.lang==='en'?'Choose your path!':'Wähle deinen Weg!'}</span><br><br>
     ${opts}
   </div>`;
   document.body.appendChild(wrap);
@@ -601,10 +602,9 @@ function shopItemMinLv(item){
   if(v>30) return 30; if(v>20) return 20; return 0;
 }
 function shopItemBetter(item){
-  // Returns true if item is strictly better in its slot than what player has equipped
   const sl=item.slot; if(!sl||sl==='rune'||sl==='pet') return false;
-  const eq=G.p.eq[sl]; if(!eq) return true; // nothing equipped → always better
-  const cur=ITEMS[eq.id]; if(!cur) return true;
+  const eq=G.p.eq[sl]; if(!eq) return false;
+  const cur=ITEMS[eq.id]; if(!cur) return false;
   return (item.atk||0)>(cur.atk||0) || (item.def||0)>(cur.def||0);
 }
 function shopBuildRow(buy,id,item){

@@ -93,8 +93,11 @@ const DROPS = {
   corrupted_knight:[{id:'elixir',p:.35},{id:'runed_sword',p:.08},{id:'iron_shield',p:.12},{id:'chain_mail',p:.10}],
   dark_sorcerer:  [{id:'elixir',p:.40},{id:'cursed_blade',p:.05},{id:'crit_rune',p:.12},{id:'mage_robe',p:.10}],
   magma_titan:    [{id:'elixir',p:.45},{id:'berserker_axe',p:.06},{id:'atk_rune',p:.12},{id:'berserker_plate',p:.05}],
-  void_lich:      [{id:'elixir',p:.50},{id:'void_gloves',p:.08},{id:'void_rune',p:.10},{id:'chaos_crystal',p:.06},{id:'crystal_crown',p:.04}],
+  void_lich:      [{id:'elixir',p:.50},{id:'void_gloves',p:.08},{id:'void_rune',p:.10},{id:'chaos_crystal',p:.06},{id:'crystal_crown',p:.04},{id:'shadow_cat',p:.03}],
   glacial_spirit: [{id:'elixir',p:.50},{id:'crystal_crown',p:.06},{id:'def_rune',p:.15},{id:'shadow_boots',p:.08}],
+  dragon:         [{id:'dragon_blade',p:.35},{id:'elixir',p:.60},{id:'magic_ring',p:.30},{id:'thorn_shield',p:.20},{id:'dragon_pet',p:.04}],
+  chaos_dragon:   [{id:'chaos_blade',p:.40},{id:'void_robe',p:.35},{id:'void_scythe',p:.08},{id:'elixir',p:.80},{id:'void_pendant',p:.10},{id:'dragon_pet',p:.08}],
+  blizzard_dragon:[{id:'abyssal_blade',p:.12},{id:'abyssal_plate',p:.10},{id:'void_scythe',p:.06},{id:'elixir',p:.90},{id:'id_scroll',p:.60},{id:'frost_heart',p:.20},{id:'dragon_pet',p:.06}],
 };
 
 const ITEMS = {
@@ -115,9 +118,14 @@ const ITEMS = {
   chaos_blade:  { name:'Chaos Blade',  nameEn:'Chaos Blade',    icon:'⚡', slot:'weapon', atk:40, def:0,                        value:900, buyable:false, rarity:'legendary' },
   void_robe:    { name:'Void Robe',    nameEn:'Void Robe',      icon:'🌀', slot:'armor',  atk:0,  def:25, maxMp:20,             value:800, buyable:false, rarity:'legendary' },
   chaos_crystal:{ name:'Chaos Crystal',nameEn:'Chaos Crystal',  icon:'💎', slot:'acc',    atk:6,  def:6,  maxHp:35, maxMp:15,  value:1000,buyable:false, rarity:'legendary' },
-  pixie_pet:    { name:'Pixie',        nameEn:'Pixie (Pet)',     icon:'🧚', slot:'pet',    xpBonus:0.20,                         value:400, buyable:true,  rarity:'rare'      },
-  golem_pet:    { name:'Stone Golem',  nameEn:'Stone Golem (Pet)',icon:'🗿', slot:'pet',   def:6,                                value:450, buyable:true,  rarity:'rare'      },
-  fox_pet:      { name:'Lucky Fox',    nameEn:'Lucky Fox (Pet)', icon:'🦊', slot:'pet',    goldBonus:0.20,                       value:400, buyable:true,  rarity:'rare'      },
+  pixie_pet:    { name:'Pixie',         nameEn:'Pixie (Pet)',          icon:'🧚', slot:'pet', xpBonus:0.20,                             value:400, buyable:true,  rarity:'rare'      },
+  golem_pet:    { name:'Steingolem',    nameEn:'Stone Golem (Pet)',    icon:'🗿', slot:'pet', def:6,                                        value:450, buyable:true,  rarity:'rare'      },
+  fox_pet:      { name:'Glücksfuchs',   nameEn:'Lucky Fox (Pet)',      icon:'🦊', slot:'pet', goldBonus:0.20,                               value:400, buyable:true,  rarity:'rare'      },
+  wolf_pet:     { name:'Wolfswelpe',    nameEn:'Wolf Pup (Pet)',       icon:'🐺', slot:'pet', atk:6, critBonus:0.08,                        value:500, buyable:true,  rarity:'rare'      },
+  dragon_pet:   { name:'Drachenjunges', nameEn:'Dragon Hatchling (Pet)',icon:'🐉',slot:'pet', atk:10, def:4, critBonus:0.05,                value:800, buyable:false, rarity:'epic'      },
+  mana_sprite:  { name:'Manasprit',     nameEn:'Mana Sprite (Pet)',    icon:'✨', slot:'pet', maxMp:20, mpRegen:2,                          value:480, buyable:true,  rarity:'rare'      },
+  shadow_cat:   { name:'Schattenkatze', nameEn:'Shadow Cat (Pet)',     icon:'🐈', slot:'pet', evasion:0.12, critBonus:0.06,                 value:550, buyable:false, rarity:'epic'      },
+  bee_pet:      { name:'Goldene Biene', nameEn:'Golden Bee (Pet)',     icon:'🐝', slot:'pet', goldBonus:0.15, xpBonus:0.10,                 value:500, buyable:true,  rarity:'rare'      },
   atk_rune:     { name:'ATK-Rune',    nameEn:'ATK Rune',        icon:'🔴', slot:'rune',   atk:8,                                value:100, buyable:true,  rarity:'uncommon'  },
   def_rune:     { name:'DEF-Rune',    nameEn:'DEF Rune',        icon:'🔵', slot:'rune',   def:8,                                value:100, buyable:true,  rarity:'uncommon'  },
   crit_rune:    { name:'Krit-Rune',   nameEn:'Crit Rune',       icon:'🟡', slot:'rune',   critBonus:0.08,                       value:130, buyable:true,  rarity:'rare'      },
@@ -226,6 +234,10 @@ const SKILLS = [
   { id:'backstab',   name:'Hinterhalt',    icon:'🗡', mp:12, unlockLv:4,  reqClass:'rogue',   dmgMult:1.5, critMult:3.0, desc:'1.5× + 3× Krit-Schaden' },
   { id:'smoke_bomb', name:'Rauchbombe',    icon:'💨', mp:20, unlockLv:7,  reqClass:'rogue',   fleeSkill:true, desc:'Garantierte Flucht' },
   { id:'poison_strike',name:'Giftstoß',   icon:'🐍', mp:25, unlockLv:12, reqClass:'rogue',   dmgMult:1.2, poisonSkill:true, desc:'1.2× + starkes Gift' },
+  // ── Jäger-Skills ───────────────────────────────────────────
+  { id:'aimed_shot', name:'Gezielter Schuss', icon:'🎯', mp:15, unlockLv:4, reqClass:'ranger', dmgMult:2.5, desc:'2.5× präziser Schuss' },
+  { id:'trap',       name:'Falle',            icon:'🪤', mp:20, unlockLv:7, reqClass:'ranger', poisonSkill:true, dmgMult:1.0, desc:'Vergiftet + 1× Schaden' },
+  { id:'eagle_eye',  name:'Adlerauge',        icon:'🦅', mp:30, unlockLv:13,reqClass:'ranger', dmgMult:3.5, critMult:2.5, desc:'3.5× + 2.5× Krit' },
 ];
 
 // ── AREA BOSSES ──────────────────────────────────────────────
@@ -290,9 +302,10 @@ const ACHIEVEMENTS = [
 
 // ── CLASSES ──────────────────────────────────────────────────
 const CLASSES = {
-  warrior: { name:'Krieger',   icon:'⚔', desc:'+15 ATK, +10 DEF, +40 HP',  bonusAtk:15, bonusDef:10, bonusHp:40, bonusMp:0  },
-  mage:    { name:'Magier',    icon:'🔮', desc:'+5 ATK, +5 DEF, +60 MP',   bonusAtk:5,  bonusDef:5,  bonusHp:0,  bonusMp:60 },
-  rogue:   { name:'Schurke',   icon:'🗡', desc:'+20 ATK, +3 DEF, +15% Krit',bonusAtk:20, bonusDef:3,  bonusHp:0,  bonusMp:0, bonusCrit:0.15 },
+  warrior: { name:'Krieger', nameEn:'Warrior', icon:'⚔', desc:'+15 ATK, +10 DEF, +40 HP, -10% DMG', bonusAtk:15, bonusDef:10, bonusHp:40, bonusMp:0, dmgReduce:0.10 },
+  mage:    { name:'Magier',  nameEn:'Mage',    icon:'🔮', desc:'+5 ATK, +5 DEF, +60 MP, +3 MP/Runde', bonusAtk:5, bonusDef:5, bonusHp:0, bonusMp:60, combatMpRegen:3 },
+  rogue:   { name:'Schurke', nameEn:'Rogue',   icon:'🗡', desc:'+20 ATK, +3 DEF, +15% Krit, +25% Gold', bonusAtk:20, bonusDef:3, bonusHp:0, bonusMp:0, bonusCrit:0.15, goldBonus:0.25 },
+  ranger:  { name:'Jäger',   nameEn:'Ranger',  icon:'🏹', desc:'+12 ATK, +8 DEF, +15% Krit, Erster Schlag', bonusAtk:12, bonusDef:8, bonusHp:0, bonusMp:0, bonusCrit:0.15, firstStrike:true },
 };
 
 // ── SUBCLASSES (LV15) ─────────────────────────────────────────
@@ -302,7 +315,9 @@ const SUBCLASSES = {
   necromancer:  { base:'mage',    name:'Nekromant',    icon:'💀', desc:'+10 ATK, +40 MP, Drain immer',   bonusAtk:10, bonusDef:0,  bonusHp:0, bonusMp:40,bonusCrit:0,   alwaysDrain:true },
   elementalist: { base:'mage',    name:'Elementalist', icon:'🌊', desc:'+15 ATK, +30 MP, Skill+30%',     bonusAtk:15, bonusDef:0,  bonusHp:0, bonusMp:30,bonusCrit:0,   skillBonus:0.30 },
   assassin:     { base:'rogue',   name:'Assassin',     icon:'🔪', desc:'+35 ATK, +25% Krit',             bonusAtk:35, bonusDef:0,  bonusHp:0, bonusMp:0, bonusCrit:0.25 },
-  ranger:       { base:'rogue',   name:'Ranger',       icon:'🏹', desc:'+20 ATK, Multi-Hit auto',         bonusAtk:20, bonusDef:0,  bonusHp:0, bonusMp:0, bonusCrit:0.1, autoMulti:true },
+  hunter:       { base:'rogue',   name:'Jäger-Schurke',icon:'🏹', desc:'+20 ATK, Multi-Hit auto',         bonusAtk:20, bonusDef:0,  bonusHp:0, bonusMp:0, bonusCrit:0.1, autoMulti:true },
+  archer:       { base:'ranger',  name:'Bogenschütze', icon:'🎯', desc:'+25 ATK, Triple Shot',             bonusAtk:25, bonusDef:0,  bonusHp:0, bonusMp:0, bonusCrit:0.1, autoMulti:true },
+  beastmaster:  { base:'ranger',  name:'Tiermeister',  icon:'🐺', desc:'+15 ATK, +60 HP, Pet +30% Bonus', bonusAtk:15, bonusDef:0,  bonusHp:60,bonusMp:0, bonusCrit:0,   petBonus:0.30 },
 };
 
 // ── ITEM SETS ─────────────────────────────────────────────────

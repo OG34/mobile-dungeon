@@ -298,14 +298,16 @@ function stats() {
   const p = G.p;
   let atk=p.baseAtk, def=p.baseDef, maxHp=p.maxHp, maxMp=p.maxMp, critBonus=0, resist=0, mpRegen=0, eqEvasion=0, eqLifesteal=0;
   const equippedIds = [];
+  const petMult = (p.subclass && SUBCLASSES[p.subclass] && SUBCLASSES[p.subclass].petBonus) ? (1 + SUBCLASSES[p.subclass].petBonus) : 1;
   for (const slot of ['weapon','armor','acc','pet','helm','gloves','boots']) {
     const eq = p.eq[slot];
     if (eq) {
-      atk+=eq.atk||0; def+=eq.def||0;
-      maxHp+=eq.maxHp||0; maxMp+=eq.maxMp||0;
-      critBonus+=eq.critBonus||0; resist+=eq.resist||0;
-      mpRegen+=eq.mpRegen||0;
-      eqEvasion+=eq.evasion||0; eqLifesteal+=eq.lifesteal||0;
+      const m = (slot==='pet') ? petMult : 1;
+      atk+=Math.floor((eq.atk||0)*m); def+=Math.floor((eq.def||0)*m);
+      maxHp+=Math.floor((eq.maxHp||0)*m); maxMp+=Math.floor((eq.maxMp||0)*m);
+      critBonus+=(eq.critBonus||0)*m; resist+=eq.resist||0;
+      mpRegen+=Math.floor((eq.mpRegen||0)*m);
+      eqEvasion+=(eq.evasion||0)*m; eqLifesteal+=eq.lifesteal||0;
       if (slot!=='pet') {
         const invSlot = p.inv.find(i=>i.id===eq.id&&i.equipped);
         if (invSlot) {
@@ -594,6 +596,8 @@ function doStep() {
 function earnGold(g) {
   const pet = G.p.eq.pet;
   if (pet && pet.goldBonus) g = Math.floor(g * (1 + pet.goldBonus));
+  const classGoldBonus = (G.p.class && CLASSES[G.p.class] && CLASSES[G.p.class].goldBonus) ? CLASSES[G.p.class].goldBonus : 0;
+  if (classGoldBonus > 0) g = Math.floor(g * (1 + classGoldBonus));
   const s = stats();
   if (s.goldFind > 0) g = Math.floor(g * (1 + s.goldFind));
   if (G.guild && G.guild.name==='Schatzhüter') g = Math.floor(g * 1.1);
@@ -746,6 +750,10 @@ function enterCombatScreen(sprite, isBoss, isKing, palette=null) {
   lbl.className='cname'+(isKing?' boss-name':isBoss?' boss-name':'');
   drawSprite(document.getElementById('enemy-canvas'),sprite,4,palette);
   drawPlayer(document.getElementById('player-combat-canvas'));
+  if (G.p.class === 'ranger' && CLASSES.ranger?.firstStrike) {
+    G.combat.firstRound = true;
+    combatLog('🏹 Erster Schlag! Ranger greift zuerst an!');
+  }
   updateCombatUI(); setCombatBtns(true); hideSkillPicker(); hideCombatItems();
 }
 
@@ -768,7 +776,9 @@ function combatAction(act) {
 
   e.combo=(e.combo||0)+1;
   const comboMult=1+Math.min(e.combo*0.12,0.72);
-  const crit=Math.random()<(0.15+(s.critBonus||0));
+  const firstStrikeBonus = e.firstRound ? 0.35 : 0;
+  if (e.firstRound) e.firstRound = false;
+  const crit=Math.random()<(0.15+(s.critBonus||0)+firstStrikeBonus);
   const sc=p.subclass?SUBCLASSES[p.subclass]:null;
   const wType=ITEMS[p.eq.weapon?.id]?.wType||null;
   const hits=(sc&&sc.autoMulti&&Math.random()<0.35)?2:(wType==='axe'&&Math.random()<0.25)?2:1;
@@ -959,8 +969,9 @@ function enemyTurn() {
   if(e.atkBonusTurns>0){e.atkBonusTurns--;if(e.atkBonusTurns===0)e.atkBonus=0;}
   if(e.defBonusTurns>0){e.defBonusTurns--;if(e.defBonusTurns===0)e.defBonus=0;}
   const s=stats();
-  // Staff MP regen
-  if(s.mpRegen>0){ p.mp=Math.min(s.maxMp,p.mp+s.mpRegen); updateHUD(); }
+  // MP regen (staff + mage passive)
+  const classMpRegen = (p.class && CLASSES[p.class] && CLASSES[p.class].combatMpRegen) ? CLASSES[p.class].combatMpRegen : 0;
+  if(s.mpRegen+classMpRegen>0){ p.mp=Math.min(s.maxMp,p.mp+s.mpRegen+classMpRegen); updateHUD(); }
   // Companion attack
   if(G.companion&&G.companion.hp>0&&e.hp>0){
     const cd=Math.max(1,G.companion.atk-Math.floor(e.def*0.5)+rand(-2,2));
@@ -982,7 +993,8 @@ function enemyTurn() {
       if(e._evasion&&Math.random()<e._evasion){ combatLog(`💨 ${e.name} weicht aus!`); continue; }
       const crit=Math.random()<0.10;
       const nightMult = (G.dayNight >= 21 || G.dayNight < 5) ? 1.1 : 1;
-      const dmg=Math.max(1,Math.floor((e.atk-s.def+rand(-2,2))*(crit?1.8:1)*nightMult));
+      const classDmgReduce = (p.class && CLASSES[p.class] && CLASSES[p.class].dmgReduce) ? (1 - CLASSES[p.class].dmgReduce) : 1;
+      const dmg=Math.max(1,Math.floor((e.atk-s.def+rand(-2,2))*(crit?1.8:1)*nightMult*classDmgReduce));
       // Status resist
       const resisted=s.resist>0&&Math.random()<s.resist;
       p.hp-=dmg; G.battleStats.dmgTaken+=dmg;

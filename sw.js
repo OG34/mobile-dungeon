@@ -1,4 +1,4 @@
-const CACHE = 'pixel-quest-v6';
+const CACHE = 'pixel-quest-v7';
 const ASSETS = [
   './',
   './index.html',
