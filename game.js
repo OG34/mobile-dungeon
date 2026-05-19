@@ -358,6 +358,11 @@ function stats() {
   if (t.def_pct) def  = Math.floor(def  * (1 + (t.def_pct||0)*0.10));
   if (t.hp_pct)  maxHp= Math.floor(maxHp* (1 + (t.hp_pct ||0)*0.08));
   mpRegen += (t.mp_regen||0)*2;
+  // Prestige bonuses
+  const pu = G.prestigeUpgrades||{};
+  if (pu.p_atk) atk   = Math.floor(atk   * (1 + (pu.p_atk||0)*0.08));
+  if (pu.p_def) def   = Math.floor(def   * (1 + (pu.p_def||0)*0.08));
+  if (pu.p_hp)  maxHp = Math.floor(maxHp * (1 + (pu.p_hp ||0)*0.10));
   return { atk, def, maxHp, maxMp, critBonus, resist, mpRegen,
     lifesteal: (t.lifesteal||0)*0.05 + eqLifesteal,
     evasion:   (t.evasion  ||0)*0.08 + eqEvasion,
@@ -377,6 +382,9 @@ function gainXP(amount) {
   if (s.xpBoost > 0) amount = Math.floor(amount * (1 + s.xpBoost));
   if (G.dayNight >= 21 || G.dayNight < 5) amount = Math.floor(amount * 1.15);
   if (G.guild && G.guild.name==='Drachentöter') amount = Math.floor(amount * 1.1);
+  // Prestige XP bonus
+  const pxp = (G.prestigeUpgrades||{}).p_xp||0;
+  if (pxp > 0) amount = Math.floor(amount * (1 + pxp*0.15));
   p.xp += amount;
   while (p.xp >= p.xpNext) {
     p.xp -= p.xpNext;
@@ -392,6 +400,7 @@ function gainXP(amount) {
     const ns = SKILLS.find(s=>s.unlockLv===p.level);
     SFX.levelUp();
     showLevelUpScreen(oldLevel, p.level, { atk: atkGain, def: defGain, maxHp: hpGain, maxMp: mpGain, statPoints: 2 });
+    burstStars();
     if (ns) addLog(`${ns.icon} ${ns.name} freigeschaltet!`);
     if(G.tutorialStep===2){G.tutorialStep=3;setTimeout(()=>showTutorialHint(2),1200);}
     updateArea();
@@ -601,6 +610,10 @@ function earnGold(g) {
   const s = stats();
   if (s.goldFind > 0) g = Math.floor(g * (1 + s.goldFind));
   if (G.guild && G.guild.name==='Schatzhüter') g = Math.floor(g * 1.1);
+  // Prestige gold bonus
+  const pgold = (G.prestigeUpgrades||{}).p_gold||0;
+  if (pgold > 0) g = Math.floor(g * (1 + pgold*0.15));
+  if (G.combat) floatGold(g);
   G.p.gold+=g; G.p.totalGoldEarned+=g; tickQuestGold(g); tickDailyGold(g);
   checkAchievements();
 }
@@ -1021,6 +1034,11 @@ function defeatPlayer(){
   combatLog('💀 Du wurdest besiegt...'); setCombatBtns(false);
   if(G.combat) recordBattleHistory(G.combat,'loss');
   G.battleStats.lost=(G.battleStats.lost||0)+1;
+  // Death screen red flash
+  const flash=document.createElement('div');
+  flash.style.cssText='position:fixed;inset:0;background:rgba(220,0,0,0.5);z-index:300;pointer-events:none;animation:fadeOutFlash 0.8s forwards';
+  document.body.appendChild(flash);
+  setTimeout(()=>flash.remove(),800);
   setTimeout(()=>{
     if(G.hardcore){
       saveHighscore();
@@ -1075,7 +1093,7 @@ function combatWin() {
   recordBattleHistory(e, 'win');
   tickQuestKill(e.id); tickDailyKill(e.id);
   tickStoryChain(e.id, e.isBoss);
-  for(const drop of (e.drops||[])){ if(Math.random()<drop.p){ addInv(drop.id); const it=ITEMS[drop.id]; if(it) combatLog(`📦 ${it.rarity==='legendary'?'🌟':it.rarity==='epic'?'💜':''} ${it.name}!`); } }
+  for(const drop of (e.drops||[])){ if(Math.random()<drop.p){ addInv(drop.id); const it=ITEMS[drop.id]; if(it){ combatLog(`📦 ${it.rarity==='legendary'?'🌟':it.rarity==='epic'?'💜':''} ${it.name}!`); floatItem(it.icon||'📦', iname(drop.id), it.rarity||'common'); } } }
   G.battleStats.won++;
   if(G.tutorialStep===1){G.tutorialStep=2;setTimeout(()=>showTutorialHint(1),600);}
   const xp=e.xp; const isKing=e.isKing;
@@ -1186,6 +1204,41 @@ function buyPrestigeUpgrade(id) {
   G.prestigeCoins-=s.cost; G.prestigeUpgrades[id]=(G.prestigeUpgrades[id]||0)+1;
   addLog(`💫 ${s.label} erworben!`); SFX.levelUp();
   document.getElementById('overlay')?.remove(); save(); showPrestigeShop();
+}
+
+// ── PRESTIGE CONFIRM / NEW PRESTIGE ─────────────────────────
+function showPrestigeConfirm() {
+  if (G.p.level < 30) { showOverlay(G.lang==='en'?'❌ Reach level 30 to prestige!':'❌ Erreiche Level 30 für Prestige!'); return; }
+  const coins = Math.floor(G.p.level / 5);
+  document.getElementById('overlay')?.remove();
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
+  wrap.innerHTML = `<div id="overlay-box" style="min-width:280px;max-width:90vw;text-align:center">
+    <div style="color:var(--accent);font-size:9px;margin-bottom:8px">⭐ PRESTIGE</div>
+    <div style="font-size:7px;color:var(--dim);margin-bottom:10px">${G.lang==='en'?'Reset level, stats, talents & class.<br>Keep gold, items & achievements.':'Level, Stats, Talente & Klasse zurücksetzen.<br>Gold, Items & Achievements bleiben!'}</div>
+    <div style="font-size:8px;color:var(--accent);margin-bottom:12px">🪙 +${coins} ${G.lang==='en'?'Prestige Coins':'Prestige-Münzen'}</div>
+    <button onclick="doNewPrestige()" style="display:block;width:100%;background:#2a1a00;color:var(--accent);border:2px solid var(--accent);border-bottom:3px solid #a08830;padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin-bottom:8px">⭐ ${G.lang==='en'?'Prestige!':'Prestige!'}</button>
+    <button onclick="document.getElementById('overlay').remove()" style="display:block;width:100%;background:var(--panel);color:var(--dim);border:1px solid var(--border);padding:8px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer">✖ ${G.lang==='en'?'Cancel':'Abbrechen'}</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function doNewPrestige() {
+  document.getElementById('overlay')?.remove();
+  const p = G.p;
+  const coins = Math.floor(p.level / 5);
+  p.prestige = (p.prestige||0) + 1;
+  G.prestigeCoins = (G.prestigeCoins||0) + coins;
+  // Reset player stats
+  p.level = 1; p.xp = 0; p.xpNext = 100;
+  p.baseAtk = 8; p.baseDef = 3; p.maxHp = 100; p.maxMp = 30;
+  p.hp = 100; p.mp = 30;
+  p.statPoints = 0; p.talentPoints = 0; p.talents = {};
+  p.class = null; p.subclass = null; p.kills = 0;
+  // Keep: gold, inventory, equipment, quests, achievements
+  addLog(`⭐ Prestige ${p.prestige}! +${coins} 🪙 Prestige-Münzen!`);
+  showOverlay(`⭐ PRESTIGE ${p.prestige}\n+${coins} 🪙 ${G.lang==='en'?'Prestige Coins':'Prestige-Münzen'}!`);
+  updateArea(); refresh(); save();
 }
 
 // ── DUNGEON GAUNTLET ─────────────────────────────────────────
@@ -1454,6 +1507,38 @@ function weatherTick() {
     ctx.globalAlpha=1;
   }
   if(wp.length>80) wp.splice(0,wp.length-80);
+}
+
+// ── VISUAL POLISH ────────────────────────────────────────────
+function floatItem(icon, name, rarity) {
+  const colors = {legendary:'#ffd700', epic:'#cc44ff', rare:'#4488ff', uncommon:'#44cc44', common:'#888'};
+  const el = document.createElement('div');
+  el.style.cssText = `position:fixed;bottom:35%;left:50%;transform:translateX(-50%);font-size:11px;color:${colors[rarity]||'#888'};font-family:'Press Start 2P',monospace;text-align:center;pointer-events:none;z-index:200;animation:floatUpItem 1.8s ease forwards`;
+  el.textContent = icon + ' ' + name;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1800);
+}
+
+function floatGold(amount) {
+  const el = document.createElement('div');
+  el.style.cssText = `position:fixed;bottom:28%;left:50%;transform:translateX(-50%);font-size:10px;color:#ffd700;font-family:'Press Start 2P',monospace;text-align:center;pointer-events:none;z-index:200;animation:floatUpItem 1.4s ease forwards`;
+  el.textContent = '+' + amount + 'g';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1400);
+}
+
+function burstStars() {
+  for (let i=0; i<8; i++) {
+    const el = document.createElement('div');
+    const angle = (i/8)*Math.PI*2;
+    const dist = 60+Math.random()*40;
+    const dx = Math.cos(angle)*dist, dy = Math.sin(angle)*dist;
+    el.style.cssText = `position:fixed;top:50%;left:50%;width:8px;height:8px;background:#ffd700;border-radius:50%;pointer-events:none;z-index:400;transform:translate(-50%,-50%);animation:burst 0.7s ease forwards`;
+    el.style.setProperty('--dx', dx+'px');
+    el.style.setProperty('--dy', dy+'px');
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 700);
+  }
 }
 
 // ── FLOATING DAMAGE NUMBERS ──────────────────────────────────
