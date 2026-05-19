@@ -1233,8 +1233,8 @@ function startDungeon() {
 }
 
 const PROC_ROOM_TYPES = [
-  {t:'combat',   w:38},{t:'chest',   w:14},{t:'heal',     w:10},
-  {t:'trap',     w:8}, {t:'merchant',w:7}, {t:'boss_room',w:10},{t:'shrine',  w:7},{t:'secret',  w:6},
+  {t:'combat',   w:40},{t:'chest',   w:14},{t:'heal',     w:12},
+  {t:'trap',     w:8}, {t:'rune',    w:7}, {t:'boss_room',w:10},{t:'shrine',  w:7},{t:'secret',  w:6},
 ];
 
 function dungeonNextRoom() {
@@ -1256,8 +1256,10 @@ function dungeonNextRoom() {
     } else if (room.t==='trap') {
       const dmg=Math.max(5,Math.floor(p.hp*0.2)); p.hp=Math.max(1,p.hp-dmg);
       SFX.dmgTake(); addLog(`🪤 Falle! -${dmg} HP`); refresh(); dungeonNextRoom();
-    } else if (room.t==='merchant') {
-      addLog('🧙 Dungeon-Händler!'); showMerchant(); G.dungeon._pausedForMerchant=true;
+    } else if (room.t==='rune') {
+      const runes=['atk_rune','def_rune','crit_rune','mp_rune'];
+      const r=runes[Math.floor(Math.random()*runes.length)]; addInv(r);
+      SFX.chest(); addLog(`💎 Rune gefunden! ${ITEMS[r].icon} ${ITEMS[r].name}!`); dungeonNextRoom();
     } else if (room.t==='shrine') {
       p.hp=stats().maxHp; p.mp=stats().maxMp; SFX.heal();
       addLog('⛩️ Dungeon-Schrein! Vollständig geheilt!'); refresh(); dungeonNextRoom();
@@ -1268,22 +1270,25 @@ function dungeonNextRoom() {
     } else { startCombat(foes[Math.floor(Math.random()*foes.length)], false); }
   }, 900);
 }
-function roomIcon(t){return {combat:'⚔',chest:'📦',heal:'💚',trap:'🪤',merchant:'🧙',boss_room:'💀',shrine:'⛩️',secret:'🌟'}[t]||'?';}
+function roomIcon(t){return {combat:'⚔',chest:'📦',heal:'💚',trap:'🪤',rune:'💎',boss_room:'💀',shrine:'⛩️',secret:'🌟'}[t]||'?';}
 
 function dungeonComplete() {
   G.dungeonClears = (G.dungeonClears||0)+1;
   G.dungeon = null;
   checkAchievements();
-  const rewards=['dragon_blade','shadow_blade','thorn_shield','chaos_crystal','void_robe','chaos_blade'];
-  const r1=rewards[Math.floor(Math.random()*rewards.length)];
-  const r2=rewards[Math.floor(Math.random()*rewards.length)];
+  const lv = G.p.level;
+  const rewardsByLevel = lv>=40 ? ['chaos_blade','void_robe','chaos_crystal','abyssal_blade','void_scythe']
+    : lv>=25 ? ['dragon_blade','shadow_blade','runed_sword','chaos_crystal','void_robe']
+    : lv>=12 ? ['runed_sword','chain_mail','iron_shield','magic_ring','elixir']
+    : ['iron_sword','leather','chain_mail','potion','elixir'];
+  const r1=rewardsByLevel[Math.floor(Math.random()*rewardsByLevel.length)];
   addInv(r1); addInv('elixir'); addInv('elixir');
-  const goldReward = 200 + DUNGEON_ROOMS * 50;
+  const goldReward = Math.floor((200 + DUNGEON_ROOMS * 50) * (1 + lv * 0.05));
   earnGold(goldReward);
   G.prestigeCoins = (G.prestigeCoins||0) + 1;
   SFX.victory();
   addLog(G.lang==='en'?'🏆 Dungeon complete! Rewards received!':'🏆 Dungeon abgeschlossen! Belohnung erhalten!');
-  showOverlay(`🏆 ${G.lang==='en'?'DUNGEON COMPLETE':'GAUNTLET KLAR'}!\n5/5 ${G.lang==='en'?'Rooms':'Räume'}!\n${ITEMS[r1].icon} ${ITEMS[r1].name}\n+2 Elixiere\n+${goldReward} Gold\n+1 💫 Prestige-Münze!`);
+  showOverlay(`🏆 ${G.lang==='en'?'DUNGEON COMPLETE':'DUNGEON KLAR'}!\n${ITEMS[r1]?.icon||'📦'} ${ITEMS[r1]?.name||r1}\n+2 Elixiere\n+${goldReward} 🪙\n+1 💫`);
   refresh();
 }
 
@@ -1294,7 +1299,7 @@ function showDungeonLobby() {
   wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:100';
   wrap.innerHTML=`<div id="overlay-box" style="min-width:270px;max-width:90vw;text-align:center">
     <div style="font-size:11px;color:var(--accent);margin-bottom:8px">🏰 ${G.lang==='en'?'DUNGEON':'DUNGEON'}</div>
-    <div style="font-size:6px;color:var(--dim);line-height:2;margin-bottom:12px">${G.lang==='en'?'5 floors, 3 enemies each.<br>Boss at the end. Rare loot!':'5 Etagen, 3 Gegner pro Etage.<br>Boss am Ende. Seltene Beute!'}</div>
+    <div style="font-size:6px;color:var(--dim);line-height:2;margin-bottom:12px">${G.lang==='en'?'5 rooms: combat, chests, traps, shrines.<br>Final room: BOSS. Rare loot!':'5 Räume: Kampf, Truhen, Fallen, Schreine.<br>Letzter Raum: BOSS. Seltene Beute!'}</div>
     <div style="font-size:6px;color:var(--accent);margin-bottom:10px">💫 ${G.lang==='en'?'Reward: rare items + 1 prestige coin':'Belohnung: seltene Items + 1 Prestige-Münze'}</div>
     <button onclick="document.getElementById('overlay').remove();startDungeon()" style="display:block;width:100%;background:var(--accent);color:var(--bg);border:none;border-bottom:3px solid var(--accent2);padding:10px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin-bottom:8px">⚔ ${G.lang==='en'?'ENTER':'BETRETEN'}</button>
     <button onclick="document.getElementById('overlay').remove()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:6px 16px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">✖ ${G.lang==='en'?'Cancel':'Abbrechen'}</button>
@@ -2098,7 +2103,7 @@ function showDailyDungeon(){
 }
 function startDailyDungeon(){
   document.getElementById('overlay')?.remove();
-  G.dungeon={floors:5,current:1,bonus:true};
+  G.dailyDungeonActive={floors:5,current:1,bonus:true};
   addLog('🏰 Tagesdungeon betreten!');
   showScreen('explore'); doStep();
 }
