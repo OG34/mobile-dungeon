@@ -862,6 +862,62 @@ function showBattleHistory() {
   document.body.appendChild(wrap);
 }
 
+// ── TITLE SCREEN ─────────────────────────────────────────────
+function showTitleScreen() {
+  const existing = document.getElementById('overlay');
+  if (existing) existing.remove();
+  const hasSave = !!localStorage.getItem('pixelquest');
+  const wrap = document.createElement('div');
+  wrap.id = 'overlay';
+  wrap.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0';
+  wrap.innerHTML = `
+    <div style="text-align:center;padding:20px">
+      <div style="font-size:7px;color:var(--dim);letter-spacing:2px;margin-bottom:8px">A PIXEL ADVENTURE</div>
+      <div style="font-size:18px;color:var(--accent);text-shadow:0 0 20px rgba(232,201,107,0.6);line-height:1.3;margin-bottom:4px">PIXEL</div>
+      <div style="font-size:18px;color:var(--accent);text-shadow:0 0 20px rgba(232,201,107,0.6);line-height:1.3;margin-bottom:20px">QUEST</div>
+      <div style="font-size:7px;color:var(--accent2);margin-bottom:32px">RPG</div>
+      <canvas id="title-player-canvas" width="64" height="64" style="display:block;margin:0 auto 24px;image-rendering:pixelated"></canvas>
+      ${hasSave ? `
+        <button onclick="continueSave()" style="display:block;width:200px;background:var(--accent);color:var(--bg);border:none;border-bottom:4px solid var(--accent2);padding:14px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin:0 auto 10px">&#9654; CONTINUE</button>
+        <button onclick="newGameConfirm()" style="display:block;width:200px;background:var(--panel);color:var(--dim);border:1px solid var(--border);padding:10px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;margin:0 auto">&#10010; NEW GAME</button>
+      ` : `
+        <button onclick="startNewGame()" style="display:block;width:200px;background:var(--accent);color:var(--bg);border:none;border-bottom:4px solid var(--accent2);padding:14px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;margin:0 auto">&#9654; START GAME</button>
+      `}
+      <div style="font-size:5px;color:var(--dim);margin-top:24px">v1.0 · og34</div>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+  setTimeout(() => {
+    const c = document.getElementById('title-player-canvas');
+    if (c) drawSprite(c, 'warrior', 4, null);
+  }, 50);
+}
+
+function continueSave() {
+  document.getElementById('overlay')?.remove();
+  refresh();
+  applyLang();
+}
+
+function newGameConfirm() {
+  const existing = document.getElementById('overlay');
+  if (existing) existing.remove();
+  const wrap = document.createElement('div'); wrap.id='overlay';
+  wrap.style.cssText='position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.92);z-index:201';
+  wrap.innerHTML=`<div id="overlay-box" style="text-align:center">
+    <div style="margin-bottom:12px;font-size:8px">&#9888; Start new game?<br><span style="font-size:6px;color:var(--dim)">Current save will be lost.</span></div>
+    <button onclick="startNewGame()" style="display:block;width:100%;background:var(--red);color:#fff;border:none;padding:10px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;margin-bottom:8px">&#10004; Yes, new game</button>
+    <button onclick="document.getElementById('overlay').remove();showTitleScreen()" style="background:none;border:1px solid var(--border);color:var(--dim);padding:8px;font-family:'Press Start 2P',monospace;font-size:7px;cursor:pointer;width:100%">&#10006; Cancel</button>
+  </div>`;
+  document.body.appendChild(wrap);
+}
+
+function startNewGame() {
+  const hasSave = !!localStorage.getItem('pixelquest');
+  if (hasSave) { localStorage.removeItem('pixelquest'); location.reload(); }
+  else { document.getElementById('overlay')?.remove(); promptName(() => save()); }
+}
+
 // ── INTRO SCREEN ─────────────────────────────────────────────
 function promptName(onDone){
   window._onNameDone=onDone;

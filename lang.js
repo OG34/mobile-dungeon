@@ -47,6 +47,11 @@ const STRINGS = {
     area_forest:'Enchanted Forest', area_cave:'Goblin Caves', area_dungeon:'Dark Dungeon', area_graveyard:'Cursed Graveyard', area_castle:'Shadow Castle', area_volcanic:'Volcanic Ruins', area_void:'Void Realm', area_underwater:'Abyssal Kingdom', area_sky:'Sky Fortress', area_ice:'Ice Tundra', area_void_rift:'Dimensional Rift',
     // Log actions
     log_found:'found', log_bought:'purchased', log_sold:'sold', log_crafted:'crafted', log_defeated:'defeated',
+    // Milestones
+    ms_pick_class:'Choose your class', ms_reach_lv5:'Reach Level 5', ms_explore_cave:'Explore the Caves (LV 10)',
+    ms_reach_lv15:'Reach Level 15', ms_dungeon:'Conquer the Dungeon (LV 20)', ms_pick_subclass:'Choose a Subclass',
+    ms_graveyard:'Reach the Graveyard (LV 30)', ms_castle:'Storm the Castle (LV 40)', ms_reach_lv50:'Reach Level 50',
+    ms_shadow_king:'Defeat the Shadow King', ms_prestige:'Prestige for eternal power', ms_legend:'Become a Legend',
   },
   de: {
     nav_explore: 'Erkunden', nav_quests: 'Quests', nav_char: 'Charakter', nav_shop: 'Shop',
@@ -82,6 +87,11 @@ const STRINGS = {
     area_forest:'Verzauberter Wald', area_cave:'Goblin-Höhlen', area_dungeon:'Dunkler Kerker', area_graveyard:'Verfluchter Friedhof', area_castle:'Schattenburg', area_volcanic:'Vulkanruinen', area_void:'Leererreich', area_underwater:'Abyssales Königreich', area_sky:'Himmelsfestung', area_ice:'Eistundra', area_void_rift:'Dimensionsriss',
     // Log actions
     log_found:'gefunden', log_bought:'gekauft', log_sold:'verkauft', log_crafted:'gecraftet', log_defeated:'besiegt',
+    // Milestones
+    ms_pick_class:'Wähle deine Klasse', ms_reach_lv5:'Erreiche Level 5', ms_explore_cave:'Erkunde die Höhlen (LV 10)',
+    ms_reach_lv15:'Erreiche Level 15', ms_dungeon:'Bezwinge den Kerker (LV 20)', ms_pick_subclass:'Wähle eine Unterklasse',
+    ms_graveyard:'Erreiche den Friedhof (LV 30)', ms_castle:'Stürme die Burg (LV 40)', ms_reach_lv50:'Erreiche Level 50',
+    ms_shadow_king:'Besiege den Shadow King', ms_prestige:'Prestige für ewige Macht', ms_legend:'Werde zur Legende',
   }
 };
 

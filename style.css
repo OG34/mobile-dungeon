@@ -131,6 +131,16 @@ h3{color:var(--accent);font-size:9px;align-self:flex-start;margin-top:4px;border
 }
 #step-counter{font-size:7px;color:var(--dim)}
 
+#milestone-bar {
+  font-family:'Press Start 2P',monospace;
+  padding:4px 8px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-left:3px solid var(--accent);
+  width:100%;
+  font-size:6px;
+}
+
 #boss-btn{
   background:#2a0000;
   color:#ff4444;

@@ -1659,9 +1659,30 @@ function applyLang(){
   if(hcEl) hcEl.textContent=G.hardcore?t('char_hardcore'):t('char_normal');
 }
 
+function getCurrentMilestone() {
+  const p = G.p; const lv = p.level; const kills = p.kills;
+  if (!p.class) return { text: t('ms_pick_class'), icon: '⚔' };
+  if (lv < 5)   return { text: t('ms_reach_lv5'), icon: '⬆', sub: `LV ${lv}/5` };
+  if (lv < 10)  return { text: t('ms_explore_cave'), icon: '🦇', sub: `LV ${lv}/10` };
+  if (lv < 15)  return { text: t('ms_reach_lv15'), icon: '⬆', sub: `LV ${lv}/15` };
+  if (lv < 20)  return { text: t('ms_dungeon'), icon: '⛏', sub: `LV ${lv}/20` };
+  if (!p.class || p.class === 'warrior') return { text: t('ms_pick_subclass'), icon: '🌟' };
+  if (lv < 30)  return { text: t('ms_graveyard'), icon: '💀', sub: `LV ${lv}/30` };
+  if (lv < 40)  return { text: t('ms_castle'), icon: '🏰', sub: `LV ${lv}/40` };
+  if (lv < 50)  return { text: t('ms_reach_lv50'), icon: '⬆', sub: `LV ${lv}/50` };
+  if (!G.kingDefeated) return { text: t('ms_shadow_king'), icon: '💀', sub: `LV ${lv}` };
+  if (!(p.prestige)) return { text: t('ms_prestige'), icon: '⭐' };
+  return { text: t('ms_legend'), icon: '👑', sub: `Prestige ${p.prestige}` };
+}
+
 function refresh(){
   updateHUD(); updateCharScreen(); updateQuestScreen();
   if(G.combat) updateCombatUI();
+  const mb = document.getElementById('milestone-bar');
+  if (mb) {
+    const m = getCurrentMilestone();
+    mb.innerHTML = `<span style="color:var(--dim);font-size:5px">NEXT: </span><span style="font-size:6px;color:var(--accent)">${m.icon} ${m.text}</span>${m.sub?`<span style="font-size:5px;color:var(--dim)"> · ${m.sub}</span>`:''}`;
+  }
   applyLang();
 }
 
@@ -2278,8 +2299,8 @@ function init(){
   generateQuests(); updateArea(); refresh();
   drawPlayer(document.getElementById('player-canvas'));
   if(!G.p.inv.length){addInv('potion',true);addInv('wood_sword',true);}
-  if(!hasSave) promptName(()=>save());
-  else if(G.p.kills===0){const log=document.getElementById('log');if(!log||!log.children.length)addLog(t('log_start'));}
+  showTitleScreen();
+  if(hasSave&&G.p.kills===0){const log=document.getElementById('log');if(!log||!log.children.length)addLog(t('log_start'));}
   if(!G.dailyChallenge||G.dailyChallenge.date!==new Date().toDateString()) generateDailyChallenge();
   updateDailyTimer();
   updateDayNight();
