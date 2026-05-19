@@ -787,6 +787,7 @@ function showStats() {
     row('Höchster Krit',bs.highCrit),
     row('Kämpfe gewonnen',bs.won),
     row('Mal geflohen',bs.fled),
+    row('Niederlagen',bs.lost||0),
     row('── WERTE ──','','var(--dim)'),
     row('ATK / DEF',`${s.atk} / ${s.def}`),
     row('MaxHP / MaxMP',`${s.maxHp} / ${s.maxMp}`),

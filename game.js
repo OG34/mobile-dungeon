@@ -266,7 +266,7 @@ const G = {
   arena: null,
   bossRush: null,
   weather: { particles: [], tick: 0 },
-  battleStats: { dmgDealt:0, dmgTaken:0, highCrit:0, won:0, fled:0 },
+  battleStats: { dmgDealt:0, dmgTaken:0, highCrit:0, won:0, fled:0, lost:0 },
   lootFilter: 'common',
   hardcore: false,
   bank: [],
@@ -956,7 +956,7 @@ function enemyTurn() {
 function defeatPlayer(){
   combatLog('💀 Du wurdest besiegt...'); setCombatBtns(false);
   if(G.combat) recordBattleHistory(G.combat,'loss');
-  G.battleStats.fled++;
+  G.battleStats.lost=(G.battleStats.lost||0)+1;
   setTimeout(()=>{
     if(G.hardcore){
       saveHighscore();
@@ -1394,6 +1394,7 @@ function weatherTick() {
 
 // ── FLOATING DAMAGE NUMBERS ──────────────────────────────────
 function floatDmg(el,text,color='#e05252'){
+  if(!el) return;
   const rect=el.getBoundingClientRect();
   const d=document.createElement('div'); d.className='dmg-num'; d.textContent=text;
   d.style.cssText=`left:${Math.round(rect.left+rect.width/2-20)}px;top:${Math.round(rect.top+4)}px;color:${color}`;
@@ -2072,7 +2073,8 @@ function load(){
     const d=JSON.parse(raw); Object.assign(G.p,d.p);
     G.steps=d.steps||0; G.quests=d.quests||[]; G.kingDefeated=d.kingDefeated||false;
     G.achievements=d.achievements||[]; G.bestiary=d.bestiary||{}; G.dungeonClears=d.dungeonClears||0;
-    G.battleStats=d.battleStats||{dmgDealt:0,dmgTaken:0,highCrit:0,won:0,fled:0};
+    G.battleStats=d.battleStats||{dmgDealt:0,dmgTaken:0,highCrit:0,won:0,fled:0,lost:0};
+    if(G.battleStats.lost===undefined) G.battleStats.lost=0;
     G.lootFilter=d.lootFilter||'common'; G.hardcore=d.hardcore||false;
     G.bank=d.bank||[]; G.resources=d.resources||{wood:0,ore:0,herbs:0};
     G.companion=d.companion||null; G.speedrun=d.speedrun||{active:false,startTime:0,bestTime:null};
