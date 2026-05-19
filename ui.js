@@ -395,7 +395,7 @@ function useItem(idx){
       const prevId=p.eq[es]?.id;
       const prev=prevId?p.inv.find(i=>i.id===prevId&&i.equipped):null;
       if(prev)prev.equipped=false;
-      slot.equipped=true; p.eq[es]=item;
+      slot.equipped=true; p.eq[es]={...item, id:slot.id};
     }
   }
   refresh();

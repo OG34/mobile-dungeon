@@ -2178,6 +2178,15 @@ function load(){
     if(!G.p.talents) G.p.talents={};
     if(G.p.talentPoints===undefined) G.p.talentPoints=0;
     if(!G.p.bestiaryRewarded) G.p.bestiaryRewarded={};
+    // Migrate: ensure all eq slots have id (old saves stored item objects without id)
+    for (const sl of ['weapon','armor','acc','pet','helm','gloves','boots']) {
+      const eq = G.p.eq[sl];
+      if (eq && !eq.id) {
+        const match = G.p.inv.find(i=>i.equipped && ITEMS[i.id] && ITEMS[i.id].slot===sl);
+        if (match) G.p.eq[sl] = {...eq, id: match.id};
+        else G.p.eq[sl] = null;
+      }
+    }
     document.getElementById('step-val').textContent=G.steps; return true;
   }catch(_){return false;}
 }
